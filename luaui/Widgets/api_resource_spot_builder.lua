@@ -424,7 +424,7 @@ local function ApplyPreviewCmds(cmds, constructorIds, shift)
 			if not ctrl then
 				Spring.GiveOrderToUnitArray(unitArray, CMD.INSERT, {i-1, -buildingId, 0, unpack(orderParams) }, { "alt" })
 			else
-				Spring.GiveOrderToUnit(unitArray[i%#unitArray],CMD.INSERT, {(math.floor(i/#unitArray)), -buildingId, 0, unpack(orderParams) }, { "alt" })
+				Spring.GiveOrderToUnit(unitArray[i%(#unitArray-1)+1],CMD.INSERT, {(math.floor(i/(#unitArray-1))), -buildingId, 0, unpack(orderParams) }, { "alt" })
 			end
 		else
 			-- we don't want to give a stop command to clear queue because it plays an unwanted sound
@@ -442,14 +442,14 @@ local function ApplyPreviewCmds(cmds, constructorIds, shift)
 				local opt = fakeShift and { "shift" } or { }
 				Spring.GiveOrderToUnitArray(unitArray, -buildingId, orderParams, opt)
 			else
-				fakeShift[i%#unitArray] = false
-				if (math.floor(i/#unitArray)) == 0 then
-					fakeShift[i%#unitArray] = shift
+				fakeShift[i%(#unitArray-1)+1] = false
+				if (math.floor(i/(#unitArray-1))) == 0 then
+					fakeShift[i%(#unitArray-1)+1] = shift
 				else
-					fakeShift[i%#unitArray] = true
+					fakeShift[i%(#unitArray-1)+1] = true
 				end
-				local opt = fakeShift[i%#unitArray] and { "shift" } or { }
-				Spring.GiveOrderToUnit(unitArray[i%#unitArray], -buildingId, orderParams, opt)
+				local opt = fakeShift[i%(#unitArray-1)+1] and { "shift" } or { }
+				Spring.GiveOrderToUnit(unitArray[i%(#unitArray-1)+1], -buildingId, orderParams, opt)
 			end
 		end
 	end
