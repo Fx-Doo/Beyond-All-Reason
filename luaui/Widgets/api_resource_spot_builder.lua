@@ -421,11 +421,11 @@ local function ApplyPreviewCmds(cmds, constructorIds, shift)
 			-- cmd insert layout is really weird, it needs to be formatted like:
 			-- { CMD.INSERT, { queue_pos, cmd_id, opt, params_flattened, }, { "alt }}
 			-- this an engine command so index starts at 0. Increment position by command count
-			if not ctrl then
+			if not ctrl then -- Unchanged
 				Spring.GiveOrderToUnitArray(unitArray, CMD.INSERT, {i-1, -buildingId, 0, unpack(orderParams) }, { "alt" })
 			else
-				local temp =((i%(#unitArray) ~= 0) and (i%(#unitArray))) or #unitArray
-				while (temp) <= #unitArray do
+				local temp =((i%(#unitArray) ~= 0) and (i%(#unitArray))) or #unitArray -- i turns into  (1;#unitArray) => this splits cmds across builders equally
+				while (temp) <= #unitArray do -- temp turns into temp + #cmds until temp > unitArray => this splits all builders across #cmds equally
 					Spring.GiveOrderToUnit(unitArray[temp],CMD.INSERT, {(math.floor(i/(#unitArray))), -buildingId, 0, unpack(orderParams) }, { "alt" })
 					temp = temp + #cmds
 				end
@@ -436,7 +436,7 @@ local function ApplyPreviewCmds(cmds, constructorIds, shift)
 			-- so we use the real shift value for the first command, then we force shift for all the others
 			-- since any commands passed to this function are intended to be queued, not discarded.
 			-- NEVER USE TERNARIES WITH OUTCOME VALUES THAT CAN BE FALSE
-			if not ctrl then
+			if not ctrl then -- Unchanged
 				fakeShift = false
 				if i == 1 then
 					fakeShift = shift
@@ -446,15 +446,15 @@ local function ApplyPreviewCmds(cmds, constructorIds, shift)
 				local opt = fakeShift and { "shift" } or { }
 				Spring.GiveOrderToUnitArray(unitArray, -buildingId, orderParams, opt)
 			else
-				local temp = ((i%(#unitArray) ~= 0) and (i%(#unitArray))) or #unitArray
+				local temp = ((i%(#unitArray) ~= 0) and (i%(#unitArray))) or #unitArray  -- i turns into  (1;#unitArray) => this splits cmds across builders equally
 				fakeShift[temp] = false
-				if (math.floor(i/(#unitArray))) == 0 then
+				if (math.floor(i/(#unitArray))) == 0 then -- First command in temp's queue so we apply shift
 					fakeShift[temp] = shift
-				else
+				else -- next command in temp's queue so we don't apply shift anymore
 					fakeShift[temp] = true
 				end
 				local opt = fakeShift[temp] and { "shift" } or { }
-				while (temp) <= #unitArray do
+				while (temp) <= #unitArray do -- temp turns into temp + #cmds until temp > unitArray => this splits all builders across #cmds equally
 					Spring.GiveOrderToUnit(unitArray[temp], -buildingId, orderParams, opt)
 					temp = temp + #cmds
 				end
