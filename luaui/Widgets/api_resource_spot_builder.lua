@@ -406,13 +406,13 @@ local function ApplyPreviewCmds(cmds, constructorIds, shift)
 		return
 	end
 
-	local _, _, meta, _ = Spring.GetModKeyState()
+	local _, ctrl, meta, _ = Spring.GetModKeyState()
 
 	local unitArray = {} -- make unit array to avoid extra work
 	for i = 1, #mainBuilders do
 		unitArray[#unitArray + 1] = mainBuilders[i]
 	end
-
+	local fakeShift = {}
 	for i = 1, #cmds do
 		local cmd = cmds[i]
 		local orderParams = { cmd[2], cmd[3], cmd[4], cmd[5] }
@@ -421,21 +421,36 @@ local function ApplyPreviewCmds(cmds, constructorIds, shift)
 			-- cmd insert layout is really weird, it needs to be formatted like:
 			-- { CMD.INSERT, { queue_pos, cmd_id, opt, params_flattened, }, { "alt }}
 			-- this an engine command so index starts at 0. Increment position by command count
-			Spring.GiveOrderToUnitArray(unitArray, CMD.INSERT, {i-1, -buildingId, 0, unpack(orderParams) }, { "alt" })
+			if not ctrl then
+				Spring.GiveOrderToUnitArray(unitArray, CMD.INSERT, {i-1, -buildingId, 0, unpack(orderParams) }, { "alt" })
+			else
+				Spring.GiveOrderToUnit(unitArray[i%#unitArray],CMD.INSERT, {(math.floor(i/#unitArray)), -buildingId, 0, unpack(orderParams) }, { "alt" })
+			end
 		else
 			-- we don't want to give a stop command to clear queue because it plays an unwanted sound
 			-- issuing any command without shift will clear the queue for us,
 			-- so we use the real shift value for the first command, then we force shift for all the others
 			-- since any commands passed to this function are intended to be queued, not discarded.
 			-- NEVER USE TERNARIES WITH OUTCOME VALUES THAT CAN BE FALSE
-			local fakeShift = false
-			if i == 1 then
-				fakeShift = shift
+			if not ctrl then
+				fakeShift = false
+				if i == 1 then
+					fakeShift = shift
+				else
+					fakeShift = true
+				end
+				local opt = fakeShift and { "shift" } or { }
+				Spring.GiveOrderToUnitArray(unitArray, -buildingId, orderParams, opt)
 			else
-				fakeShift = true
+				fakeShift[i%#unitArray] = false
+				if (math.floor(i/#unitArray)) == 0 then
+					fakeShift[i%#unitArray] = shift
+				else
+					fakeShift[i%#unitArray] = true
+				end
+				local opt = fakeShift[i%#unitArray] and { "shift" } or { }
+				Spring.GiveOrderToUnit(unitArray[i%#unitArray], -buildingId, orderParams, opt)
 			end
-			local opt = fakeShift and { "shift" } or { }
-			Spring.GiveOrderToUnitArray(unitArray, -buildingId, orderParams, opt)
 		end
 	end
 end
