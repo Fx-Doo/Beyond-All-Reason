@@ -59,13 +59,18 @@ function GetTargetPos()
 		local states = Spring.GetUnitStates(unitID)
 		local moveState = (states and states.movestate) or 0
 		Spring.Echo(moveState)
-		if (ttype == settarget and dist > 1.5*range) or (ttype == autotarget and dist > moveState * range / 2) then
-			-- Spring.Echo("target was cancelled")
+		if (ttype == settarget and dist > 1.5*range) or (ttype == autotarget and (dist > moveState * range / 2) or ( dist < 0.25 * range )) then
+			-- for autotargets:
+			-- movestate hold pos => ignore autotargets when deciding to revert
+			-- movestate manoeuver => ignore autotargets that are > 0.5* range
+			-- movestate roam => ignore autotargets that are > 1* range
+			-- in all cases on autotarget, ignore targets that are under 0.25 * range (because they can cause glitchy behaviours by turning around the unit...)
+			-- it will drop targets that will go outside of arc and find ones inside arcs if there are multiple ones, so we just want to make sure it doesn't attempt to follow ticks that are running in circles around it while it should be moving.
 			tx = nil
 			ttype = notarget
 		end
 	end
-	if tx then -- smooth out transitions when target cleared and picking new targets (avoid turning loops)
+	if tx then -- smooth out transitions when target cleared ( or ignored ) and picking new targets (avoid turning loops)
 		FallBackTarget = {tx, ty, tz}
 		Signal(SIG_RESTORETARGET)
 		StartThread(RestoreFallBackTarget)
