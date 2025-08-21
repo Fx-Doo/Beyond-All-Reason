@@ -42,7 +42,9 @@ local MoveCtrl_SetGMD      = Spring.MoveCtrl.SetGroundMoveTypeData
 -- Config
 -- =============================
 local UPDATE_RATE = 3 -- every 3 frames
-
+local minDistMult = 0.25
+local maxDistMultSetTarget = 1.5
+local maxDistMultAutoTarget = 1 -- (1 for ROAM, 0.5 for manoeuver, 0 for hold pos)
 -- =============================
 -- State
 -- =============================
@@ -96,8 +98,8 @@ local function GetTargetPos(unitID, state)
         local states = getUnitStates(unitID)
         local moveState = (states and states.movestate) or 0
 
-        if (ttype==settarget and dist>1.5*range) or
-           (ttype==autotarget and (dist>moveState*range/2 or dist<0.25*range)) then
+        if (ttype==settarget and dist>maxDistMultSetTarget*range) or
+           (ttype==autotarget and (dist>maxDistMultAutoTarget*moveState*range/2 or dist<minDistMult*range)) then
             tx = nil
             ttype = notarget
         end
