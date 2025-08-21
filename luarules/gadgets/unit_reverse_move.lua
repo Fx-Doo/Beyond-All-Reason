@@ -135,20 +135,21 @@ local function StartReversing(unitID, state)
 end
 
 local function CheckIfINeedToTurnAroundManually(unitID, state, pos)
-    local DEADZONE = rad(5)
     local delta = (state.curHeading - state.mHeading) % (2*pi)
-    local aligned = (delta > pi/2 + DEADZONE and delta < 3*pi/2 - DEADZONE)
+    local aligned = (delta > pi/2 and delta < 3*pi/2)
     if (not aligned) or not state.stopped then
         MoveCtrl_SetGMD(unitID, "maxReverseSpeed", 0)
         MoveCtrl_SetGMD(unitID, "accRate", 0)
         local ux,uy,uz = getUnitPosition(unitID)
         local tx,ty,tz = pos[1] or ux, pos[2] or uy, pos[3] or uz
         local dtx,dty,dtz = Normalize(tx-ux, ty-uy, tz-uz)
+        local mx,my,mz = state.lastmGoal[1] or ux, state.lastmGoal[2] or uy, state.lastmGoal[3] or uz
+        local dmx,dmy,dmz = Normalize(mx-ux, my-uy, mz-uz)
         local vx,vy,vz,v = Spring.GetUnitVelocity(unitID)
         local brakeRate = (UnitDefs[state.defID].maxDec or 1) * 30
         v = v*30
         local ratio = v~=0 and ((v-brakeRate)/v) or 0
-        state.fakeMoveGoal = {x=ux+dtx*16, y=uy-dty*16, z=uz+dtz*16}
+        state.fakeMoveGoal = {x=ux+dtx*16 - dmx*16, y=uy-dty*16 - dmy*16, z=uz+dtz*16 - dmz * 16}
         if v >= 0 and v <= 0.3*UnitDefs[state.defID].speed then
             setUnitVelocity(unitID, 0,0,0)
             state.stopped = true
