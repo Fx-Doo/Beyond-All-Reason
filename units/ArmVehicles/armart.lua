@@ -30,6 +30,7 @@ return {
 		selfdestructas = "smallExplosionGenericSelfd",
 		sightdistance = 364,
 		speed = 54,
+		rspeed = 54,
 		trackoffset = 6,
 		trackstrength = 5,
 		tracktype = "armpincer_tracks",

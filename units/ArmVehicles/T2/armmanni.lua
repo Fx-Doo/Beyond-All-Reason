@@ -24,7 +24,7 @@ return {
 		movestate = 0,
 		nochasecategory = "VTOL",
 		objectname = "Units/ARMMANNI.s3o",
-		script = "Units/ARMMANNI_LUS.lua",
+		script = "Units/ARMMANNI.cob",
 		seismicsignature = 0,
 		selfdestructas = "penetrator",
 		sightdistance = 650,

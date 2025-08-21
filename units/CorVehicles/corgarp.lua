@@ -30,6 +30,7 @@ return {
 		sightdistance = 305,
 		sonardistance = 175.5,
 		speed = 58.5,
+		rspeed = 58.5,
 		trackoffset = 0,
 		trackstrength = 6,
 		tracktype = "corparrowtracks",
