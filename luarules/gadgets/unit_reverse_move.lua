@@ -225,8 +225,9 @@ function gadget:GameFrame(f)
             end
 
             local data = getUnitMoveTypeData(unitID)
-            if data and data.goalx then
-                local goalx, goaly, goalz = data.goalx, data.goaly, data.goalz
+            if data and data.nextwaypointx then
+				-- Spring.Echo(data)
+                local goalx, goaly, goalz = data.nextwaypointx, data.nextwaypointy, data.nextwaypointz
                 local fake = state.fakeMoveGoal
                 local isFake = fake and fake.x and abs(goalx-fake.x)<1e-3 and abs(goaly-fake.y)<1e-3 and abs(goalz-fake.z)<1e-3
 
