@@ -56,10 +56,10 @@ function gadget:GameFrame(n)
 		local unitDefID = affectedUnits[i][2]
 		local nearestAlly = Spring.GetUnitNearestAlly(unitID, isAffectedUnit[unitDefID][1])
 		if nearestAlly then
-			if not canMove[Spring.GetUnitDefID(nearestAlly)] then
+			if not canMove[GG.GetUnitDefID(nearestAlly)] then
 				if not Spring.GetUnitTransporter(unitID) then
-					local x,_,z = Spring.GetUnitPosition(unitID)
-					local ax,_,az = Spring.GetUnitPosition(nearestAlly)
+					local x,_,z = GG.GetUnitPosition(unitID)
+					local ax,_,az = GG.GetUnitPosition(nearestAlly)
 					local r = math.random(1,3)
 					local movementTargetX = 0
 					local movementTargetZ = 0

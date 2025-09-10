@@ -19,7 +19,7 @@ local spCreateUnit              = Spring.CreateUnit
 local spDestroyUnit             = Spring.DestroyUnit
 local spGiveOrderToUnit         = Spring.GiveOrderToUnit
 local spSetUnitRulesParam       = Spring.SetUnitRulesParam
-local spGetUnitPosition			= Spring.GetUnitPosition
+local spGetUnitPosition			= GG.GetUnitPosition
 local SetUnitNoSelect			= Spring.SetUnitNoSelect
 local spGetUnitRulesParam		= Spring.GetUnitRulesParam
 local spUseTeamResource 		= Spring.UseTeamResource
@@ -27,7 +27,7 @@ local spGetTeamResources 		= Spring.GetTeamResources
 local GetCommandQueue     		= Spring.GetCommandQueue
 local spSetUnitArmored 			= Spring.SetUnitArmored
 local spGetUnitStates			= Spring.GetUnitStates
-local spGetUnitDefID        	= Spring.GetUnitDefID
+local spGetUnitDefID        	= GG.GetUnitDefID
 local spSetUnitVelocity     	= Spring.SetUnitVelocity
 local spUnitAttach 				= Spring.UnitAttach
 local spUnitDetach 				= Spring.UnitDetach
@@ -35,7 +35,7 @@ local spSetUnitHealth 			= Spring.SetUnitHealth
 local spGetGroundHeight 		= Spring.GetGroundHeight
 local spGetUnitNearestEnemy		= Spring.GetUnitNearestEnemy
 local spTransferUnit			= Spring.TransferUnit
-local spGetUnitTeam 			= Spring.GetUnitTeam
+local spGetUnitTeam 			= GG.GetUnitTeam
 local spGetUnitHealth 			= Spring.GetUnitHealth
 local spGetUnitCurrentCommand 	= Spring.GetUnitCurrentCommand
 local spGetUnitWeaponTarget		= Spring.GetUnitWeaponTarget
@@ -453,7 +453,7 @@ local function SpawnUnit(spawnData)
 					local carriery
 					local carrierz
 					dockPointx,dockPointy, dockPointz = Spring.GetUnitPiecePosition(ownerID, dockingpiece)--Spring.GetUnitPieceInfo (ownerID, dockingpieceindex)
-					carrierx,carriery, carrierz = Spring.GetUnitPosition(ownerID)
+					carrierx,carriery, carrierz = GG.GetUnitPosition(ownerID)
 					mcSetPosition(subUnitID, carrierx+dockPointx, carriery+dockPointy, carrierz+dockPointz)
 				end
 				mcDisable(subUnitID)
@@ -701,7 +701,7 @@ function gadget:UnitCmdDone(unitID, unitDefID, unitTeam, cmdID, cmdTag, cmdParam
 			elseif carrierMetaList[carrierUnitID].subUnitsList[unitID].dronetype == "fighter" and (cmdID == CMD.MOVE) and carrierMetaList[carrierUnitID].subUnitsList[unitID].fighterStage > 0 then
 				local rx = cos((carrierMetaList[carrierUnitID].subUnitsList[unitID].fighterStage/4)*(-2)*PI)
 				local rz = sin((carrierMetaList[carrierUnitID].subUnitsList[unitID].fighterStage/4)*(-2)*PI)
-				local carrierx,carriery, carrierz = Spring.GetUnitPosition(carrierUnitID)
+				local carrierx,carriery, carrierz = GG.GetUnitPosition(carrierUnitID)
 				local idleRadius = 500
 				spGiveOrderToUnit(unitID, CMD.MOVE, {carrierx + rx*idleRadius, carriery, carrierz + rz*idleRadius}, CMD.OPT_SHIFT)
 				--Spring.Echo("fighterStage: ", carrierMetaList[carrierUnitID].subUnitsList[unitID].fighterStage)

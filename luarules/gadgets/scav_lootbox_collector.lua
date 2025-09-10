@@ -105,7 +105,7 @@ function gadget:GameFrame(frame)
                 local loopCount = 0
                 local success = false
                 for lootboxID, lootboxTier in pairs(aliveLootboxes) do
-                    local lootboxPosX, lootboxPosY, lootboxPosZ = Spring.GetUnitPosition(lootboxID)
+                    local lootboxPosX, lootboxPosY, lootboxPosZ = GG.GetUnitPosition(lootboxID)
                     if (lootboxPosX) and not GG.IsPosInRaptorScum(lootboxPosX, lootboxPosY, lootboxPosZ) then
                         if math.random(0,aliveLootboxesCount) == 0 and not handledLootboxesList[lootboxID] then
                             for transportDefID, transportTier in pairs(transportsList) do
@@ -113,7 +113,7 @@ function gadget:GameFrame(frame)
                                     for spawnerID, _ in pairs(aliveSpawners) do
                                         if math.random(0,SetCount(aliveSpawners)) == 0 and not handledLootboxesList[lootboxID] then
                                             targetLootboxID = lootboxID
-                                            local spawnerPosX, spawnerPosY, spawnerPosZ = Spring.GetUnitPosition(spawnerID)
+                                            local spawnerPosX, spawnerPosY, spawnerPosZ = GG.GetUnitPosition(spawnerID)
                                             for j = 1,5 do
                                                 if math.random() <= config.spawnChance then
                                                     local transportID = Spring.CreateUnit(transportDefID, spawnerPosX+math.random(-1024, 1024), spawnerPosY+100, spawnerPosZ+math.random(-1024, 1024), math.random(0,3), scavTeamID)

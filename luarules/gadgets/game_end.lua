@@ -255,7 +255,7 @@ if gadgetHandler:IsSyncedCode() then
 					allyTeamInfo.unitCount = allyTeamInfo.unitCount + teamInfo.unitCount
 					local units = Spring.GetTeamUnits(teamID)
 					for u = 1, #units do
-						if unitDecoration[Spring.GetUnitDefID(units[u])] then
+						if unitDecoration[GG.GetUnitDefID(units[u])] then
 							allyTeamInfo.unitDecorationCount = allyTeamInfo.unitDecorationCount + 1
 						end
 					end
@@ -386,7 +386,7 @@ if gadgetHandler:IsSyncedCode() then
 				if type(winners) == 'table' then
 					local units = Spring.GetAllUnits()
 					for i, unitID in ipairs(units) do
-						if isCommander[Spring.GetUnitDefID(unitID)] then
+						if isCommander[GG.GetUnitDefID(unitID)] then
 							for u, allyTeamID in pairs(winners) do
 								if Spring.GetUnitAllyTeam(unitID) == allyTeamID then
 									Spring.GiveOrderToUnit(unitID, CMD.STOP, 0, 0)	-- give stop cmd so commanders can animate in place

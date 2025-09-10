@@ -22,9 +22,9 @@ local gaiaTeamID = Spring.GetGaiaTeamID()
 local mapX = Game.mapSizeX
 local mapZ = Game.mapSizeZ
 local allMobileUnits = {}
-local spGetUnitPosition = Spring.GetUnitPosition
-local spGetUnitTeam = Spring.GetUnitTeam
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitPosition = GG.GetUnitPosition
+local spGetUnitTeam = GG.GetUnitTeam
+local spGetUnitDefID = GG.GetUnitDefID
 local spValidUnitID = Spring.ValidUnitID
 local spIsPosInMap = Spring.IsPosInMap
 local CMD_STOP = CMD.STOP
@@ -45,7 +45,7 @@ function gadget:Initialize()
 	gadgetHandler:RegisterAllowCommand(CMD_STOP)
 	gadgetHandler:RegisterAllowCommand(CMD_GUARD)
 	for _, unitID in pairs(Spring.GetAllUnits()) do
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), spGetUnitTeam(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID), spGetUnitTeam(unitID))
 	end
 end
 

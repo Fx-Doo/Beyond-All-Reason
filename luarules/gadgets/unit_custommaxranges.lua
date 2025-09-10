@@ -30,7 +30,7 @@ end
 
 function gadget:Initialize()
 	for ct, unitID in pairs(Spring.GetAllUnits()) do
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID))
 	end
 end
 

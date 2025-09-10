@@ -32,10 +32,10 @@ end
 --function gadget:AllowCommand(unitID, unitDefID, teamID, cmdID, cmdParams, cmdOptions)
 --	if isT1Mex[unitDefID] then
 --		-- search for t2 mex on top
---		local x, y, z = Spring.GetUnitPosition(unitID)
+--		local x, y, z = GG.GetUnitPosition(unitID)
 --		local units = Spring.GetUnitsInCylinder(x, z, 10)
 --		for k, uID in ipairs(units) do
---			if isT2Mex[Spring.GetUnitDefID(uID)] then
+--			if isT2Mex[GG.GetUnitDefID(uID)] then
 --				--Spring.GiveOrderToUnit(unitID, CMD.INSERT, cmdParams, cmdOptions.coded)
 --				return false
 --			end
@@ -46,10 +46,10 @@ end
 
 -- get the first mex bellow that isn't itself, stacking more than one should be prevented by yardmaps
 local function hasMexBeneath(unitID)
-	local x, _, z = Spring.GetUnitPosition(unitID)
+	local x, _, z = GG.GetUnitPosition(unitID)
 	local units = Spring.GetUnitsInCylinder(x, z, 10)
 	for k, uID in ipairs(units) do
-		if isMex[Spring.GetUnitDefID(uID)] then
+		if isMex[GG.GetUnitDefID(uID)] then
 			if unitID ~= uID then
 				return uID
 			end
@@ -65,7 +65,7 @@ function gadget:UnitCreated(unitID, unitDefID, unitTeam)
 		if mex then
 			Spring.SetUnitNoSelect(mex, true)
 			if transferInstantly then
-				local mexTeamID = Spring.GetUnitTeam(mex)
+				local mexTeamID = GG.GetUnitTeam(mex)
 				if mexTeamID ~= unitTeam and not select(3, Spring.GetTeamInfo(mexTeamID, false)) then
 					_G.transferredUnits[unitID] = Spring.GetGameFrame()
 					Spring.TransferUnit(unitID, mexTeamID)
@@ -92,9 +92,9 @@ function gadget:UnitFinished(unitID, unitDefID, unitTeam)
 		-- if theres a mex below this one reclaim it, and donate this one to the owner of the previous mex
 		local mex = hasMexBeneath(unitID)
 		if mex then
-			local mexTeamID = Spring.GetUnitTeam(mex)
+			local mexTeamID = GG.GetUnitTeam(mex)
 			Spring.DestroyUnit(mex, false, true)
-			Spring.AddTeamResource(unitTeam, "metal", isMex[Spring.GetUnitDefID(mex)])
+			Spring.AddTeamResource(unitTeam, "metal", isMex[GG.GetUnitDefID(mex)])
 			if not transferInstantly and mexTeamID ~= unitTeam and not select(3, Spring.GetTeamInfo(mexTeamID, false)) then
 				_G.transferredUnits[unitID] = Spring.GetGameFrame()
 				Spring.TransferUnit(unitID, mexTeamID)

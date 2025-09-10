@@ -184,7 +184,7 @@ local spGetUnitRulesParam = Spring.GetUnitRulesParam
 local spGetUnitIsBeingBuilt = Spring.GetUnitIsBeingBuilt
 local spGetUnitIsActive = Spring.GetUnitIsActive
 local IsPosInLos = Spring.IsPosInLos
-local GetUnitPosition = Spring.GetUnitPosition
+local GetUnitPosition = GG.GetUnitPosition
 
 local particleIDs = {}
 local Lups, LupsAddFX
@@ -216,7 +216,7 @@ local function AddFxs(unitID, fxID)
 end
 
 local function addUnit(unitID, unitDefID)
-	if not fullview and select(6, Spring.GetTeamInfo(Spring.GetUnitTeam(unitID))) ~= myAllyTeamID and not CallAsTeam(myTeamID, IsPosInLos, GetUnitPosition(unitID)) then
+	if not fullview and select(6, Spring.GetTeamInfo(GG.GetUnitTeam(unitID))) ~= myAllyTeamID and not CallAsTeam(myTeamID, IsPosInLos, GetUnitPosition(unitID)) then
 		return
 	end
 
@@ -285,7 +285,7 @@ local function CheckForExistingUnits()
 	local allUnits = Spring.GetAllUnits()
 	for i = 1, #allUnits do
 		local unitID = allUnits[i]
-		local unitDefID = Spring.GetUnitDefID(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
 		if UnitEffects[unitDefID] and not spGetUnitIsBeingBuilt(unitID) then
 			local _, _, inBuild = Spring.GetUnitIsStunned(unitID)
 			if not inBuild then

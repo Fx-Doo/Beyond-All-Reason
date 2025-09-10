@@ -54,6 +54,6 @@ end
 function gadget:Initialize()
 	gadgetHandler:RegisterAllowCommand(CMD_QUOTA_BUILD_TOGGLE)
 	for _, unitID in ipairs(Spring.GetAllUnits()) do -- handle /luarules reload
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID))
 	end
 end

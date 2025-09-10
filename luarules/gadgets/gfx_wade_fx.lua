@@ -24,9 +24,9 @@ local n_folds = 3 -- check every X-th unit
 local current_fold = 1
 
 local spGetUnitIsCloaked = Spring.GetUnitIsCloaked
-local spGetUnitPosition  = Spring.GetUnitPosition
+local spGetUnitPosition  = GG.GetUnitPosition
 local spGetUnitVelocity  = Spring.GetUnitVelocity
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitDefID = GG.GetUnitDefID
 local spGetUnitDefDimensions = Spring.GetUnitDefDimensions
 local spSpawnCEG = Spring.SpawnCEG
 

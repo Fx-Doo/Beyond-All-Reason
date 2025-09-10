@@ -17,13 +17,13 @@ if not gadgetHandler:IsSyncedCode() then
 end
 
 local GetTeamInfo = Spring.GetTeamInfo
-local GetUnitPosition = Spring.GetUnitPosition
+local GetUnitPosition = GG.GetUnitPosition
 local GetUnitHealth = Spring.GetUnitHealth
 local GetGroundHeight = Spring.GetGroundHeight
 local MoveCtrl = Spring.MoveCtrl
 local GetGameFrame = Spring.GetGameFrame
 local DestroyUnit = Spring.DestroyUnit
-local UnitTeam = Spring.GetUnitTeam
+local UnitTeam = GG.GetUnitTeam
 local math_random = math.random
 
 local immuneDgunList = {}

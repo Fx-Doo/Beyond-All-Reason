@@ -20,9 +20,9 @@ local CMD_REPAIR = CMD.REPAIR
 local CMD_RECLAIM = CMD.RECLAIM
 local SpGetUnitCommands = Spring.GetUnitCommands
 local SpGiveOrderToUnit = Spring.GiveOrderToUnit
-local SpGetUnitPosition = Spring.GetUnitPosition
+local SpGetUnitPosition = GG.GetUnitPosition
 local SpGetFeaturePosition = Spring.GetFeaturePosition
-local SpGetUnitDefID = Spring.GetUnitDefID
+local SpGetUnitDefID = GG.GetUnitDefID
 local SpGetUnitsInCylinder = Spring.GetUnitsInCylinder
 local SpGetUnitAllyTeam = Spring.GetUnitAllyTeam
 local SpGetFeaturesInCylinder = Spring.GetFeaturesInCylinder
@@ -202,7 +202,7 @@ function gadget:UnitFinished(unitID, unitDefID, unitTeam)
 	-- for now, just corvac gets an attached con turret
 	if unitDef.name == "corvac" then
 		local xx,yy,zz = SpGetUnitPosition(unitID)
-		nano_id = Spring.CreateUnit("corvacct",xx,yy,zz,0,Spring.GetUnitTeam(unitID) )
+		nano_id = Spring.CreateUnit("corvacct",xx,yy,zz,0,GG.GetUnitTeam(unitID) )
 		if not nano_id then
 			-- unit limit hit or invalid spawn surface
 			return
@@ -216,7 +216,7 @@ function gadget:UnitFinished(unitID, unitDefID, unitTeam)
 	end
 	if unitDef.name == "legmohobp" then
 		local xx,yy,zz = SpGetUnitPosition(unitID)
-		nano_id = Spring.CreateUnit("legmohobpct",xx,yy,zz,0,Spring.GetUnitTeam(unitID) )
+		nano_id = Spring.CreateUnit("legmohobpct",xx,yy,zz,0,GG.GetUnitTeam(unitID) )
 		if not nano_id then
 			-- unit limit hit or invalid spawn surface
 			return

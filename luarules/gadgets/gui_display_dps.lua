@@ -37,7 +37,7 @@ local fontfileOutlineSize = 6
 local fontfileOutlineStrength = 1.3
 local font = gl.LoadFont(fontfile, fontfileSize * fontfileScale, fontfileOutlineSize * fontfileScale, fontfileOutlineStrength)
 
-local GetUnitDefID = Spring.GetUnitDefID
+local GetUnitDefID = GG.GetUnitDefID
 local GetUnitDefDimensions = Spring.GetUnitDefDimensions
 local AreTeamsAllied = Spring.AreTeamsAllied
 local GetGameSpeed = Spring.GetGameSpeed

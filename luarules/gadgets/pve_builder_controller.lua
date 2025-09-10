@@ -89,7 +89,7 @@ function gadget:GameFrame(frame)
                         end
                         if #turretOptions > 1 then
                             local turret = turretOptions[math.random(1, #turretOptions)]
-                            local x,y,z = Spring.GetUnitPosition(unitID)
+                            local x,y,z = GG.GetUnitPosition(unitID)
                             Spring.GiveOrderToUnit(unitID, -turret, {x+math.random(-data.range, data.range), y, z+math.random(-data.range, data.range)}, {})
                             if data.isFactory then
                                 for i = 1,math.random(1,5) do

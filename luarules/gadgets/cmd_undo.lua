@@ -204,7 +204,7 @@ if gadgetHandler:IsSyncedCode() then
 	-- log selfd units and all the deaths they caused
 	function gadget:UnitDestroyed(unitID, unitDefID, teamID, attackerID, attackerDefID, attackerTeamID, weaponDefID)
 		if (attackerID == nil and selfdCmdUnits[unitID]) or (attackerID ~= nil and selfdCmdUnits[attackerID]) then -- attackerID == nil -> selfd/reclaim
-			local ux,uy,uz = Spring.GetUnitPosition(unitID)
+			local ux,uy,uz = GG.GetUnitPosition(unitID)
 			local health, maxHealth = Spring.GetUnitHealth(unitID)
 			local buildFacing =  Spring.GetUnitBuildFacing(unitID)
 			local dx, dy, dz =  Spring.GetUnitDirection(unitID)

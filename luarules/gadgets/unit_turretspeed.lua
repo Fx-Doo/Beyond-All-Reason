@@ -62,7 +62,7 @@ end
 
 function gadget:Initialize()
 	for ct, unitID in pairs(Spring.GetAllUnits()) do
-		local udefID = Spring.GetUnitDefID(unitID)
+		local udefID = GG.GetUnitDefID(unitID)
 		gadget:UnitCreated(unitID, udefID)
 	end
 end

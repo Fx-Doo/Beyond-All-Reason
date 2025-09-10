@@ -31,8 +31,8 @@ for udefID,def in ipairs(UnitDefs) do
 end
 
 local spDestroyUnit = Spring.DestroyUnit
-local spGetUnitPosition = Spring.GetUnitPosition
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitPosition = GG.GetUnitPosition
+local spGetUnitDefID = GG.GetUnitDefID
 local DISTANCE_LIMIT = math.max(Game.mapSizeX,Game.mapSizeZ) * math.max(Game.mapSizeX,Game.mapSizeZ)
 local destroyUnitQueue = {}
 

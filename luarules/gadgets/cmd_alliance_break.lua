@@ -16,10 +16,10 @@ end
 
 if gadgetHandler:IsSyncedCode() then
 
-	local GetUnitDefID = Spring.GetUnitDefID
+	local GetUnitDefID = GG.GetUnitDefID
 	local AreTeamsAllied = Spring.AreTeamsAllied
 	local GetUnitsInSphere = Spring.GetUnitsInSphere
-	local GetUnitTeam = Spring.GetUnitTeam
+	local GetUnitTeam = GG.GetUnitTeam
 	local GetUnitAllyTeam = Spring.GetUnitAllyTeam
 	local GetTeamList = Spring.GetTeamList
 	local GetUnitHealth = Spring.GetUnitHealth

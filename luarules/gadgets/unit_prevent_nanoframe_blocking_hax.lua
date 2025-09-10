@@ -122,8 +122,8 @@ function gadget:Initialize()
 	-- handle luarules reload
 	local units = Spring.GetAllUnits()
 	for _,unitID in ipairs(units) do
-		local unitDefID = Spring.GetUnitDefID(unitID)
-		local unitTeam = Spring.GetUnitTeam(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
+		local unitTeam = GG.GetUnitTeam(unitID)
 		gadget:UnitCreated(unitID, unitDefID, unitTeam)
 	end
 end

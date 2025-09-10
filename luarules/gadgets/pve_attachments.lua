@@ -60,7 +60,7 @@ function gadget:UnitCreated(unitID, unitDefID, unitTeam)
             local posx = unitAttachments[unitDefID][i].posx
             local posz = unitAttachments[unitDefID][i].posz
             local dir = unitAttachments[unitDefID][i].dir or 0
-            local bx, by, bz = Spring.GetUnitPosition(unitID)
+            local bx, by, bz = GG.GetUnitPosition(unitID)
             local attachmentID = Spring.CreateUnit(unitType, bx + posx, by, bz + posz, dir, unitTeam)
             if attachmentID then
                 Spring.SetUnitBlocking(attachmentID, false, false)

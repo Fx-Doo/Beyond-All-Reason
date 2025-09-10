@@ -75,7 +75,7 @@ end
 function gadget:Initialize()
 	gadgetHandler:RegisterAllowCommand(CMD_HOUND_WEAPON_TOGGLE)
 	for _, unitID in ipairs(Spring.GetAllUnits()) do
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID))
 	end
 end
 

@@ -24,7 +24,7 @@ end
 local SpSetUnitVelocity = Spring.SetUnitVelocity
 local SpGetUnitVelocity = Spring.GetUnitVelocity
 local SpGetGroundHeight = Spring.GetGroundHeight
-local SpGetUnitPosition = Spring.GetUnitPosition
+local SpGetUnitPosition = GG.GetUnitPosition
 local SpGetGameFrame = Spring.GetGameFrame
 local SpSetUnitPhysics = Spring.SetUnitPhysics
 local SpSetUnitDirection = Spring.SetUnitDirection
@@ -46,7 +46,7 @@ function gadget:UnitUnloaded(unitID, unitDefID, teamID, transportID)
 		SpSetUnitVelocity(unitID, x, y, z)
 	else
     -- prevent unloaded units from sliding across the map
-        local px,py,pz = Spring.GetUnitPosition(unitID)
+        local px,py,pz = GG.GetUnitPosition(unitID)
         local dx,dy,dz = Spring.GetUnitDirection(unitID)
         local frame = SpGetGameFrame() + frameMargin
         unloadedUnits[unitID] = {["px"]=px,["py"]=py,["pz"]=pz,["dx"]=dx,["dy"]=dy,["dz"]=dz,["frame"]=frame}

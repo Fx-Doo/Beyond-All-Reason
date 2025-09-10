@@ -147,9 +147,9 @@ function gadget:Initialize()
 	for i = 1, #allUnits do
 		local unitID = allUnits[i]
 		if select(5, Spring.GetUnitHealth(unitID)) == 1 then
-			local unitDefID = Spring.GetUnitDefID(unitID)
+			local unitDefID = GG.GetUnitDefID(unitID)
 			if storageDefs[unitDefID] and spGetUnitIsStunned(unitID) then
-				reduceStorage(unitID, unitDefID, Spring.GetUnitTeam(unitID))
+				reduceStorage(unitID, unitDefID, GG.GetUnitTeam(unitID))
 			end
 		end
 	end
@@ -159,7 +159,7 @@ function gadget:Shutdown()
 	local spGetUnitIsStunned = Spring.GetUnitIsStunned
 	for unitID, unitDefID in pairs(paralyzedUnits) do
 		if spGetUnitIsStunned(unitID) then
-			restoreStorage(unitID, unitDefID, Spring.GetUnitTeam(unitID))
+			restoreStorage(unitID, unitDefID, GG.GetUnitTeam(unitID))
 		end
 	end
 end

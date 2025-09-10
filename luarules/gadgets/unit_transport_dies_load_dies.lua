@@ -78,7 +78,7 @@ function gadget:GameFrame (currentFrame)
 			--check that trans is dead/crashing and unit is still alive
 			if not Spring.GetUnitIsDead(uID) and (Spring.GetUnitIsDead(tID) or (Spring.GetUnitMoveTypeData(tID).aircraftState=="crashing"))	then
 				--Spring.Echo("killing unit " .. uID)=
-				local deathExplosion = UnitDefs[Spring.GetUnitDefID(uID)].deathExplosion
+				local deathExplosion = UnitDefs[GG.GetUnitDefID(uID)].deathExplosion
 				if deathExplosion and WeaponDefNames[deathExplosion].id and WeaponDefs[WeaponDefNames[deathExplosion].id] then
 					local tabledamages = WeaponDefs[WeaponDefNames[deathExplosion].id]
 					Spring.SetUnitWeaponDamages(uID, "selfDestruct", tabledamages)

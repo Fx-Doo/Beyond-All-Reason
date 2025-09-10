@@ -110,8 +110,8 @@ if gadgetHandler:IsSyncedCode() then
 				end
 			elseif CommandsToCatchUnit[cmdID] and #cmdParams == 1 then
 				local targetUnitID = cmdParams[1]
-				if Spring.GetUnitDefID(targetUnitID) then
-					local x, y, z = Spring.GetUnitPosition(targetUnitID)
+				if GG.GetUnitDefID(targetUnitID) then
+					local x, y, z = GG.GetUnitPosition(targetUnitID)
 					if not positionCheckLibrary.StartboxCheck(x, y, z, allyTeamID) then
 						allowed = false
 					end

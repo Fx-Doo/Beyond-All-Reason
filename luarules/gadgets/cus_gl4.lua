@@ -1105,7 +1105,7 @@ local function GetObjectDefName(objectID)
 		return "Failed to GetObjectDefName(objectID): " .. tostring(objectID)
 	elseif objectID >= 0 then
 		if Spring.ValidUnitID(objectID) then
-			local udid = Spring.GetUnitDefID(objectID)
+			local udid = GG.GetUnitDefID(objectID)
 			return UnitDefs[udid].name
 		else
 			return "Invalid UnitID:"..tostring(objectID)
@@ -1318,7 +1318,7 @@ local function AddObject(objectID, drawFlag, reason)
 
 	local objectDefID
 	if objectID >= 0 then
-		objectDefID = Spring.GetUnitDefID(objectID)
+		objectDefID = GG.GetUnitDefID(objectID)
 		objectIDtoDefID[objectID] = objectDefID
 	else
 		objectDefID = -1 *  Spring.GetFeatureDefID(-1 * objectID)
@@ -1839,12 +1839,12 @@ local function DumpCUSGL4(optName, line, words, playerID)
 							Spring.Echo(string.format("        %s = {",minibinattr))
 							if minibinattr == "objectsIndex" then
 								for k,v in pairs(minibinvalue) do
-									local objdefname = (k>=0 and Spring.GetUnitDefID(k) and UnitDefs[Spring.GetUnitDefID(k)].name) or (Spring.GetFeatureDefID(-1 * k)  and FeatureDefs[Spring.GetFeatureDefID(-1 * k) ].name) or "???"
+									local objdefname = (k>=0 and GG.GetUnitDefID(k) and UnitDefs[GG.GetUnitDefID(k)].name) or (Spring.GetFeatureDefID(-1 * k)  and FeatureDefs[Spring.GetFeatureDefID(-1 * k) ].name) or "???"
 									Spring.Echo(string.format("          %i = %i, --(%s)", k,v,objdefname))
 								end
 							elseif minibinattr == "objectsArray" then
 								for k,v in pairs(minibinvalue) do
-									local objdefname = (v>=0 and Spring.GetUnitDefID(v) and UnitDefs[Spring.GetUnitDefID(v)].name) or (Spring.GetFeatureDefID(-1 * v)  and FeatureDefs[Spring.GetFeatureDefID(-1 * v) ].name) or "???"
+									local objdefname = (v>=0 and GG.GetUnitDefID(v) and UnitDefs[GG.GetUnitDefID(v)].name) or (Spring.GetFeatureDefID(-1 * v)  and FeatureDefs[Spring.GetFeatureDefID(-1 * v) ].name) or "???"
 									Spring.Echo(string.format("          %i = %i, --(%s)", k,v,objdefname))
 								end
 							else
@@ -1885,7 +1885,7 @@ local function MarkBinCUSGL4(optName, line, words, playerID)
 					for objectID, _ in pairs(minibin.objectsIndex) do
 						local px, py, pz
 						if objectID > 0 then
-							px, py, pz = Spring.GetUnitPosition(objectID)
+							px, py, pz = GG.GetUnitPosition(objectID)
 						else
 							px, py, pz = Spring.GetFeaturePosition(-1* objectID)
 						end

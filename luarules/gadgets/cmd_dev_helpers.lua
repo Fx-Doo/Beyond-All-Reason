@@ -744,16 +744,16 @@ if gadgetHandler:IsSyncedCode() then
 			elseif action == 'remove' then
 				Spring.DestroyUnit(unitID, false, true)
 			elseif action == 'reclaim' then
-				local teamID = Spring.GetUnitTeam(unitID)
-				local unitDefID = Spring.GetUnitDefID(unitID)
+				local teamID = GG.GetUnitTeam(unitID)
+				local unitDefID = GG.GetUnitDefID(unitID)
 				Spring.DestroyUnit(unitID, false, true)		-- this doesnt give back resources in itself
 				Spring.AddTeamResource(teamID, 'metal', UnitDefs[unitDefID].metalCost)
 				Spring.AddTeamResource(teamID, 'energy', UnitDefs[unitDefID].energyCost)
 			elseif action == 'wreck' then
-				local unitDefID = Spring.GetUnitDefID(unitID)
-				local x, y, z = Spring.GetUnitPosition(unitID)
+				local unitDefID = GG.GetUnitDefID(unitID)
+				local x, y, z = GG.GetUnitPosition(unitID)
 				local heading = Spring.GetUnitHeading(unitID)
-				local unitTeam = Spring.GetUnitTeam(unitID)
+				local unitTeam = GG.GetUnitTeam(unitID)
 				Spring.DestroyUnit(unitID, false, true)
 				if UnitDefs[unitDefID].corpse and FeatureDefNames[UnitDefs[unitDefID].corpse] then
 					Spring.CreateFeature(FeatureDefNames[UnitDefs[unitDefID].corpse].id, x, y, z, heading, unitTeam)
@@ -785,7 +785,7 @@ if gadgetHandler:IsSyncedCode() then
 			local removedwrecks = 0
 			local removedheaps = 0
 			for i, unitID in ipairs(allunits) do
-				if unitDefID == Spring.GetUnitDefID(unitID) then
+				if unitDefID == GG.GetUnitDefID(unitID) then
 					Spring.DestroyUnit(unitID, false, true)
 					removedunits = removedunits + 1
 				end
@@ -943,10 +943,10 @@ else	-- UNSYNCED
 		Spring.Echo("Dumping all units")
 		local units=Spring.GetAllUnits()
 		for k,unitID in pairs(units) do
-			local unitname = (UnitDefs[Spring.GetUnitDefID(unitID)].name or "nil")
-			local x, y, z = Spring.GetUnitPosition(unitID)
+			local unitname = (UnitDefs[GG.GetUnitDefID(unitID)].name or "nil")
+			local x, y, z = GG.GetUnitPosition(unitID)
 			local r = Spring.GetUnitHeading(unitID)
-			local tid = Spring.GetUnitTeam(unitID)
+			local tid = GG.GetUnitTeam(unitID)
 			local isneutral = tostring(Spring.GetUnitNeutral(unitID))
 			Spring.Echo(string.format("{name = \'%s\', x = %d, y = %d, z = %d, rot = %d , team = %d, neutral = %s},\n",unitname,x,y,z,r,tid, isneutral)) --{ name = 'ad0_aleppo_2', x = 2900, z = 52, rot = "-1" },
 		end

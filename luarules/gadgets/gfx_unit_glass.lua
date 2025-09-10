@@ -14,9 +14,9 @@ end
 -- Global Acceleration
 -----------------------------------------------------------------
 
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitDefID = GG.GetUnitDefID
 local spGetUnitPieceList = Spring.GetUnitPieceList
-local spGetUnitTeam = Spring.GetUnitTeam
+local spGetUnitTeam = GG.GetUnitTeam
 local spSetUnitPieceVisible = Spring.SetUnitPieceVisible
 local spGetUnitIsCloaked = Spring.GetUnitIsCloaked
 

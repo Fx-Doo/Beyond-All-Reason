@@ -248,7 +248,7 @@ else	-- UNSYNCED
 	local SendLuaRulesMsg = Spring.SendLuaRulesMsg
 	local GetMouseState = Spring.GetMouseState
 	local GetGameSeconds = Spring.GetGameSeconds
-	local GetUnitDefID = Spring.GetUnitDefID
+	local GetUnitDefID = GG.GetUnitDefID
 	local GetRealBuildQueue = Spring.GetRealBuildQueue
 
 	local min = math.min

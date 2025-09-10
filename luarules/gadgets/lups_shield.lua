@@ -152,7 +152,7 @@ if gadgetHandler:IsSyncedCode() then
 		if proID and proID ~= -1 then
 			weaponDefID = Spring.GetProjectileDefID(proID)
 		elseif beamEmitterUnitID then -- hitscan weapons
-			local uDefID = Spring.GetUnitDefID(beamEmitterUnitID)
+			local uDefID = GG.GetUnitDefID(beamEmitterUnitID)
 			if unitBeamWeapons[ uDefID ] and unitBeamWeapons[ uDefID ][beamEmitterWeaponNum] then
 				weaponDefID = unitBeamWeapons[ uDefID ][beamEmitterWeaponNum]
 				if weaponType[weaponDefID] ~= "LightningCannon" then
@@ -167,7 +167,7 @@ if gadgetHandler:IsSyncedCode() then
 				dmg = weaponDamages[weaponDefID][SHIELDARMORIDALT]
 			end
 
-			local x, y, z = Spring.GetUnitPosition(shieldCarrierUnitID)
+			local x, y, z = GG.GetUnitPosition(shieldCarrierUnitID)
 			local dx, dy, dz
 			local onlyMove = false
 			if bounceProjectile then
@@ -225,7 +225,7 @@ end
 local function UpdateVisibility(unitID, unitData, unitVisible, forceUpdate)
 	unitVisible = unitVisible or (myAllyTeamID == unitData.allyTeamID)
 	if not unitVisible then
-		local ux,_,uz = Spring.GetUnitPosition(unitID)
+		local ux,_,uz = GG.GetUnitPosition(unitID)
 		unitVisible = GetVisibleSearch(ux, uz, unitData.search)
 	end
 
@@ -488,7 +488,7 @@ function gadget:Initialize(n)
 	local allUnits = Spring.GetAllUnits()
 	for i = 1, #allUnits do
 		local unitID = allUnits[i]
-		local unitDefID = Spring.GetUnitDefID(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
 		gadget:UnitFinished(unitID, unitDefID)
 	end
 end
@@ -502,7 +502,7 @@ function gadget:Shutdown()
 	local allUnits = Spring.GetAllUnits()
 	for i = 1, #allUnits do
 		local unitID = allUnits[i]
-		local unitDefID = Spring.GetUnitDefID(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
 		gadget:UnitDestroyed(unitID, unitDefID)
 	end
 end

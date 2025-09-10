@@ -28,8 +28,8 @@ local spGetCOBScriptID = Spring.GetCOBScriptID
 
 function gadget:Initialize()
     for i, unitID in pairs(Spring.GetAllUnits()) do
-        gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID))
-		if hasSetStockpile[Spring.GetUnitDefID(unitID)] then
+        gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID))
+		if hasSetStockpile[GG.GetUnitDefID(unitID)] then
 			spCallCOBScript(unitID, 'SetStockpile', 0, spGetUnitStockpile(unitID))
 		end
     end

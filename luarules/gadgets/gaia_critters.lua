@@ -55,11 +55,11 @@ local sceduledOrders = {}
 local commanders = {}
 
 local GetGroundHeight = Spring.GetGroundHeight
-local GetUnitPosition = Spring.GetUnitPosition
-local GetUnitDefID = Spring.GetUnitDefID
+local GetUnitPosition = GG.GetUnitPosition
+local GetUnitDefID = GG.GetUnitDefID
 local GiveOrderToUnit = Spring.GiveOrderToUnit
 local CreateUnit = Spring.CreateUnit
-local GetUnitTeam = Spring.GetUnitTeam
+local GetUnitTeam = GG.GetUnitTeam
 local ValidUnitID = Spring.ValidUnitID
 
 local random = math.random

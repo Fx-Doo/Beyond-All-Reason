@@ -61,8 +61,8 @@ local atan2 = math.atan2
 
 local spGetGroundHeight  = Spring.GetGroundHeight
 local spGetGroundNormal  = Spring.GetGroundNormal
-local spGetUnitDefID     = Spring.GetUnitDefID
-local spGetUnitPosition  = Spring.GetUnitPosition
+local spGetUnitDefID     = GG.GetUnitDefID
+local spGetUnitPosition  = GG.GetUnitPosition
 local spGetUnitRadius    = Spring.GetUnitRadius
 local spGetUnitsInSphere = Spring.GetUnitsInSphere
 local spSpawnProjectile  = Spring.SpawnProjectile

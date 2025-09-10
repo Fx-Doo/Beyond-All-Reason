@@ -53,17 +53,17 @@ if gadgetHandler:IsSyncedCode() then
 	local math_random = math.random
 	local math_min = math.min
 
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitDefID = GG.GetUnitDefID
 	local spGetUnitMoveTypeData = Spring.GetUnitMoveTypeData
 	local spGetUnitSeparation = Spring.GetUnitSeparation
 	local spGetUnitHealth = Spring.GetUnitHealth
 	local spGetUnitStates = Spring.GetUnitStates
-	local spGetUnitPosition = Spring.GetUnitPosition
+	local spGetUnitPosition = GG.GetUnitPosition
 	local spGetUnitPiecePosDir = Spring.GetUnitPiecePosDir
 	local spValidUnitID = Spring.ValidUnitID
 	local spGetUnitRadius = Spring.GetUnitRadius
 	local spGetUnitRotation = Spring.GetUnitRotation
-	local spGetUnitTeam = Spring.GetUnitTeam
+	local spGetUnitTeam = GG.GetUnitTeam
 
 	local CMD_INSERT = CMD.INSERT
 	local CMD_REMOVE = CMD.REMOVE
@@ -267,7 +267,7 @@ if gadgetHandler:IsSyncedCode() then
 			local r = 2.5 * spGetUnitRadius(airbaseID)
 			local tx, tz = px + r * math_sin(theta), pz + r * math_cos(theta)
 			local ty = Spring.GetGroundHeight(tx, tz)
-			--local uDID = Spring.GetUnitDefID(unitID)
+			--local uDID = GG.GetUnitDefID(unitID)
 			--local cruiseAlt = UnitDefs[uDID].cruiseAltitude
 			Spring.GiveOrderToUnit(unitID, CMD_MOVE, { tx, ty, tz }, 0)
 		end
@@ -513,7 +513,7 @@ if gadgetHandler:IsSyncedCode() then
 							-- fly towards pad (the pad may move!)
 							local radius = spGetUnitRadius(unitID)
 							if radius then
-								local unitDefID = Spring.GetUnitDefID(unitID)
+								local unitDefID = GG.GetUnitDefID(unitID)
 								if isAirUnit[unitDefID] and uy > Spring.GetGroundHeight(ux,uz)+10 then -- maybe landed planes are "not a flying unit" so lets try checking ground height
 									local moveTypeData = Spring.GetUnitMoveTypeData(unitID)
 
@@ -629,8 +629,8 @@ else	-- Unsynced
 	local landAtAirBaseCmdColor = { 0.50, 1.00, 1.00, 0.8 } -- same colour as repair
 
 	local spAreTeamsAllied = Spring.AreTeamsAllied
-	local spGetUnitTeam = Spring.GetUnitTeam
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitTeam = GG.GetUnitTeam
+	local spGetUnitDefID = GG.GetUnitDefID
 	local spGetSelectedUnits = Spring.GetSelectedUnits
 
 	local myTeamID = Spring.GetMyTeamID()

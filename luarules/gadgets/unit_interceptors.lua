@@ -15,9 +15,9 @@ if not gadgetHandler:IsSyncedCode() then
 end
 
 -- Localize and pre-compute things
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitDefID = GG.GetUnitDefID
 local spGetProjectileTarget = Spring.GetProjectileTarget
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitPosition = GG.GetUnitPosition
 local spGetFeaturePosition = Spring.GetFeaturePosition
 local spGetProjectilePosition = Spring.GetProjectilePosition
 
@@ -32,7 +32,7 @@ local interceptorUnitDefWeapCovSqr = {}
 function gadget:AllowWeaponInterceptTarget(interceptorUnitID, interceptorWeaponID, targetProjectileID)
 	--interceptorWeaponID is actually weaponNum, e.g.: gadget:AllowWeaponInterceptTarget( 24871, 1, 6540)
 	--old method using the below method hammered cache hard:
-	--local coverageRange = WeaponDefs[UnitDefs[Spring.GetUnitDefID(interceptorUnitID)].weapons[interceptorWeaponID].weaponDef].coverageRange
+	--local coverageRange = WeaponDefs[UnitDefs[GG.GetUnitDefID(interceptorUnitID)].weapons[interceptorWeaponID].weaponDef].coverageRange
     --Spring.GetProjectileTarget( number projectileID ) -> nil | [number targetTypeInt, number targetID | table targetPos = {x, y, z}]
 	local targetType, targetID = spGetProjectileTarget(targetProjectileID)
 

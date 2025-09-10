@@ -35,7 +35,7 @@ local function addEvent(unitID,callin, param1, param2, param3, param4)
 		py = unitID[2]
 		pz = unitID[3]
 	elseif Spring.ValidUnitID(unitID) then
-		px, py, pz = Spring.GetUnitPosition(unitID)
+		px, py, pz = GG.GetUnitPosition(unitID)
 	end
 	if px == nil then return end
 	local caption = 'g:'..callin

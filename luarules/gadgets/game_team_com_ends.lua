@@ -92,7 +92,7 @@ end
 
 function gadget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
 	if isCommander[unitDefID] and not ignoredTeams[unitTeam] then
-		local x,_,z = Spring.GetUnitPosition(unitID)
+		local x,_,z = GG.GetUnitPosition(unitID)
 		commanderDeathQueue[unitID] = {unitTeam, x, z}
 	end
 end
@@ -105,7 +105,7 @@ local function transferCommander(unitID, unitTeam, newTeam)
 		aliveComCount[newAllyTeamID] = aliveComCount[newAllyTeamID] + 1
 		aliveTeamComCount[newTeam] = aliveTeamComCount[newTeam] + 1
 		-- remove from unitTeam
-		local x,_,z = Spring.GetUnitPosition(unitID)
+		local x,_,z = GG.GetUnitPosition(unitID)
 		commanderDeathQueue[unitID] = {unitTeam, x, z}
 	end
 end
@@ -139,7 +139,7 @@ function gadget:Initialize()
 	local units = Spring.GetAllUnits()
 	for i = 1, #units do
 		local unitID = units[i]
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), Spring.GetUnitTeam(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID), GG.GetUnitTeam(unitID))
 	end
 
 	-- for debug purpose: destroy comless allyteams (usefull when team has no coms because of error and you do luarules reload)

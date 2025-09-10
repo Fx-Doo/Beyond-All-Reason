@@ -44,7 +44,7 @@ if not gadgetHandler:IsSyncedCode() then
 
 	local validation = SYNCED.validationLogger
 
-	local spGetUnitPosition = Spring.GetUnitPosition
+	local spGetUnitPosition = GG.GetUnitPosition
 	local math_floor = math.floor
 	local math_ceil = math.ceil
 
@@ -142,7 +142,7 @@ if not gadgetHandler:IsSyncedCode() then
 
 	function gadget:Initialize()
 		for ct, unitID in pairs(Spring.GetAllUnits()) do
-			gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), Spring.GetUnitTeam(unitID))
+			gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID), GG.GetUnitTeam(unitID))
 		end
 		gadgetHandler:AddSyncAction("receivedPart", receivedPart)
 	end

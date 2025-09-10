@@ -140,7 +140,7 @@ if gadgetHandler:IsSyncedCode() then
 		gadgetHandler:RegisterAllowCommand(CMD_INSERT)
 		local units = Spring.GetAllUnits()
 		for i = 1, #units do
-			local unitDefID = Spring.GetUnitDefID(units[i])
+			local unitDefID = GG.GetUnitDefID(units[i])
 			gadget:UnitCreated(units[i], unitDefID)
 		end
 	end

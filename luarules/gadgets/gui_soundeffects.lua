@@ -94,10 +94,10 @@ local myAllyTeamID = Spring.GetMyAllyTeamID()
 local spectator, fullview = Spring.GetSpectatingState()
 
 local spGetUnitIsActive = Spring.GetUnitIsActive
-local spGetUnitDefID = Spring.GetUnitDefID
-local spGetUnitTeam = Spring.GetUnitTeam
+local spGetUnitDefID = GG.GetUnitDefID
+local spGetUnitTeam = GG.GetUnitTeam
 local spGetUnitAllyTeam = Spring.GetUnitAllyTeam
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitPosition = GG.GetUnitPosition
 local spIsUnitInView = Spring.IsUnitInView
 local spIsUnitInLos = Spring.IsUnitInLos
 local spPlaySoundFile = Spring.PlaySoundFile

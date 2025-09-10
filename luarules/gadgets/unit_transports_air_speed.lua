@@ -37,7 +37,7 @@ local currentMassUsage = 0
 
 local spGetUnitVelocity = Spring.GetUnitVelocity
 local spSetUnitVelocity = Spring.SetUnitVelocity
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitDefID = GG.GetUnitDefID
 local spGetUnitIsTransporting = Spring.GetUnitIsTransporting
 
 -- update allowed speed for transport

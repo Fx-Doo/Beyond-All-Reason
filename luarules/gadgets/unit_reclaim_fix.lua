@@ -16,7 +16,7 @@ end
 
 local SetFeatureReclaim = Spring.SetFeatureReclaim
 local GetFeaturePosition = Spring.GetFeaturePosition
-local GetUnitDefID = Spring.GetUnitDefID
+local GetUnitDefID = GG.GetUnitDefID
 local GetFeatureResources = Spring.GetFeatureResources
 
 local featureListMaxResource = {}

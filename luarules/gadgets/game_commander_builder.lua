@@ -41,7 +41,7 @@ if Spring.GetModOptions().experimentallegionfaction then
 end
 
 function SpawnAssistTurret(unitID, unitDefID, unitTeam)
-	local posx, posy, posz = Spring.GetUnitPosition(unitID)
+	local posx, posy, posz = GG.GetUnitPosition(unitID)
     local spawnpadunit = spawnpads[unitDefID]
     local spawnpadID
     for k = 1,10000 do
@@ -81,8 +81,8 @@ end
 function gadget:GameFrame(n)
     if n == 150 then
         for comID, _ in pairs(commandersList) do
-            local comDefID = Spring.GetUnitDefID(comID)
-            local comTeam = Spring.GetUnitTeam(comID)
+            local comDefID = GG.GetUnitDefID(comID)
+            local comTeam = GG.GetUnitTeam(comID)
             SpawnAssistTurret(comID, comDefID, comTeam)
         end
     end

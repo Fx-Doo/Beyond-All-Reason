@@ -59,8 +59,8 @@ end
 function gadget:Initialize()
 	local allUnits = Spring.GetAllUnits()
 	for _, unitID in ipairs(allUnits) do
-		local unitDefID = Spring.GetUnitDefID(unitID)
-		local unitTeamID = Spring.GetUnitTeam(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
+		local unitTeamID = GG.GetUnitTeam(unitID)
 		gadget:UnitFinished(unitID, unitDefID, unitTeamID)
 	end
 end

@@ -19,7 +19,7 @@ if not gadgetHandler:IsSyncedCode() then return false end
 -- wtboostunittype = "MOBILE TURRET" defined in unitdef of builder which defines what units trigger workertime boost for that builder.
 
 local spGetUnitIsBuilding = Spring.GetUnitIsBuilding
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitDefID = GG.GetUnitDefID
 local spSetUnitRulesParam = Spring.SetUnitRulesParam
 local boostableUnits = {}
 local builderWatchDefs = {}

@@ -73,7 +73,7 @@ local spGetProjectilePosition  = Spring.GetProjectilePosition
 local spGetProjectileVelocity  = Spring.GetProjectileVelocity
 local spGetUnitHealth          = Spring.GetUnitHealth
 local spGetUnitIsDead          = Spring.GetUnitIsDead
-local spGetUnitPosition        = Spring.GetUnitPosition
+local spGetUnitPosition        = GG.GetUnitPosition
 local spGetUnitRadius          = Spring.GetUnitRadius
 local spSetProjectileVelocity  = Spring.SetProjectileVelocity
 

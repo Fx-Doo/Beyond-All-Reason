@@ -25,7 +25,7 @@ local spValidUnitID         = Spring.ValidUnitID
 local spGiveOrderToUnit     = Spring.GiveOrderToUnit
 local spGetUnitHealth       = Spring.GetUnitHealth
 local spSetUnitRulesParam   = Spring.SetUnitRulesParam
-local spGetUnitTeam         = Spring.GetUnitTeam
+local spGetUnitTeam         = GG.GetUnitTeam
 local spSetUnitTarget       = Spring.SetUnitTarget
 local spGetUnitNearestEnemy	= Spring.GetUnitNearestEnemy
 

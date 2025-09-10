@@ -58,7 +58,7 @@ if gadgetHandler:IsSyncedCode() then
 			zz = target[3]
 		end
 		if targetTypeInt == string.byte('u') then
-			_,_,_,_,_,_,xx,yy,zz = Spring.GetUnitPosition(target,true,true)
+			_,_,_,_,_,_,xx,yy,zz = GG.GetUnitPosition(target,true,true)
 		end
 		local xp,yp,zp = Spring.GetProjectilePosition(proID)
 		local vxp,vyp,vzp = Spring.GetProjectileVelocity(proID)
@@ -232,6 +232,7 @@ if gadgetHandler:IsSyncedCode() then
 		local vx, vy, vz = Spring.GetProjectileVelocity(proID)
 		local vw = math_sqrt(vx*vx + vy*vy + vz*vz)
 		local ownerID = Spring.GetProjectileOwnerID(proID)
+		local teamID = GG.GetUnitTeam(ownerID)
 		local infos = projectiles[proID]
 		for i = 1, tonumber(infos.number) do
 			local projectileParams = {
@@ -242,6 +243,7 @@ if gadgetHandler:IsSyncedCode() then
 				gravity = -Game.gravity/900,
 				model = infos.model,
 				cegTag = infos.cegtag,
+				team = teamID,
 				}
 			Spring.SpawnProjectile(weaponDefNamesID[infos.def], projectileParams)
 		end
@@ -258,7 +260,7 @@ if gadgetHandler:IsSyncedCode() then
 		local targetType, targetID = Spring.GetProjectileTarget(proID)
 		
 		if (targetType ~= nil) and (targetID ~= nil) and (targetType ~= 103) then--ground attack borks it; skip
-			local unitPosX, unitPosY, unitPosZ = Spring.GetUnitPosition(targetID)
+			local unitPosX, unitPosY, unitPosZ = GG.GetUnitPosition(targetID)
 			if (unitPosY ~= nil) and unitPosY<-10 then
 				bypass = true
 				Spring.SetProjectileVelocity(proID,vx/1.3,vy/6,vz/1.3)--apply brake without fully halting, otherwise it will overshoot very close targets before tracking can reorient it

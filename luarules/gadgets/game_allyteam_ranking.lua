@@ -98,7 +98,7 @@ end
 
 function gadget:Initialize()
 	for _, unitID in ipairs(Spring.GetAllUnits()) do
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), Spring.GetUnitTeam(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID), GG.GetUnitTeam(unitID))
 	end
 end
 

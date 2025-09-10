@@ -21,7 +21,7 @@ if (gadgetHandler:IsSyncedCode()) then
 
     -- detect resurrected units here
 	function gadget:UnitCreated(unitID, unitDefID, unitTeam, builderID)
-		if builderID and canResurrect[Spring.GetUnitDefID(builderID)] then
+		if builderID and canResurrect[GG.GetUnitDefID(builderID)] then
 			if not Spring.Utilities.Gametype.IsScavengers() then
 				Spring.SetUnitRulesParam(unitID, "resurrected", 1, {inlos=true})
 			end

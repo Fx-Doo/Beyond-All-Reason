@@ -41,7 +41,7 @@ function gadget:UnitCreated(uID, uDefID, uTeam, bID)
 			xr, zr = unitZsize5[uDefID], unitXsize5[uDefID]
 		end
 
-		local ux, _, uz = Spring.GetUnitPosition(uID)
+		local ux, _, uz = GG.GetUnitPosition(uID)
 		local features = Spring.GetFeaturesInRectangle(ux-xr, uz-zr, ux+xr, uz+zr)
 		for i = 1, #features do
 			if gibFeatureDefs[Spring.GetFeatureDefID(features[i])] then

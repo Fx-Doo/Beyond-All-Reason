@@ -286,7 +286,7 @@ function gadget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerD
 	end
 	if string.find(UnitDefs[unitDefID].name, "scavbeacon") then
 		if math.random() <= 0.33 then
-			local posx, posy, posz = Spring.GetUnitPosition(unitID)
+			local posx, posy, posz = GG.GetUnitPosition(unitID)
 			SpawnLootbox(posx, posy, posz)
 		else
 			LootboxesToSpawn = LootboxesToSpawn+0.33

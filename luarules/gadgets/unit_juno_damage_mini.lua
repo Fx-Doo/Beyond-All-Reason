@@ -118,7 +118,7 @@ if gadgetHandler:IsSyncedCode() then
 	local SpGetGameSeconds = Spring.GetGameSeconds
 	local SpGetUnitsInCylinder = Spring.GetUnitsInCylinder
 	local SpDestroyUnit = Spring.DestroyUnit
-	local SpGetUnitDefID = Spring.GetUnitDefID
+	local SpGetUnitDefID = GG.GetUnitDefID
 	local SpValidUnitID = Spring.ValidUnitID
 	local Mmin = math.min
 
@@ -140,7 +140,7 @@ if gadgetHandler:IsSyncedCode() then
 	function gadget:UnitDamaged(uID, uDefID, uTeam, damage, paralyzer, weaponID, projID, aID, aDefID, aTeam)
 		if junoWeapons[weaponID] and tokillUnits[uDefID] then
 			if uID and SpValidUnitID(uID) then
-				local px, py, pz = Spring.GetUnitPosition(uID)
+				local px, py, pz = GG.GetUnitPosition(uID)
 				if px then
 					Spring.SpawnCEG("juno-damage", px, py + 8, pz, 0, 1, 0)
 				end
@@ -200,7 +200,7 @@ if gadgetHandler:IsSyncedCode() then
 					local unitID = unitIDsBig[i]
 					local unitDefID = SpGetUnitDefID(unitID)
 					if todenyUnits[unitDefID] then
-						local px, py, pz = Spring.GetUnitPosition(unitID)
+						local px, py, pz = GG.GetUnitPosition(unitID)
 						local dx = expl.x - px
 						local dz = expl.z - pz
 						if (dx * dx + dz * dz) > (q * (radius - width)) * (q * (radius - width)) then

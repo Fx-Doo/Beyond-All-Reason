@@ -52,7 +52,7 @@ if gadgetHandler:IsSyncedCode() then
 	local GetGameSeconds = Spring.GetGameSeconds
 	local DestroyUnit = Spring.DestroyUnit
 	local GetTeamUnits = Spring.GetTeamUnits
-	local GetUnitPosition = Spring.GetUnitPosition
+	local GetUnitPosition = GG.GetUnitPosition
 	local GiveOrderToUnit = Spring.GiveOrderToUnit
 	local TestBuildOrder = Spring.TestBuildOrder
 	local GetGroundBlocked = Spring.GetGroundBlocked
@@ -282,9 +282,9 @@ if gadgetHandler:IsSyncedCode() then
 					if random <= ecoTierMaxProbability then
 						local target = units:GetRandom()
 						if ValidUnitID(target) and not GetUnitIsDead(target) and not GetUnitNeutral(target) then
-							-- Spring.Echo("Targetting eco: " .. random .. " found " .. UnitDefs[Spring.GetUnitDefID(target)].name);
+							-- Spring.Echo("Targetting eco: " .. random .. " found " .. UnitDefs[GG.GetUnitDefID(target)].name);
 
-							local x,y,z = Spring.GetUnitPosition(target)
+							local x,y,z = GG.GetUnitPosition(target)
 							pos = {x = x+mRandom(-32,32), y = y, z = z+mRandom(-32,32)}
 							pickedTarget = target
 							break
@@ -447,11 +447,11 @@ if gadgetHandler:IsSyncedCode() then
 					for j, unitID in pairs(squadsTable[i].squadUnits) do
 						if unitID then
 							destroyQueue[#destroyQueue+1] = unitID
-							-- Spring.Echo("Killing old unit. ID: ".. unitID .. ", Name:" .. UnitDefs[Spring.GetUnitDefID(unitID)].name)
+							-- Spring.Echo("Killing old unit. ID: ".. unitID .. ", Name:" .. UnitDefs[GG.GetUnitDefID(unitID)].name)
 						end
 					end
 					for j = 1,#destroyQueue do
-						-- Spring.Echo("Destroying Unit. ID: ".. unitID .. ", Name:" .. UnitDefs[Spring.GetUnitDefID(unitID)].name)
+						-- Spring.Echo("Destroying Unit. ID: ".. unitID .. ", Name:" .. UnitDefs[GG.GetUnitDefID(unitID)].name)
 						Spring.DestroyUnit(destroyQueue[j], true, false)
 					end
 					destroyQueue = nil
@@ -478,7 +478,7 @@ if gadgetHandler:IsSyncedCode() then
 				local count = 0
 				for i, unitID in pairs(units) do
 					if ValidUnitID(unitID) and not GetUnitIsDead(unitID) and not GetUnitNeutral(unitID) then
-						local x,y,z = Spring.GetUnitPosition(unitID)
+						local x,y,z = GG.GetUnitPosition(unitID)
 						if x < xmin then xmin = x end
 						if z < zmin then zmin = z end
 						if x > xmax then xmax = x end
@@ -599,7 +599,7 @@ if gadgetHandler:IsSyncedCode() then
 			for i = 1,SetCount(squadsTable[squadID].squadUnits) do
 				local unitID = squadsTable[squadID].squadUnits[i]
 				unitSquadTable[unitID] = squadID
-				-- Spring.Echo("#".. i ..", ID: ".. unitID .. ", Name:" .. UnitDefs[Spring.GetUnitDefID(unitID)].name)
+				-- Spring.Echo("#".. i ..", ID: ".. unitID .. ", Name:" .. UnitDefs[GG.GetUnitDefID(unitID)].name)
 			end
 			refreshSquad(squadID)
 		else
@@ -1424,7 +1424,7 @@ if gadgetHandler:IsSyncedCode() then
 						end
 						for _ = 1,SetCount(humanTeams) do
 							if mRandom() < config.spawnChance then
-								SpawnMinions(queenID, Spring.GetUnitDefID(queenID))
+								SpawnMinions(queenID, GG.GetUnitDefID(queenID))
 							end
 						end
 						spawnCreepStructuresWave()
@@ -1522,8 +1522,8 @@ if gadgetHandler:IsSyncedCode() then
 				curH = math.max(curH, maxH*0.05)
 				local spawnChance = math.max(0, math.ceil(curH/maxH*10000))
 				if mRandom(0,spawnChance) == 1 then
-					SpawnMinions(queenID, Spring.GetUnitDefID(queenID))
-					SpawnMinions(queenID, Spring.GetUnitDefID(queenID))
+					SpawnMinions(queenID, GG.GetUnitDefID(queenID))
+					SpawnMinions(queenID, GG.GetUnitDefID(queenID))
 				end
 			end
 		end
@@ -1678,8 +1678,8 @@ if gadgetHandler:IsSyncedCode() then
 		else
 			if mRandom() < config.spawnChance / 15 then
 				for i = 1,config.queenSpawnMult do
-					SpawnMinions(queenID, Spring.GetUnitDefID(queenID))
-					SpawnMinions(queenID, Spring.GetUnitDefID(queenID))
+					SpawnMinions(queenID, GG.GetUnitDefID(queenID))
+					SpawnMinions(queenID, GG.GetUnitDefID(queenID))
 
 				end
 			end
@@ -1891,8 +1891,8 @@ if gadgetHandler:IsSyncedCode() then
 		if n%7 == 3 then
 			local raptors = GetTeamUnits(raptorTeamID)
 			for i = 1,#raptors do
-				if mRandom(1,math.ceil((33*math.max(1, Spring.GetTeamUnitDefCount(raptorTeamID, Spring.GetUnitDefID(raptors[i])))))) == 1 and mRandom() < config.spawnChance then
-					SpawnMinions(raptors[i], Spring.GetUnitDefID(raptors[i]))
+				if mRandom(1,math.ceil((33*math.max(1, Spring.GetTeamUnitDefCount(raptorTeamID, GG.GetUnitDefID(raptors[i])))))) == 1 and mRandom() < config.spawnChance then
+					SpawnMinions(raptors[i], GG.GetUnitDefID(raptors[i]))
 				end
 				if mRandom(1,60) == 1 then
 					if unitCowardCooldown[raptors[i]] and (Spring.GetGameFrame() > unitCowardCooldown[raptors[i]]) then
@@ -1930,7 +1930,7 @@ if gadgetHandler:IsSyncedCode() then
 
 		if unitTeam == raptorTeamID then
 			if config.useEggs and (not gameIsOver) then
-				local x,y,z = Spring.GetUnitPosition(unitID)
+				local x,y,z = GG.GetUnitPosition(unitID)
 				spawnRandomEgg(x,y,z, UnitDefs[unitDefID].name)
 			end
 			if unitDefID == config.burrowDef then
@@ -2013,7 +2013,7 @@ if gadgetHandler:IsSyncedCode() then
 			SetGameRulesParam(config.burrowName .. "Kills", kills + 1)
 
 			burrows[unitID] = nil
-			if attackerID and Spring.GetUnitTeam(attackerID) ~= raptorTeamID then
+			if attackerID and GG.GetUnitTeam(attackerID) ~= raptorTeamID then
 				playerAggression = playerAggression + (config.angerBonus/config.raptorSpawnMultiplier)
 				config.maxXP = config.maxXP*1.01
 			end
@@ -2032,7 +2032,7 @@ if gadgetHandler:IsSyncedCode() then
 			end
 
 			SetGameRulesParam("raptor_hiveCount", SetCount(burrows))
-		elseif unitTeam == raptorTeamID and UnitDefs[unitDefID].isBuilding and (attackerID and Spring.GetUnitTeam(attackerID) ~= raptorTeamID) then
+		elseif unitTeam == raptorTeamID and UnitDefs[unitDefID].isBuilding and (attackerID and GG.GetUnitTeam(attackerID) ~= raptorTeamID) then
 			playerAggression = playerAggression + ((config.angerBonus/config.raptorSpawnMultiplier)*0.1)
 		end
 		if unitTeleportCooldown[unitID] then

@@ -3,7 +3,7 @@
 ShardUnit = class(function(a, id)
 	a.id = id
 	a.className = "unit"
-	local udefid = Spring.GetUnitDefID(id)
+	local udefid = GG.GetUnitDefID(id)
 	a.type = ShardUnitType(udefid)
 end)
 
@@ -199,7 +199,7 @@ function ShardUnit:ID()
 end
 
 function ShardUnit:Team()
-	return Spring.GetUnitTeam(self.id)
+	return GG.GetUnitTeam(self.id)
 end
 
 function ShardUnit:Radius()
@@ -614,7 +614,7 @@ function ShardUnit:IdleModeLand()
 end
 
 function ShardUnit:GetPosition()
-	local bpx, bpy, bpz = Spring.GetUnitPosition(self.id)
+	local bpx, bpy, bpz = GG.GetUnitPosition(self.id)
 	local isDead = Spring.GetUnitIsDead(self.id)
 	--[[if isDead or isDead == nil then
 		if bpx then
@@ -637,7 +637,7 @@ function ShardUnit:GetPosition()
 end
 
 function ShardUnit:GetRawPos()
-	local bpx, bpy, bpz = Spring.GetUnitPosition(self.id)
+	local bpx, bpy, bpz = GG.GetUnitPosition(self.id)
 	return bpx, bpy, bpz
 end
 

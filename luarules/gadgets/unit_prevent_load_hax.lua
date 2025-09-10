@@ -21,11 +21,11 @@ if (not gadgetHandler:IsSyncedCode()) then
 end
 
 local GiveOrderToUnit = Spring.GiveOrderToUnit
-local GetUnitPosition = Spring.GetUnitPosition
+local GetUnitPosition = GG.GetUnitPosition
 local GetUnitSeparation = Spring.GetUnitSeparation
 local GetGameFrame = Spring.GetGameFrame
 local GetCommandQueue = Spring.GetCommandQueue
-local GetUnitTeam = Spring.GetUnitTeam
+local GetUnitTeam = GG.GetUnitTeam
 local CMD_LOAD_UNITS = CMD.LOAD_UNITS
 local CMD_INSERT = CMD.INSERT
 local CMD_MOVE = CMD.MOVE

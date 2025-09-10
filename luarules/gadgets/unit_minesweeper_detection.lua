@@ -19,10 +19,10 @@ end
 
 local spSetUnitLosState		= Spring.SetUnitLosState
 local spSetUnitLosMask		= Spring.SetUnitLosMask
-local spGetUnitPosition		= Spring.GetUnitPosition
+local spGetUnitPosition		= GG.GetUnitPosition
 local spGetUnitsInCylinder	= Spring.GetUnitsInCylinder
-local spGetUnitDefID		= Spring.GetUnitDefID
-local spGetUnitTeam			= Spring.GetUnitTeam
+local spGetUnitDefID		= GG.GetUnitDefID
+local spGetUnitTeam			= GG.GetUnitTeam
 
 local minesweeperRanges = {}
 local minesweepers = {}
@@ -107,8 +107,8 @@ end
 
 function gadget:Initialize()
 	for _, unitID in pairs(Spring.GetAllUnits()) do
-		local unitDefID = Spring.GetUnitDefID(unitID)
-		local unitTeam = Spring.GetUnitTeam(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
+		local unitTeam = GG.GetUnitTeam(unitID)
 		if minesweeperRanges[unitDefID] then
 			minesweepers[unitTeam][unitID] = unitDefID
 		end

@@ -34,8 +34,8 @@ for unitDefID, unitDef in pairs(UnitDefs) do
 	end
 end
 
-local spGetUnitDefID = Spring.GetUnitDefID
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitDefID = GG.GetUnitDefID
+local spGetUnitPosition = GG.GetUnitPosition
 local spGetFeaturePosition = Spring.GetFeaturePosition
 local mapx = Game.mapSizeX
 local mapz = Game.mapSizeZ

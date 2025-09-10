@@ -29,7 +29,7 @@ local descentModulo = math.floor(Game.gameSpeed / 4)
 local leashModulo = math.ceil(Game.gameSpeed / 3)
 
 --functions
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitPosition = GG.GetUnitPosition
 local mathRandom = math.random
 local mathCeil = math.ceil
 local mathSqrt = math.sqrt

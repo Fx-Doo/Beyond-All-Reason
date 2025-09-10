@@ -77,7 +77,7 @@ local spSetUnitBuildSpeed = Spring.SetUnitBuildSpeed
 local spGetUnitIsBuilding = Spring.GetUnitIsBuilding
 local spValidUnitID = Spring.ValidUnitID
 local spGetTeamInfo = Spring.GetTeamInfo
-local spGetUnitTeam = Spring.GetUnitTeam
+local spGetUnitTeam = GG.GetUnitTeam
 local simSpeed = Game.gameSpeed
 
 local max = math.max
@@ -127,7 +127,7 @@ function gadget:Initialize()
 	end
 
 	for _,unitID in pairs(Spring.GetAllUnits()) do
-        gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), spGetUnitTeam(unitID))
+        gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID), spGetUnitTeam(unitID))
 		if currentBuildSpeed[unitID] then
 			spSetUnitBuildSpeed(unitID, currentBuildSpeed[unitID]) -- needed for luarules reloads
 		end

@@ -106,7 +106,7 @@ function gadget:GameFrame(frame)
 
     if frame%30 == 21 then
         for unitID, unitDefID in pairs(aliveMists) do
-            local posx, posy, posz = Spring.GetUnitPosition(unitID)
+            local posx, posy, posz = GG.GetUnitPosition(unitID)
             if not GG.IsPosInRaptorScum(posx, posy, posz) then
                 Spring.DestroyUnit(unitID, true, true)
             elseif math.random(0,360) == 0 and Spring.GetTeamUnitDefCount(scavTeamID, unitDefID) > maxMists - math.ceil(maxMists*0.05) then

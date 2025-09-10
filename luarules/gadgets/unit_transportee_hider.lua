@@ -17,7 +17,7 @@ end
 local SetUnitNoDraw = Spring.SetUnitNoDraw
 local SetUnitStealth = Spring.SetUnitStealth
 local SetUnitSonarStealth = Spring.SetUnitSonarStealth
-local GetUnitDefID = Spring.GetUnitDefID
+local GetUnitDefID = GG.GetUnitDefID
 local GiveOrderToUnit = Spring.GiveOrderToUnit
 
 local CMD_LOAD_ONTO = CMD.LOAD_ONTO
@@ -63,7 +63,7 @@ function gadget:Initialize()
 	gadgetHandler:RegisterAllowCommand(CMD_LOAD_ONTO)
 	local allUnits = Spring.GetAllUnits()
 	for _, unitID in ipairs(allUnits) do
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), Spring.GetUnitTeam(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID), GG.GetUnitTeam(unitID))
 	end
 end
 

@@ -173,7 +173,7 @@ function gadget:GameFrame(n)
 		for unitID, frame in pairs(decorations) do
 			if frame < n then
 				decorations[unitID] = nil
-				local x,y,z = Spring.GetUnitPosition(unitID)
+				local x,y,z = GG.GetUnitPosition(unitID)
 				if x then
 					local gy = Spring.GetGroundHeight(x,z)
 					decorationsTerminal[unitID] = n+random(0,50)+225+((y - gy) * 33)		-- allows if in sea to take longer to go under seafloor
@@ -278,7 +278,7 @@ function gadget:UnitDestroyed(unitID, unitDefID, teamID, attackerID, attackerDef
 
 			local inProgress = Spring.GetUnitIsBeingBuilt(unitID)
 			if not inProgress then	-- exclude incompleted nanoframes
-				local x,y,z = Spring.GetUnitPosition(unitID)
+				local x,y,z = GG.GetUnitPosition(unitID)
 				createDecorations[#createDecorations+1] = {x,y,z, teamID, unitDefID }
 				--Spring.Echo(hasDecoration[unitDefID][1])
 			end

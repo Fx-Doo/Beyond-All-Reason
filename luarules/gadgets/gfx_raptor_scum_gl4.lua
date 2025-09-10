@@ -278,7 +278,7 @@ if gadgetHandler:IsSyncedCode() then
 
 	function gadget:UnitCreated(unitID, unitDefID, unitTeam)
 		if scumSpawnerIDs[unitDefID] and (debugmode or (unitTeam == scavengerAITeamID or unitTeam == raptorsAITeamID)) then
-			local px, py, pz = Spring.GetUnitPosition(unitID)
+			local px, py, pz = GG.GetUnitPosition(unitID)
 			local gf = Spring.GetGameFrame()
 
 			local scumID = AddOrUpdateScum(px, py, pz, scumSpawnerIDs[unitDefID].radius, scumSpawnerIDs[unitDefID].growthrate, unitID)
@@ -299,7 +299,7 @@ if gadgetHandler:IsSyncedCode() then
 	function gadget:GameFrame(n)
 		if not initialized then
 			for i, unitID in ipairs(Spring.GetAllUnits()) do
-				gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID))
+				gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID))
 			end
 			initialized = true
 		end

@@ -19,7 +19,7 @@ if gadgetHandler:IsSyncedCode() then
 	-- Localization and speedups
 	local spSetPieceCollisionData = Spring.SetUnitPieceCollisionVolumeData
 	local spGetPieceList = Spring.GetUnitPieceList
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitDefID = GG.GetUnitDefID
 	local spGetUnitCollisionData = Spring.GetUnitCollisionVolumeData
 	local spSetUnitCollisionData = Spring.SetUnitCollisionVolumeData
 	local spSetUnitRadiusAndHeight = Spring.SetUnitRadiusAndHeight

@@ -55,7 +55,7 @@ local max                   = math.max
 local spGetFeaturesInSphere = Spring.GetFeaturesInSphere
 local spGetGroundHeight     = Spring.GetGroundHeight
 local spGetGroundNormal     = Spring.GetGroundNormal
-local spGetUnitDefID        = Spring.GetUnitDefID
+local spGetUnitDefID        = GG.GetUnitDefID
 local spGetUnitsInSphere    = Spring.GetUnitsInSphere
 local spSpawnCEG            = Spring.SpawnCEG
 
@@ -165,7 +165,7 @@ local function damageTargetsInAreas(timedAreas, gameFrame)
         for j = 1, #unitsInRange do
             local unitID = unitsInRange[j]
             if not unitDamageImmunity[spGetUnitDefID(unitID)][area.resistance] then
-                local ux, uy, uz = Spring.GetUnitPosition(unitID)
+                local ux, uy, uz = GG.GetUnitPosition(unitID)
                 spSpawnCEG(area.damageCeg, ux, uy, uz)
                 Spring.AddUnitDamage(unitID, area.damage, nil, area.owner, area.weapon)
             end

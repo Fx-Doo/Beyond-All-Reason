@@ -14,8 +14,8 @@ if not gadgetHandler:IsSyncedCode() then
     return false
 end
 
-local GetUnitTeam = Spring.GetUnitTeam
-local GetUnitDefID = Spring.GetUnitDefID
+local GetUnitTeam = GG.GetUnitTeam
+local GetUnitDefID = GG.GetUnitDefID
 local GetGroundNormal = Spring.GetGroundNormal
 local GetUnitIsTransporting = Spring.GetUnitIsTransporting
 

@@ -35,7 +35,7 @@ local spSetUnitShieldState          = Spring.SetUnitShieldState
 local spSetUnitShieldRechargeDelay  = Spring.SetUnitShieldRechargeDelay
 local spDeleteProjectile            = Spring.DeleteProjectile
 local spGetProjectileDefID          = Spring.GetProjectileDefID
-local spGetUnitPosition             = Spring.GetUnitPosition
+local spGetUnitPosition             = GG.GetUnitPosition
 local spGetUnitsInSphere            = Spring.GetUnitsInSphere
 local spGetProjectilesInRectangle   = Spring.GetProjectilesInRectangle
 local spAreTeamsAllied              = Spring.AreTeamsAllied
@@ -505,8 +505,8 @@ function gadget:Initialize()
 	GG.AddShieldDamage = addShieldDamage
 
 	for _, unitID in ipairs(Spring.GetAllUnits()) do
-		local unitDefID = Spring.GetUnitDefID(unitID)
-		local unitTeam = Spring.GetUnitTeam(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
+		local unitTeam = GG.GetUnitTeam(unitID)
 		gadget:UnitFinished(unitID, unitDefID, unitTeam)
 	end
 end

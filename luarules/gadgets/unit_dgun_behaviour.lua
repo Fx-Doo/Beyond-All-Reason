@@ -20,7 +20,7 @@ local spGetProjectileVelocity = Spring.GetProjectileVelocity
 local spGetGroundHeight = Spring.GetGroundHeight
 local spDeleteProjectile = Spring.DeleteProjectile
 local spSpawnExplosion = Spring.SpawnExplosion
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitPosition = GG.GetUnitPosition
 local spSpawnCEG = Spring.SpawnCEG
 local spGetGameFrame = Spring.GetGameFrame
 

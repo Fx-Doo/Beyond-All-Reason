@@ -192,7 +192,7 @@ local function SpawnUnit(spawnData)
 			end
       
 			if ownerID then
-				local ownx, owny, ownz = Spring.GetUnitPosition(ownerID)
+				local ownx, owny, ownz = GG.GetUnitPosition(ownerID)
 				
 				if ownx then
 				local dx = (spawnData.x  - ownx) 
@@ -210,7 +210,7 @@ local function SpawnUnit(spawnData)
 				expireCount = expireCount + 1
 				expireByID[unitID] = expireCount
 				expireID[expireCount] = unitID
-				if Spring.GetUnitTeam(unitID) ~= scavengerAITeamID then
+				if GG.GetUnitTeam(unitID) ~= scavengerAITeamID then
 					expireList[expireCount] = spGetGameFrame() + spawnDef.expire
 				else
 					expireList[expireCount] = spGetGameFrame() + 99999

@@ -80,7 +80,7 @@ if gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:ProjectileCreated(projectileID, ownerID, weaponID)		-- needs: Script.SetWatchProjectile(weaponDefID, true)
-		--local unitDef = Spring.GetUnitDefID(ownerID)
+		--local unitDef = GG.GetUnitDefID(ownerID)
 		--Spring.Echo("gadget:ProjectileCreated(",projectileID, ownerID, weaponID,weapondefsreload[weaponID],unitreloadframe[ownerID], ")")
 		local weaponIndex = weapondefsreload[weaponID]
 
@@ -146,8 +146,8 @@ else
 	end
 
 	function projetileCreatedReload(cmd, projectileID, ownerID, weaponID)
-		--Spring.Echo("unsynced projetileCreatedReload", projectileID, ownerID, weaponID, fullview, Spring.GetUnitTeam(ownerID))
-		if fullview or Spring.GetUnitTeam(ownerID) == myTeamID then
+		--Spring.Echo("unsynced projetileCreatedReload", projectileID, ownerID, weaponID, fullview, GG.GetUnitTeam(ownerID))
+		if fullview or GG.GetUnitTeam(ownerID) == myTeamID then
 			if Script.LuaUI("ProjectileCreatedReloadHB") then
 				--Spring.Echo("G:ProjectileCreatedReloadHB", projectileID, ownerID, weaponID)
 				Script.LuaUI.ProjectileCreatedReloadHB(projectileID, ownerID, weaponID)

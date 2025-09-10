@@ -75,7 +75,7 @@ if gadgetHandler:IsSyncedCode() then
 		local allunits = Spring.GetAllUnits()
 		local numdestroyed = 0
 		for _,unitID in ipairs(allunits) do
-			local ux,uy,uz = Spring.GetUnitPosition(unitID)
+			local ux,uy,uz = GG.GetUnitPosition(unitID)
 			if ux and distsqrgreater(ux - mapCenterX, uz - mapCenterZ, radiussquared) then
 			  --Spring.DestroyUnit(unitID, true, false)
 			  numdestroyed = numdestroyed + 1

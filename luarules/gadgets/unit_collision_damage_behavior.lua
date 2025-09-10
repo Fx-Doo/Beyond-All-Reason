@@ -262,7 +262,7 @@ local function setVelocityControl(unitID, enabled)
 	elseif not unitInertiaCheckFlags[unitID] then
 		unitInertiaCheckFlags[unitID] = {
 			expirationFrame = gameFrame + velocityWatchFrames,
-			velocityCap     = unitDefData[Spring.GetUnitDefID(unitID)].velocityCap,
+			velocityCap     = unitDefData[GG.GetUnitDefID(unitID)].velocityCap,
 		}
 	end
 end

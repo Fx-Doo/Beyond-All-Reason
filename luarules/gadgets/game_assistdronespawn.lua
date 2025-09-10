@@ -62,7 +62,7 @@ function SpawnAssistDrone(unitID, unitDefID, unitTeam)
     if not teamIDDroneList[unitTeam] then teamIDDroneList[unitTeam] = {} end
     local droneunit = drones[unitDefID]
     if CountItemsInArray(teamIDDroneList[unitTeam]) < droneCount then
-        local posx, posy, posz = Spring.GetUnitPosition(unitID)
+        local posx, posy, posz = GG.GetUnitPosition(unitID)
         local droneID = Spring.CreateUnit(droneunit, posx, posy+100, posz, 0, unitTeam)
         if droneID then
             Spring.SpawnCEG("scav-spawnexplo", posx, posy+100, posz,0,0,0)
@@ -95,8 +95,8 @@ end
 function gadget:GameFrame(n)
     if n == 150 or n > 150 and n%1800 == 0 then -- Drone respawn
         for comID, _ in pairs(commandersList) do
-            local comDefID = Spring.GetUnitDefID(comID)
-            local comTeam = Spring.GetUnitTeam(comID)
+            local comDefID = GG.GetUnitDefID(comID)
+            local comTeam = GG.GetUnitTeam(comID)
             SpawnAssistDrone(comID, comDefID, comTeam)
         end
     end

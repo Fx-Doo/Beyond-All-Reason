@@ -183,8 +183,8 @@ function gadget:AllowCommand(unitID, unitDefID, teamID, cmdID, cmdParams, cmdOpt
 
 	-- Overkill?
 	--for i = 2, #cmdParams do
-	--	if teamID == Spring.GetUnitTeam(cmdParams[i]) then
-	--		SetUnitWantedSpeed(cmdParams[i], Spring.GetUnitDefID(cmdParams[i]), wantedSpeed)
+	--	if teamID == GG.GetUnitTeam(cmdParams[i]) then
+	--		SetUnitWantedSpeed(cmdParams[i], GG.GetUnitDefID(cmdParams[i]), wantedSpeed)
 	--	end
 	--end
 

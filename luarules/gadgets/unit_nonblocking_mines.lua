@@ -25,12 +25,12 @@ for udid, ud in pairs(UnitDefs) do
 end
 
 local spSetUnitBlocking = Spring.SetUnitBlocking
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitPosition = GG.GetUnitPosition
 local spGetMyTeamID = Spring.GetMyTeamID
 
 function gadget:UnitCreated(uID, uDefID, uTeam)
 	if isMine[uDefID] then
-		local x, _, z = Spring.GetUnitPosition(uID)
+		local x, _, z = GG.GetUnitPosition(uID)
 		mines[uID] = { x, z }
 		spSetUnitBlocking(uID, false, false)
 	end

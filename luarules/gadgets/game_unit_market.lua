@@ -30,8 +30,8 @@ if gadgetHandler:IsSyncedCode() then
 local unitsForSale = {}
 local spGetPlayerInfo       = Spring.GetPlayerInfo
 local spGetTeamInfo         = Spring.GetTeamInfo
-local spGetUnitDefID        = Spring.GetUnitDefID
-local spGetUnitTeam			= Spring.GetUnitTeam
+local spGetUnitDefID        = GG.GetUnitDefID
+local spGetUnitTeam			= GG.GetUnitTeam
 local ShareTeamResource     = Spring.ShareTeamResource
 local spGetTeamResources    = Spring.GetTeamResources
 local TransferUnit          = Spring.TransferUnit

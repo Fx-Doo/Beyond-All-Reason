@@ -111,7 +111,7 @@ else	-- UNSYNCED
 			local mx,my = Spring.GetMouseState()
 			local targettype,pos = Spring.TraceScreenRay(mx,my)
 			if targettype == 'unit' then
-				pos = {Spring.GetUnitPosition(pos)}
+				pos = {GG.GetUnitPosition(pos)}
 			elseif targettype == 'feature' then
 				pos = {Spring.GetFeaturePosition(pos)}
 			end

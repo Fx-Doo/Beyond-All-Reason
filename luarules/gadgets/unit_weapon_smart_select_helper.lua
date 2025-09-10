@@ -75,7 +75,7 @@ local modeSwitchFrames = {}
 
 function gadget:Initialize()
 	local units = Spring.GetAllUnits()
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitDefID = GG.GetUnitDefID
 	for i = 1, #units do
 		gadget:UnitCreated(units[i], spGetUnitDefID(units[i]))
 	end

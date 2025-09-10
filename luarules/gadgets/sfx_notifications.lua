@@ -83,7 +83,7 @@ if gadgetHandler:IsSyncedCode() then
 	function gadget:ProjectileCreated(proID, proOwnerID, weaponDefID)
 		local proDefID = Spring.GetProjectileDefID(proID)
 		if nukeWeapons[Spring.GetProjectileDefID(proID)] then
-			local players = AllButAllyTeamID(GetAllyTeamID(Spring.GetUnitTeam(proOwnerID)))
+			local players = AllButAllyTeamID(GetAllyTeamID(GG.GetUnitTeam(proOwnerID)))
 			for ct, player in pairs (players) do
 				if tostring(player) then
 					SendToUnsynced("NotificationEvent", "NukeLaunched", tostring(player))
@@ -232,7 +232,7 @@ else
 				end
 			end
 			if numTeams > 1 and not playingAsHorde then
-				local players =  PlayersInAllyTeamID(GetAllyTeamID(Spring.GetUnitTeam(unitID)))
+				local players =  PlayersInAllyTeamID(GetAllyTeamID(GG.GetUnitTeam(unitID)))
 				for ct, player in pairs (players) do
 					if tostring(player) then
 						if not unitInView then
@@ -255,7 +255,7 @@ else
 				end
 			end
 			if not unitInView then
-				local players =  AllButAllyTeamID(GetAllyTeamID(Spring.GetUnitTeam(unitID)))
+				local players =  AllButAllyTeamID(GetAllyTeamID(GG.GetUnitTeam(unitID)))
 				for ct, player in pairs (players) do
 					if tostring(player) and not Spring.GetUnitRulesParam(unitID, "unit_evolved") then
 						BroadcastEvent("NotificationEvent", "EnemyCommanderDied", tostring(player))

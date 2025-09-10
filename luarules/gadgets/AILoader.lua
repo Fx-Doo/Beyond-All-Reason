@@ -54,7 +54,7 @@ local spGetTeamLuaAI = Spring.GetTeamLuaAI
 local spAreTeamsAllied = Spring.AreTeamsAllied
 local spGetTeamStartPosition = Spring.GetTeamStartPosition
 local spGetAllUnits = Spring.GetAllUnits
-local spGetUnitTeam = Spring.GetUnitTeam
+local spGetUnitTeam = GG.GetUnitTeam
 local spGetUnitAllyTeam = Spring.GetUnitAllyTeam
 local spGetGaiaTeamID = Spring.GetGaiaTeamID()
 
@@ -140,8 +140,8 @@ else	-- UNSYNCED CODE
 			self:GameStart()
 			-- catch up to current units
 			for _, uId in ipairs(spGetAllUnits()) do
-				self:UnitCreated(uId, Spring.GetUnitDefID(uId), Spring.GetUnitTeam(uId))
-				self:UnitFinished(uId, Spring.GetUnitDefID(uId), Spring.GetUnitTeam(uId))
+				self:UnitCreated(uId, GG.GetUnitDefID(uId), GG.GetUnitTeam(uId))
+				self:UnitFinished(uId, GG.GetUnitDefID(uId), GG.GetUnitTeam(uId))
 			end
 		end
 		collectgarbage('collect')
@@ -258,7 +258,7 @@ else	-- UNSYNCED CODE
 
 			end
 
-			if Spring.GetUnitTeam(unitId) == thisAI.id then
+			if GG.GetUnitTeam(unitId) == thisAI.id then
 				thisAI:Prepare()
 				thisAI:UnitCreated(unit, unitDefId, teamId, builderId)
 			end

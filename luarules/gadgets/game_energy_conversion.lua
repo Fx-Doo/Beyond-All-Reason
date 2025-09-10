@@ -65,8 +65,8 @@ local spGetTeamRulesParam = Spring.GetTeamRulesParam
 local spSetTeamRulesParam = Spring.SetTeamRulesParam
 local spGetTeamResources = Spring.GetTeamResources
 local spGetUnitHealth = Spring.GetUnitHealth
-local spGetUnitTeam = Spring.GetUnitTeam
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitTeam = GG.GetUnitTeam
+local spGetUnitDefID = GG.GetUnitDefID
 local spSetUnitResourcing = Spring.SetUnitResourcing
 
 ----------------------------------------------------------------

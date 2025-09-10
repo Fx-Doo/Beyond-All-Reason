@@ -280,7 +280,7 @@ if gadgetHandler:IsSyncedCode() then
 
 					-- CRUSH
 					elseif attackerID and weaponDefID < 0 then
-						ppx, ppy, ppz = Spring.GetUnitPosition(attackerID)
+						ppx, ppy, ppz = GG.GetUnitPosition(attackerID)
 						local vpx, vpy, vpz = Spring.GetUnitVelocity(attackerID)
 						ppx = ppx - 2 * vpx
 						ppy = ppy - 2 * vpy
@@ -290,7 +290,7 @@ if gadgetHandler:IsSyncedCode() then
 
 					-- UNITEXPLOSION
 					elseif attackerID and weaponDefID and not (noFireWeapons[weaponDefID]) then
-						ppx, ppy, ppz = Spring.GetUnitPosition(attackerID)
+						ppx, ppy, ppz = GG.GetUnitPosition(attackerID)
 						dmg = math.min(treeMass[featureDefID] * 2, dmg)
 						if fy >= 0 then
 							fire = true

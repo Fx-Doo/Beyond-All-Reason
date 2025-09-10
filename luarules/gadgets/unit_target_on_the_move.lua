@@ -54,9 +54,9 @@ if gadgetHandler:IsSyncedCode() then
 	local spGetUnitAllyTeam = Spring.GetUnitAllyTeam
 	local spSetUnitTarget = Spring.SetUnitTarget
 	local spValidUnitID = Spring.ValidUnitID
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitDefID = GG.GetUnitDefID
 	local spGetUnitLosState = Spring.GetUnitLosState
-	local spGetUnitTeam = Spring.GetUnitTeam
+	local spGetUnitTeam = GG.GetUnitTeam
 	local spAreTeamsAllied = Spring.AreTeamsAllied
 	local spGetUnitsInRectangle = Spring.GetUnitsInRectangle
 	local spGetUnitsInCylinder = Spring.GetUnitsInCylinder
@@ -539,7 +539,7 @@ if gadgetHandler:IsSyncedCode() then
 		end
 	end
 	local function unpauseTargetting(unitID)
-		addUnitTargets(unitID, Spring.GetUnitDefID(unitID), pausedTargets[unitID].targets, true)
+		addUnitTargets(unitID, GG.GetUnitDefID(unitID), pausedTargets[unitID].targets, true)
 		pausedTargets[unitID] = nil
 	end
 
@@ -651,7 +651,7 @@ else	-- UNSYNCED
 	local GL_LINE_STRIP = GL.LINE_STRIP
 	local GL_LINES = GL.LINES
 
-	local spGetUnitPosition = Spring.GetUnitPosition
+	local spGetUnitPosition = GG.GetUnitPosition
 	local spGetUnitLosState = Spring.GetUnitLosState
 	local spValidUnitID = Spring.ValidUnitID
 	local spGetMyAllyTeamID = Spring.GetMyAllyTeamID
@@ -659,7 +659,7 @@ else	-- UNSYNCED
 	local spIsUnitSelected = Spring.IsUnitSelected
 	local spGetSpectatingState = Spring.GetSpectatingState
 	local spGetUnitAllyTeam = Spring.GetUnitAllyTeam
-	local spGetUnitTeam = Spring.GetUnitTeam
+	local spGetUnitTeam = GG.GetUnitTeam
 
 	local myAllyTeam = spGetMyAllyTeamID()
 	local myTeam = spGetMyTeamID()
@@ -771,7 +771,7 @@ else	-- UNSYNCED
 			local target = targetData.target
 
 			if tonumber(target) and spValidUnitID(target) then
-				local _, _, _, x2, y2, z2 = spGetUnitPosition(target, false, true)
+				local _, _, _, x2, y2, z2 = spGetUnitSlowPosition(target, false, true)
 				drawUnitTarget(target, x2, y2, z2)
 			elseif target and not tonumber(target) then
 				-- 3d coordinate target

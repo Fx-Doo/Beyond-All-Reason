@@ -18,7 +18,7 @@ end
 
 
 local spGetUnitBuildFacing = Spring.GetUnitBuildFacing
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitPosition = GG.GetUnitPosition
 local spGetUnitRadius = Spring.GetUnitRadius
 local spGiveOrderToUnit = Spring.GiveOrderToUnit
 local spInsertUnitCmdDesc  = Spring.InsertUnitCmdDesc
@@ -177,7 +177,7 @@ end
 function gadget:Initialize()
 	gadgetHandler:RegisterAllowCommand(CMD_FACTORY_GUARD)
 	for _, unitID in ipairs(Spring.GetAllUnits()) do
-		gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID))
+		gadget:UnitCreated(unitID, GG.GetUnitDefID(unitID))
 	end
 end
 --------------------------------------------------------------------------------

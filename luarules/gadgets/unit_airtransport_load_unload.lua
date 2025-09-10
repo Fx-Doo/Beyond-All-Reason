@@ -39,10 +39,10 @@ if (gadgetHandler:IsSyncedCode()) then
 		if isAirTransport[transporterUnitDefID] then
 			--local terDefs = UnitDefs[transporterUnitDefID]
 			--local teeDefs = UnitDefs[transporteeUnitDefID]
-			local pos1 = {Spring.GetUnitPosition(transporterID)}
+			local pos1 = {GG.GetUnitPosition(transporterID)}
 			local pos2 = {goalX, goalY, goalZ}
 			if gadget:Distance(pos1, pos2) <= isAirTransport[transporterUnitDefID] then
-				if Spring.AreTeamsAllied(Spring.GetUnitTeam(transporterID), Spring.GetUnitTeam(transporteeID)) or select(4, Spring.GetUnitVelocity(transporteeID)) < 0.5 then	-- make it hard for moving enemy units to be picked up
+				if Spring.AreTeamsAllied(GG.GetUnitTeam(transporterID), GG.GetUnitTeam(transporteeID)) or select(4, Spring.GetUnitVelocity(transporteeID)) < 0.5 then	-- make it hard for moving enemy units to be picked up
 					Spring.SetUnitVelocity(transporterID, 0,0,0)
 					return true
 				else
@@ -60,7 +60,7 @@ if (gadgetHandler:IsSyncedCode()) then
 		if isAirTransport[transporterUnitDefID] then
 			--local terDefs = UnitDefs[transporterUnitDefID]
 			--local teeDefs = UnitDefs[transporteeUnitDefID]
-			local pos1 = {Spring.GetUnitPosition(transporterID)}
+			local pos1 = {GG.GetUnitPosition(transporterID)}
 			local pos2 = {goalX, goalY, goalZ}
 			if gadget:Distance(pos1, pos2) <= isAirTransport[transporterUnitDefID] then
 				Spring.SetUnitVelocity(transporterID, 0,0,0)

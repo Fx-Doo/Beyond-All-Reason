@@ -21,7 +21,7 @@ if not gadgetHandler:IsSyncedCode() then return false end
 local spGetUnitExperience = Spring.GetUnitExperience
 local spSetUnitExperience = Spring.SetUnitExperience
 local spGetUnitRulesParam = Spring.GetUnitRulesParam
-local spGetUnitDefID = Spring.GetUnitDefID
+local spGetUnitDefID = GG.GetUnitDefID
 
 local inheritChildrenXP = {} -- stores the value of XP rate to be derived from unitdef
 local childrenInheritXP = {} -- stores the string that represents the types of units that will inherit the parent's XP when created

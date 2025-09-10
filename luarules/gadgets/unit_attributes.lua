@@ -31,7 +31,7 @@ local UPDATE_PERIOD = 3
 local floor = math.floor
 
 local spValidUnitID         = Spring.ValidUnitID
-local spGetUnitDefID        = Spring.GetUnitDefID
+local spGetUnitDefID        = GG.GetUnitDefID
 local spGetGameFrame        = Spring.GetGameFrame
 local spGetUnitRulesParam  	= Spring.GetUnitRulesParam
 local spSetUnitRulesParam   = Spring.SetUnitRulesParam
@@ -349,7 +349,7 @@ local function UpdateMovementSpeed(unitID, unitDefID, speedFactor, turnAccelFact
 		speedFactor = 0
 
 		-- Set the units velocity to zero if it is attached to the ground.
-		local x, y, z = Spring.GetUnitPosition(unitID)
+		local x, y, z = GG.GetUnitPosition(unitID)
 		if x then
 			local h = Spring.GetGroundHeight(x, z)
 			if h and h >= y then

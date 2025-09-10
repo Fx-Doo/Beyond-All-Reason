@@ -64,7 +64,7 @@ function gadget:Initialize()
 	gadgetHandler:RegisterAllowCommand(CMD_STOP)
 	-- load active units
 	for _, unitID in ipairs(Spring.GetAllUnits()) do
-		local unitDefID = Spring.GetUnitDefID(unitID)
+		local unitDefID = GG.GetUnitDefID(unitID)
 		gadget:UnitCreated(unitID, unitDefID)
 	end
 end

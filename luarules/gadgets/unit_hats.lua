@@ -140,8 +140,8 @@ function gadget:GameFrame(gf)
 				local units = Spring.GetTeamUnits(teamID)
 				for k = 1, #units do
 					local unitID = units[k]
-					local unitDefID = Spring.GetUnitDefID(unitID)
-					local unitPosX, unitPosY, unitPosZ = Spring.GetUnitPosition(unitID)
+					local unitDefID = GG.GetUnitDefID(unitID)
+					local unitPosX, unitPosY, unitPosZ = GG.GetUnitPosition(unitID)
 
 					if unitDefCanWearHats[unitDefID] then
 
@@ -265,7 +265,7 @@ function gadget:UnitDestroyed(unitID, unitDefID, teamID, attackerID, attackerDef
 		Hats[hatID] = -1
 		Spring.SetUnitNoSelect(hatID, false)
 		Spring.TransferUnit(hatID, Spring.GetGaiaTeamID()) -- ( number unitID,  numer newTeamID [, boolean given = true ] ) -> nil if given=false, the unit is captured
-		local px, py, pz = Spring.GetUnitPosition(unitID)
+		local px, py, pz = GG.GetUnitPosition(unitID)
 		Spring.SetUnitPosition(hatID, px + 32, pz + 32)
 	end
 end
@@ -292,10 +292,10 @@ function gadget:UnitGiven(unitID, unitDefID, unitTeam)
 			Spring.Echo("A hat was given, finding a wearer", hatID, unitDefID, unitTeam)
 		end
 		-- find nearest commander and attach hat onto him?
-		local hx, hy, hz = Spring.GetUnitPosition(hatID)
+		local hx, hy, hz = GG.GetUnitPosition(hatID)
 		if hx then
 			for ct, nearunitID in pairs(Spring.GetUnitsInCylinder(hx, hz, 200, unitTeam)) do
-				local neardefID = Spring.GetUnitDefID(nearunitID)
+				local neardefID = GG.GetUnitDefID(nearunitID)
 				if unitDefCanWearHats[neardefID] then
 
 					if DEBUG then

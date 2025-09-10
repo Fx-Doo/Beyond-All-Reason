@@ -18,10 +18,10 @@ if gadgetHandler:IsSyncedCode() then
 	local spDestroyUnit           = Spring.DestroyUnit
 	local spGiveOrderToUnit       = Spring.GiveOrderToUnit
 	local spSetUnitRulesParam     = Spring.SetUnitRulesParam
-	local spGetUnitPosition       = Spring.GetUnitPosition
+	local spGetUnitPosition       = GG.GetUnitPosition
 	local spGetUnitRulesParam = Spring.GetUnitRulesParam
 	local spGetUnitHealth 		= Spring.GetUnitHealth
-	local spGetUnitTeam 		= Spring.GetUnitTeam
+	local spGetUnitTeam 		= GG.GetUnitTeam
 	local spSetUnitHealth = Spring.SetUnitHealth
 	local spGetGameSeconds = Spring.GetGameSeconds
 	local spGetUnitNearestEnemy = Spring.GetUnitNearestEnemy

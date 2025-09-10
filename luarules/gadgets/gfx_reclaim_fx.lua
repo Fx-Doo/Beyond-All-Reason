@@ -50,7 +50,7 @@ if gadgetHandler:IsSyncedCode() then
 
 	function gadget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
 		if attackerID == nil and not ignoreUnits[unitDefID] then -- if reclaimed
-			local ux,uy,uz = Spring.GetUnitPosition(unitID)
+			local ux,uy,uz = GG.GetUnitPosition(unitID)
 			if ux ~= nil then
 				local x,y,z = ux,uy,uz
 				Spring.SpawnCEG("metalshards1", x, y, z)

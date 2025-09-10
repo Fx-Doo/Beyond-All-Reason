@@ -49,7 +49,7 @@ if gadgetHandler:IsSyncedCode() then
 	local spGetFeaturePosition = Spring.GetFeaturePosition
 	local spGetFeatureResources = Spring.GetFeatureResources
 	local spGetUnitBasePosition = Spring.GetUnitBasePosition
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitDefID = GG.GetUnitDefID
 	local spSetFeatureResources = Spring.SetFeatureResources
 	local spSpawnCEG = Spring.SpawnCEG
 	local random = math.random

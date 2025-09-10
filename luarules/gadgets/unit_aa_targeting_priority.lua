@@ -12,7 +12,7 @@ function gadget:GetInfo()
 end
 
 if gadgetHandler:IsSyncedCode() then
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitDefID = GG.GetUnitDefID
 	local targetPriority = {
 		Bombers = 1,
 		Vtols = 10,

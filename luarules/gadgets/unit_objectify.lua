@@ -41,7 +41,7 @@ if gadgetHandler:IsSyncedCode() then
 	local numObjects = 0
 
 	local CMD_ATTACK = CMD.ATTACK
-	local spGetUnitDefID = Spring.GetUnitDefID
+	local spGetUnitDefID = GG.GetUnitDefID
 
 	function gadget:Initialize()
 		gadgetHandler:RegisterAllowCommand(CMD.ANY)
@@ -149,7 +149,7 @@ else -- UNSYNCED
 
 
     local CMD_MOVE = CMD.MOVE
-    local spGetUnitDefID = Spring.GetUnitDefID
+    local spGetUnitDefID = GG.GetUnitDefID
 
     function gadget:DefaultCommand(type, id, cmd)
 		if type == "unit" and cmd ~= CMD_MOVE then

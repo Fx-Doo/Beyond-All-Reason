@@ -178,7 +178,7 @@ local todenyUnitsNames = {
 	local SpGetGameSeconds = Spring.GetGameSeconds
 	local SpGetUnitsInCylinder = Spring.GetUnitsInCylinder
 	local SpDestroyUnit = Spring.DestroyUnit
-	local SpGetUnitDefID = Spring.GetUnitDefID
+	local SpGetUnitDefID = GG.GetUnitDefID
 	local SpValidUnitID = Spring.ValidUnitID
 	local Mmin = math.min
 
@@ -206,7 +206,7 @@ local todenyUnitsNames = {
 		--[[
 		if junoWeapons[weaponID] and toTarpitUnits[uDefID] and aID~=99 then
 			if uID and SpValidUnitID(uID) then
-				local px, py, pz = Spring.GetUnitPosition(uID)
+				local px, py, pz = GG.GetUnitPosition(uID)
 				if px then
 					Spring.SpawnCEG("juno-damage", px, py + 8, pz, 0, 1, 0)
 				end
@@ -218,7 +218,7 @@ local todenyUnitsNames = {
 
 		if junoWeapons[weaponID] and toStunUnits[uDefID] and aID~=99 and (paralyzer == false) then--needed to stop possible loops
 			if uID and SpValidUnitID(uID) then
-				local px, py, pz = Spring.GetUnitPosition(uID)
+				local px, py, pz = GG.GetUnitPosition(uID)
 				if px then
 					Spring.SpawnCEG("juno-damage", px, py + 8, pz, 0, 1, 0)
 				end
@@ -232,7 +232,7 @@ local todenyUnitsNames = {
 	
 		if junoWeapons[weaponID] and tokillUnits[uDefID] then
 			if uID and SpValidUnitID(uID) then
-				local px, py, pz = Spring.GetUnitPosition(uID)
+				local px, py, pz = GG.GetUnitPosition(uID)
 				if px then
 					Spring.SpawnCEG("juno-damage", px, py + 8, pz, 0, 1, 0)
 				end
@@ -297,7 +297,7 @@ local todenyUnitsNames = {
 						local unitID = unitIDsBig[i]
 						local unitDefID = SpGetUnitDefID(unitID)
 						if todenyUnits[unitDefID] then
-							local px, py, pz = Spring.GetUnitPosition(unitID)
+							local px, py, pz = GG.GetUnitPosition(unitID)
 							local dx = expl.x - px
 							local dz = expl.z - pz
 							if (dx * dx + dz * dz) > (q * (radius - width)) * (q * (radius - width)) then
@@ -309,7 +309,7 @@ local todenyUnitsNames = {
 
 						
 						if toStunUnits[unitDefID] then
-							local px, py, pz = Spring.GetUnitPosition(unitID)
+							local px, py, pz = GG.GetUnitPosition(unitID)
 							local dx = expl.x - px
 							local dz = expl.z - pz
 
@@ -330,7 +330,7 @@ local todenyUnitsNames = {
 						--[[
 						--this mostly works but has a loop I can't chase out atm, and some weirdness at the end of the effect that applies a stun all over again
 						if toTarpitUnits[unitDefID] and Spring.GetModOptions().emprework then--useless without it, just adds visual noise
-							local px, py, pz = Spring.GetUnitPosition(unitID)
+							local px, py, pz = GG.GetUnitPosition(unitID)
 							local dx = expl.x - px
 							local dz = expl.z - pz
 							if (dx * dx + dz * dz) > (q * (radius - width)) * (q * (radius - width)) then

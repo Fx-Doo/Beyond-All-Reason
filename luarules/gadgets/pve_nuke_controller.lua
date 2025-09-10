@@ -120,8 +120,8 @@ function gadget:GameFrame(frame)
         for nukeID, cooldown in pairs(aliveNukeLaunchers) do
             if cooldown <= GetGameSeconds() then
                 local targetID = allUnits[math.random(1,#allUnits)]
-                if Spring.GetUnitTeam(targetID) ~= Spring.GetUnitTeam(nukeID) then
-                    local x,y,z = Spring.GetUnitPosition(targetID)
+                if GG.GetUnitTeam(targetID) ~= GG.GetUnitTeam(nukeID) then
+                    local x,y,z = GG.GetUnitPosition(targetID)
                     x = x + math.random(-1024,1024)
                     z = z + math.random(-1024,1024)
                     y = math.max(Spring.GetGroundHeight(x,z), 0)

@@ -54,7 +54,7 @@ else	-- UNSYNCED
 	local myTeamID = Spring.GetMyTeamID()
 	local myPlayerID = Spring.GetMyPlayerID()
 	local mySpec, fullview = Spring.GetSpectatingState()
-	local spGetUnitPosition = Spring.GetUnitPosition
+	local spGetUnitPosition = GG.GetUnitPosition
 	local spIsPosInLos = Spring.IsPosInLos
 
 	local altflametex = {}

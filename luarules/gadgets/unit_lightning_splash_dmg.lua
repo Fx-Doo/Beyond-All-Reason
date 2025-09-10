@@ -20,8 +20,8 @@ local terminal_spark_effect = "genericshellexplosion-splash-lightning" -- can re
 local visual_chain_weapon = WeaponDefNames["lightning_chain"].id -- can refactor into sparkWeapons if per-unit effects defined by customParams are desired
 
 local spGetUnitsInSphere = Spring.GetUnitsInSphere
-local spGetUnitDefID = Spring.GetUnitDefID
-local spGetUnitPosition = Spring.GetUnitPosition
+local spGetUnitDefID = GG.GetUnitDefID
+local spGetUnitPosition = GG.GetUnitPosition
 local spSpawnCEG = Spring.SpawnCEG
 local spAddUnitDamage = Spring.AddUnitDamage
 local spSpawnProjectile = Spring.SpawnProjectile
