@@ -167,7 +167,7 @@ if gadgetHandler:IsSyncedCode() then
 				dmg = weaponDamages[weaponDefID][SHIELDARMORIDALT]
 			end
 
-			local x, y, z = GG.GetUnitPosition(shieldCarrierUnitID)
+			local x, y, z = GG.GetUnitPosition(shieldCarrierUnitID,_,30)
 			local dx, dy, dz
 			local onlyMove = false
 			if bounceProjectile then
@@ -225,7 +225,7 @@ end
 local function UpdateVisibility(unitID, unitData, unitVisible, forceUpdate)
 	unitVisible = unitVisible or (myAllyTeamID == unitData.allyTeamID)
 	if not unitVisible then
-		local ux,_,uz = GG.GetUnitPosition(unitID)
+		local ux,_,uz = GG.GetUnitPosition(unitID,_,30)
 		unitVisible = GetVisibleSearch(ux, uz, unitData.search)
 	end
 

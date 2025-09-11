@@ -782,13 +782,13 @@ else	-- UNSYNCED
 	end
 
 	local function drawCurrentTarget(unitID, unitData, myTeam, myAllyTeam)
-		local _, _, _, x1, y1, z1 = spGetUnitPosition(unitID, true)
+		local _, _, _, x1, y1, z1 = GG.GetUnitPosition(unitID, true, 5)
 		glVertex(x1, y1, z1)
 		drawTargetCommand(unitData.targets[unitData.targetIndex], myTeam, myAllyTeam)
 	end
 
 	local function drawTargetQueue(unitID, unitData, myTeam, myAllyTeam)
-		local _, _, _, x1, y1, z1 = spGetUnitPosition(unitID, true)
+		local _, _, _, x1, y1, z1 = GG.GetUnitPosition(unitID, true,5)
 		glVertex(x1, y1, z1)
 		for _, targetData in ipairs(unitData.targets) do
 			drawTargetCommand(targetData, myTeam, myAllyTeam)
