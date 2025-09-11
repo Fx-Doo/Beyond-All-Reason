@@ -12,21 +12,15 @@ end
 ------------------------------------------------------------
 -- SYNCED
 ------------------------------------------------------------
-if gadgetHandler:IsSyncedCode() then
-  local cachedUnitData = {}
-  local unitPos = {}       -- unified table: unitPos[unitID] = {frame, pos={x,y,z,...}}
-  local currentFrame = -1
-
-  function gadget:Initialize()
-    for _, unitID in pairs(Spring.GetAllUnits()) do
-      gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), Spring.GetUnitTeam(unitID))
-    end
-  end
-
+function Shared()
+  cachedUnitData = {}
+  unitPos = {}       -- unified table: unitPos[unitID] = {frame, pos={x,y,z,...}}
+  currentFrame = -1
+ 
   function gadget:GameFrame(f)
     currentFrame = f
   end
-
+  
   function gadget:UnitCreated(unitID, unitDefID, unitTeam, builderID)
     cachedUnitData[unitID] = {
       unitDefID = unitDefID,
@@ -36,8 +30,8 @@ if gadgetHandler:IsSyncedCode() then
     local x,y,z,mx,my,mz,ax,ay,az = Spring.GetUnitPosition(unitID,true)
     unitPos[unitID] = {frame = currentFrame, pos = {x,y,z,mx,my,mz,ax,ay,az}}
   end
-
-  function gadget:UnitGiven(unitID, unitDefID, newTeam, oldTeam)
+  
+   function gadget:UnitGiven(unitID, unitDefID, newTeam, oldTeam)
     local dat = cachedUnitData[unitID]
     if dat then dat.unitTeam = newTeam end
   end
@@ -47,9 +41,6 @@ if gadgetHandler:IsSyncedCode() then
     unitPos[unitID] = nil
   end
 
-  ----------------------------------------------------------------
-  -- GG functions
-  ----------------------------------------------------------------
   GG.GetUnitTeam = function (unitID)
     local dat = cachedUnitData[unitID]
     return dat and dat.unitTeam or Spring.GetUnitTeam(unitID)
@@ -64,8 +55,17 @@ if gadgetHandler:IsSyncedCode() then
     local dat = cachedUnitData[unitID]
     return (dat and dat.defs) or UnitDefs[Spring.GetUnitDefID(unitID)]
   end
+  
+end
 
-  -- Unified position getter with maxDelay
+function Synced()
+
+   function gadget:Initialize()
+    for _, unitID in pairs(Spring.GetAllUnits()) do
+      gadget:UnitCreated(unitID, Spring.GetUnitDefID(unitID), Spring.GetUnitTeam(unitID))
+    end
+  end
+  
   GG.GetUnitPosition = function (unitID, _, maxDelay)
     maxDelay = maxDelay or 0
     local cached = unitPos[unitID]
@@ -79,14 +79,9 @@ if gadgetHandler:IsSyncedCode() then
     SendToUnsynced("unitPosUpdate", unitID, x,y,z,mx,my,mz,ax,ay,az, currentFrame)
     return unpack(pos)
   end
+end
 
-------------------------------------------------------------
--- UNSYNCED
-------------------------------------------------------------
-else
-  local cachedUnitData = {}
-  local unitPos = {}
-  local currentFrame = -1
+function Unsynced()
 
   local function unitPosUpdate(_, unitID, x,y,z,mx,my,mz,ax,ay,az, frame)
     unitPos[unitID] = {frame = frame, pos = {x,y,z,mx,my,mz,ax,ay,az}}
@@ -100,49 +95,6 @@ else
     gadgetHandler:AddSyncAction("unitPosUpdate", unitPosUpdate)
   end
 
-  function gadget:GameFrame(f)
-    currentFrame = f
-  end
-
-  function gadget:UnitCreated(unitID, unitDefID, unitTeam, builderID)
-    cachedUnitData[unitID] = {
-      unitDefID = unitDefID,
-      unitTeam  = unitTeam,
-      defs      = UnitDefs[unitDefID],
-    }
-    local x,y,z,mx,my,mz,ax,ay,az = Spring.GetUnitPosition(unitID,true)
-    unitPos[unitID] = {frame = currentFrame, pos = {x,y,z,mx,my,mz,ax,ay,az}}
-  end
-
-  function gadget:UnitGiven(unitID, unitDefID, newTeam, oldTeam)
-    local dat = cachedUnitData[unitID]
-    if dat then dat.unitTeam = newTeam end
-  end
-
-  function gadget:UnitDestroyed(unitID)
-    cachedUnitData[unitID] = nil
-    unitPos[unitID] = nil
-  end
-
-  ----------------------------------------------------------------
-  -- GG functions
-  ----------------------------------------------------------------
-  GG.GetUnitTeam = function (unitID)
-    local dat = cachedUnitData[unitID]
-    return dat and dat.unitTeam or Spring.GetUnitTeam(unitID)
-  end
-
-  GG.GetUnitDefID = function (unitID)
-    local dat = cachedUnitData[unitID]
-    return dat and dat.unitDefID or Spring.GetUnitDefID(unitID)
-  end
-
-  GG.GetDefs = function (unitID)
-    local dat = cachedUnitData[unitID]
-    return (dat and dat.defs) or UnitDefs[Spring.GetUnitDefID(unitID)]
-  end
-
-  -- Same unified getter
   GG.GetUnitPosition = function (unitID, _, maxDelay)
     maxDelay = maxDelay or 0
     local cached = unitPos[unitID]
@@ -155,4 +107,11 @@ else
     unitPos[unitID] = {frame = currentFrame, pos = pos}
     return unpack(pos)
   end
+end
+
+	Shared()
+if gadgetHandler:IsSyncedCode() then
+	Synced()
+else
+	Unsynced()
 end
