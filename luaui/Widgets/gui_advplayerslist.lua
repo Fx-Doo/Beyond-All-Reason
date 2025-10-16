@@ -574,6 +574,10 @@ if mySpecStatus or numTeamsInAllyTeam <= 1 then
     hideShareIcons = true
 end
 
+if Spring.GetModOptions().tax_resource_sharing_amount == 1 then
+	hideShareIcons = true
+end
+
 local teamRanking = {}
 local isPvE = Spring.Utilities.Gametype.IsPvE()
 

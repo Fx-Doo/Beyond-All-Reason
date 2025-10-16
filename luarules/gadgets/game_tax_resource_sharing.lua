@@ -48,6 +48,10 @@ function gadget:AllowResourceTransfer(senderTeamId, receiverTeamId, resourceType
 		-- We don't handle whatever this resource is, allow it
 		return true
 	end
+	
+	if sharingTax == 1.0 then
+		return false
+	end
 
 	-- Calculate the maximum amount the receiver can receive
 	--Current, Storage, Pull, Income, Expense
