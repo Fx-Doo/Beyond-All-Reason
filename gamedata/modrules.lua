@@ -93,6 +93,8 @@ local modrules = {
 		allowTake = true,				-- Enables and disables the /take UI command.
 		LuaAllocLimit = 1536,			-- default: 1536.  Global Lua alloc limit (in megabytes)
 		enableSmoothMesh = true,
+
+		nativeExcessSharing = Spring.GetModOptions().disable_overflow == false, 	-- this will onle work on 2025.06.05 +, for previous engine versions, a gadget will handle this
 		
 		pathFinderSystem = useQTPFS and 1 or 0,			-- Which pathfinder does the game use? Can be 0 - The legacy default pathfinder, 1 - Quad-Tree Pathfinder System (QTPFS) or -1 - disabled.
 		--pathFinderUpdateRate = 0.0001,	-- default: 0.007.  Controls how often the pathfinder updates; larger values means more rapid updates

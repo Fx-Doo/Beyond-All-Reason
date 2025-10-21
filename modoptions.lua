@@ -268,17 +268,33 @@ local options = {
 		def		=  true,
 	},
 	{
-		key		= "tax_resource_sharing_amount",
+		key		= "sharing_tax",
 		name	= "Resource Sharing Tax",
-		desc	=	"Taxes resource sharing".."\255\128\128\128".." and overflow (engine TODO:)\n"..
-					"Set to [0] to turn off. Recommended: [0.4]. (Ranges: 0 - 0.99)",
+		desc	=	"Tax applied to both overflow and resource sharing"..
+					"Set to [0] to turn off. Recommended: [40]. (Ranges: 0 - 99)",
 		type	= "number",
 		def		= 0,
 		min		= 0,
-		max		= 1.0,
-		step	= 0.01,
+		max		= 99,
+		step	= 1,
 		section	= "options_main",
 		column	= 1,
+	},
+	{
+		key		= "disable_manual_resource_sharing",
+		name	= "Disable manual Resource Sharing",
+		desc	= "Disable sharing resources to allies",
+		type	= "bool",
+		section	= "options_main",
+		def		= false,
+	},
+	{
+		key		= "disable_overflow",
+		name	= "Disable Overflow system",
+		desc	= "Disable passively sharing resources to allies",
+		type	= "bool",
+		section	= "options_main",
+		def		= false,
 	},
 	{
 		key		= "disable_unit_sharing",
