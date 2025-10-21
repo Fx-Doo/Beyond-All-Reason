@@ -2,7 +2,9 @@ local gadget = gadget ---@type Gadget
 local sharing_tax = Spring.GetModOptions().sharing_tax/100
 local disable_manual_resource_sharing = Spring.GetModOptions().disable_manual_resource_sharing
 local disable_overflow = Spring.GetModOptions().disable_overflow
-local ver20250605 = Engine.versionFull == "2025.06.06"
+local engineOverflowBlock = Game.nativeExcessSharing ~= nil
+local teamExcessCallin = Script.GetCallInList().TeamResourceExcess ~= nil
+
 
 function gadget:GetInfo()
 	return {
@@ -22,7 +24,7 @@ end
 
 if sharing_tax == 0 and disable_manual_resource_sharing == false and disable_overflow == false then -- remove ourselves
 	return false
-elseif sharing_tax == 0 and disable_manual_resource_sharing == false and ver20250605 == true and disable_overflow == true then -- we don't need any of the following if we're just disabling overflow post 2025.06.05
+elseif sharing_tax == 0 and disable_manual_resource_sharing == false and engineOverflowBlock == true and disable_overflow == true then -- we don't need any of the following if we're just disabling overflow post 2025.06.05
 	return false
 end
 
@@ -68,7 +70,13 @@ function gadget:AllowResourceTransfer(senderTeamId, receiverTeamId, resourceType
 	return false -- we processed the share
 end
 
-if (ver20250605 == false and (sharing_tax > 0 or disable_overflow)) or (ver20250605 == true and sharing_tax > 0 and (not disable_overflow)) then -- we only need this to A) kill overflow pre 2025.06.05 and tax overflow pre 2025.06.05 or B) tax overflow post 2025.06.05
+if teamExcessCallin then
+	function gadget:TeamResourceExcess(teamID, metal, energy) -- no need to handle the disable_overflow case here; we only need to dispatch among allyteam with a tax
+		--Do something here; WIP
+		return true
+	end
+	
+elseif (engineOverflowBlock == false and (sharing_tax > 0 or disable_overflow)) or (engineOverflowBlock == true and sharing_tax > 0 and (not disable_overflow)) then -- we only need this to A) kill overflow pre 2025.06.05 and tax overflow pre 2025.06.05 or B) tax overflow post 2025.06.05
 
 	local function KillOverflow(teamID, resType, amount)
 		if amount > 0 then
