@@ -5,7 +5,6 @@ local disable_overflow = Spring.GetModOptions().disable_overflow
 local engineOverflowBlock = Game.nativeExcessSharing ~= nil
 local teamExcessCallin = Script.GetCallInList().TeamResourceExcess ~= nil
 
-
 function gadget:GetInfo()
 	return {
 		name    = 'Resource sharing limitations',
@@ -31,6 +30,8 @@ end
 local ForcedRequests = {}
 local lastRecv = {}
 
+
+
 for _, teamID in pairs(Spring.GetTeamList()) do
 	lastRecv[teamID] = {metal = 0, energy = 0}
 	if disable_overflow then
@@ -53,7 +54,6 @@ function Hash(senderTeamId, receiverTeamId, resourceType, amount)  -- Id those s
 end
 
 function gadget:AllowResourceTransfer(senderTeamId, receiverTeamId, resourceType, amount)
-
 	local hash = Hash(senderTeamId, receiverTeamId, resourceType, amount)
 	
 	if ForcedRequests[hash] == true then -- if this is a requested share, allow it + remove from requests table
@@ -71,10 +71,55 @@ function gadget:AllowResourceTransfer(senderTeamId, receiverTeamId, resourceType
 end
 
 if teamExcessCallin then
+
 	function gadget:TeamResourceExcess(teamID, metal, energy) -- no need to handle the disable_overflow case here; we only need to dispatch among allyteam with a tax
-		--Do something here; WIP
-		return true
+		if disable_overflow == true then
+			-- Do NOTHING
+			return true
+		else
+			Leak(teamID, "energy", energy)
+			Leak(teamID, "metal", metal)
+			return true
+		end
 	end
+	
+	function Leak(teamID, resType, excess)
+		local _,_,_,_,_,curAlly = Spring.GetTeamInfo(teamID)
+		local totAvailableStor = 0
+		local perTeamAvStor = {}
+		local preTaxExcess = excess
+		excess = excess * (1-sharing_tax)
+		local teamAllyList = Spring.GetTeamList(curAlly)
+		for i, toTeamID in pairs (teamAllyList) do
+			if teamID ~= toTeamID then
+				local curr,stor,_,_,_,share = Spring.GetTeamResources(toTeamID, resType)
+				local avStor = stor - curr
+				perTeamAvStor[toTeamID] = avStor
+				totAvailableStor = totAvailableStor + avStor
+			end
+		end
+		if totAvailableStor <= 0 then
+			return
+		end
+		local percent = math.min(1,excess / totAvailableStor)
+		for i, toTeamID in pairs (teamAllyList) do
+			if teamID ~= toTeamID then
+				local amnt = percent * perTeamAvStor[toTeamID]
+				if amnt > 0 then
+					Spring.AddTeamResource(toTeamID, resType, amnt)
+					-- Spring.Echo(teamID.."leaked "..(amnt).." "..resType.." to "..toTeamID..".")
+					totAvailableStor = totAvailableStor - amnt
+					perTeamAvStor[toTeamID] = perTeamAvStor[toTeamID] - amnt
+				end
+			end
+		end	
+		-- Spring.Echo("Team "..teamID.." leaked a total of "..(percent* totAvailableStor).." ".. resType.. "to its team.")
+	end
+	
+	function gadget:AllowResourceLevel()
+		return false
+	end
+
 	
 elseif (engineOverflowBlock == false and (sharing_tax > 0 or disable_overflow)) or (engineOverflowBlock == true and sharing_tax > 0 and (not disable_overflow)) then -- we only need this to A) kill overflow pre 2025.06.05 and tax overflow pre 2025.06.05 or B) tax overflow post 2025.06.05
 
