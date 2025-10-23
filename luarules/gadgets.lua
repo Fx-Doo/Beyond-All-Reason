@@ -208,6 +208,7 @@ local callInLists = {
 	"AllowWeaponTargetCheck",
 	"AllowWeaponTarget",
 	"AllowWeaponInterceptTarget",
+	"TeamResourceExcess",
 	-- unsynced
 	"DrawUnit",
 	"DrawFeature",
@@ -1569,6 +1570,15 @@ function gadgetHandler:AllowUnitTransfer(unitID, unitDefID,
 		end
 	end
 	return true
+end
+
+function gadgetHandler:TeamResourceExcess(teamID, metal, energy)
+	for _, g in ipairs(self.TeamResourceExcessList) do
+		if g:TeamResourceExcess(teamID, metal, energy) then
+			return true
+		end
+	end
+	return false
 end
 
 function gadgetHandler:AllowUnitBuildStep(builderID, builderTeam,
