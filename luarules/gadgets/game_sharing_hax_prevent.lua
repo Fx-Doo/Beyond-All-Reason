@@ -18,6 +18,7 @@ OR
 > We share our wreck to our ally
 > He reclaims with his own BP
 > he gets his own metal because we shared the wreck
+== self-d commander to boost
 
 From this scenario we can compute what would happen in the different tax/share disabilities that coexist
 
@@ -66,6 +67,7 @@ OR
 > We share the wreck to our ally
 > he provides the bp and cost for his own benefit
 > he gets HIS unit
+== self-kill a unit to share it via resurrection
 
 1/ disabled unit sharing
 > our ally provides the BP
@@ -105,6 +107,7 @@ OR
 > He provides BP and cost
 > the unit gets finished and he shares it back to us
 > he gets back his, and we get back our building
+== boosting by assisting labs/cons
 
 1/ disabled unit_sharing
 > our ally provides the BP
@@ -143,7 +146,7 @@ OR
 > We share our unit to our ally
 > He reclaims with his own BP
 > he gets his own metal because we shared the wreck
-
+== boosting by allowing mate to reclaim our units
 
 1/ sharing tax only
 > We share our unit to our ally
@@ -190,6 +193,7 @@ OR
 > we share the wreck to our ally
 > He provides BP and cost
 > the wreck gets repaired
+== boosting by feeding metal into a wreck while ally reclaims it
 
 1/ disabled unit_sharing
 > our ally provides the BP
@@ -442,6 +446,7 @@ function ProcessResurrectWreck(builderID, builderTeam, featureID, featureDefID, 
 		-- But because DestroyFeature will only take action at the end of the simFrame, we will still have other rezzers managing to "spawn" new units.
 		-- Causing 1 wreck + 15 rezzers => 15 live units + 15 rezzers; that's really an issue
 		-- I have to figure out a better way to do it; in the meantime i'll just leave it at that.
+		-- maybe with a clamped step and a step > 0 check i can avoid multiple create + destroy calls
 		return true
 	end
 	return false
