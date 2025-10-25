@@ -339,9 +339,6 @@ end
 -------------------------- Repair Wreck Behaviour code
 function AddRepairStepToFeature(featureID, stepCostMetal, stepCostEnergy,step)
 	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
-	if reclaimLeft >= 1 then
-		return
-	end
 	local newMetal = math.min(maxMetal, metal + stepCostMetal)
 	local newEnergy = math.min(maxEnergy, energy + stepCostEnergy)
 	local newReclaimLeft = math.min(1, reclaimLeft + step)
@@ -350,6 +347,8 @@ function AddRepairStepToFeature(featureID, stepCostMetal, stepCostEnergy,step)
 end
 
 function ProcessRepairWreck(builderID, builderTeam, featureID, featureDefID, step)
+	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
+	step = math.min(1-reclaimLeft, step)
 	local costMetal = fdefcost[featureDefID].metal
 	local costEnergy = fdefcost[featureDefID].energy
 	local stepCostMetal = costMetal*step
@@ -379,8 +378,9 @@ function ProcessRepairWreck(builderID, builderTeam, featureID, featureDefID, ste
 	local hadEnough, hadEnoughM, hadEnoughE = UseResources(builderID, builderTeam, bpOwner, taxCostMetal +stepCostMetal, taxCostEnergy + stepCostEnergy)
 	
 	if hadEnough then
-		AddRepairStepToFeature(featureID, stepCostMetal, stepCostEnergy,step)
-		return false
+		-- we refund just the stepCost part, engine will use it again, this allows us to actually return true
+		AddResources(builderID, builderTeam, bpOwner, stepCostMetal, stepCostEnergy)
+		return true
 	end
 	-- refund if didnt get through
 	if hadEnoughM then
@@ -396,12 +396,7 @@ end
 
 function AddResurrectStepToFeature(featureID, stepCostEnergy, step, wreckOwner, wreckDefID, facing)
 	local health, maxHealth, resurrectProgress = Spring.GetFeatureHealth(featureID)
-
-	if resurrectProgress >= 1 then
-		return
-	end
 	local newResurrectProgress = math.min(1, resurrectProgress + step)
-	Spring.Echo(resurrectProgress, newResurrectProgress)
 	if newResurrectProgress >= 1 then
 		Spring.TransferFeature(featureID, wreckOwner)
 	end
@@ -409,6 +404,8 @@ function AddResurrectStepToFeature(featureID, stepCostEnergy, step, wreckOwner, 
 end
 
 function ProcessResurrectWreck(builderID, builderTeam, featureID, featureDefID, step)
+	local health, maxHealth, resurrectProgress = Spring.GetFeatureHealth(featureID)
+	step = math.min ( 1 - resurrectProgres, step)
 	local wreckDefName, facing = Spring.GetFeatureResurrect (featureID)
 	local wreckDefID = UnitDefNames[wreckDefName].id
 	local costEnergy = udefcost[wreckDefID].energy
@@ -437,24 +434,29 @@ function ProcessResurrectWreck(builderID, builderTeam, featureID, featureDefID, 
 	end
 	local hadEnough = UseResources(builderID, builderTeam, bpOwner, 0, taxCostEnergy + stepCostEnergy)
 	if hadEnough then
-		AddResurrectStepToFeature(featureID, stepCostEnergy, step, wreckOwner, wreckDefID, facing)
-		return false
+		-- we refund just the stepCost part, engine will use it again, this allows us to actually return true
+		AddResources(builderID, builderTeam, bpOwner, 0,  stepCostEnergy)
+		-- the issue here is that once we hit resurrectProgress >= 1, engine will spawn the unit as builderTeam's rather than wreckOwner's (which can be a different team in case of disable_unit_sharing = true but disable_manual_resource_sharing = false
+		-- transfering ownership of the wreck (as seen previously) is meaningless
+		-- what we need is to remove the final buildstep after processing its cost, and Spring.CreateUnit(wreckDefID) + Spring.DestroyFeature(featureID);
+		-- But because DestroyFeature will only take action at the end of the simFrame, we will still have other rezzers managing to "spawn" new units.
+		-- Causing 1 wreck + 15 rezzers => 15 live units + 15 rezzers; that's really an issue
+		-- I have to figure out a better way to do it; in the meantime i'll just leave it at that.
+		return true
 	end
 	return false
 end
 ----------------------------
 ------------------ Reclaim Wreck Behaviour Code
--- this is logical and all but missing the engineformula to barformula correction
-
+-- this is logical and all but missing the engineformula to barformula correction (semi constant reclaim rate)
+local amountMetalClaimedOnFeature = {}
 function AddReclaimStepToFeature(featureID, stepCostEnergy, stepCostMetal,step)
 	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
-	if reclaimLeft <= 0 then
-		return
-	end
 	local newMetal = math.max(0, metal - stepCostMetal)
 	local newEnergy = math.max(0, energy - stepCostEnergy)
 	local newReclaimLeft = math.max(0, reclaimLeft - step)
 	if newReclaimLeft == 0 then
+		Spring.Echo("ended: "..(amountMetalClaimedOnFeature[featureID] - maxMetal))
 		Spring.DestroyFeature(featureID)
 		return
 	end
@@ -462,8 +464,12 @@ function AddReclaimStepToFeature(featureID, stepCostEnergy, stepCostMetal,step)
 	Spring.SetFeatureReclaim(featureID, newReclaimLeft)
 end
 
+
+
 function ProcessReclaimWreck(builderID, builderTeam, featureID, featureDefID, step)
+	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
 	step = math.abs(step)
+	step = math.min( reclaimLeft, step)
 	local costMetal = fdefcost[featureDefID].metal
 	local costEnergy = fdefcost[featureDefID].energy
 	local stepCostMetal = costMetal*step
@@ -492,20 +498,19 @@ function ProcessReclaimWreck(builderID, builderTeam, featureID, featureDefID, st
 	else
 		wreckOwner = bpOwner
 	end
-	canReceive = AddResources(builderID, builderTeam, bpOwner, stepCostMetal - taxCostMetal, stepCostEnergy - taxCostEnergy)
-
-	if canReceive then
-		AddReclaimStepToFeature(featureID, stepCostEnergy, stepCostMetal, step)
-	end
+		
+	local canReceive = AddResources(builderID, builderTeam, bpOwner, stepCostMetal - taxCostMetal, stepCostEnergy - taxCostEnergy)
+		Spring.Echo(amountMetalClaimedOnFeature[featureID])
+		if canReceive then 
+			amountMetalClaimedOnFeature[featureID] = (amountMetalClaimedOnFeature[featureID] or 0) + stepCostMetal - taxCostMetal
+			AddReclaimStepToFeature(featureID, stepCostEnergy, stepCostMetal, step)
+		end
 	return false
 end
 ----------------------------
 -------------Build Unit Behaviour code
 function AddBuildStepToUnit(unitID, step)
 	local health, maxHealth, capture, paralyze, buildProgress = Spring.GetUnitHealth(unitID)
-	if buildProgress >= 1 then
-		return
-	end
 	local newHealth = math.min(maxHealth, health + step*maxHealth)
 	local newBuildProgress = math.min(1, buildProgress + step)
 	local data = {
@@ -518,6 +523,8 @@ function AddBuildStepToUnit(unitID, step)
 end
 
 function ProcessBuildUnit(builderID, builderTeam, unitID, unitDefID, step)
+	local health, maxHealth, capture, paralyze, buildProgress = Spring.GetUnitHealth(unitID)
+	step = math.min(1-buildProgress, step)
 	local costMetal = udefcost[unitDefID].metal
 	local costEnergy = udefcost[unitDefID].energy
 	local stepCostMetal = costMetal*step
@@ -547,8 +554,8 @@ function ProcessBuildUnit(builderID, builderTeam, unitID, unitDefID, step)
 	local hadEnough, hadEnoughM, hadEnoughE = UseResources(builderID, builderTeam, bpOwner, taxCostMetal +stepCostMetal, taxCostEnergy + stepCostEnergy)
 	
 	if hadEnough then
-		AddBuildStepToUnit(unitID, step)
-		return false
+		AddResources(builderID, builderTeam, bpOwner, stepCostMetal, stepCostEnergy) -- refund the step cost that will be picked again by engine
+		return true
 	end
 	-- refund if didnt get through
 	if hadEnoughM then
@@ -597,7 +604,8 @@ function ProcessReclaimUnit(builderID, builderTeam, unitID, unitDefID, step)
 		end
 	else
 		unitOwner = bpOwner
-	end
+	end 
+	--wanted to try returning true and managine resources, but could not, reason being paying a tax upfront (before getting the resources form engine) might be blocked due to not enough current resource
 	canReceive = AddResources(builderID, builderTeam, bpOwner, costMetal - taxCostMetal, 0)
 
 	if canReceive then
