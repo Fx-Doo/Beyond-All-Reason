@@ -288,41 +288,187 @@ end
 local udefcost = {}
 local fdefcost = {}
 
--- some localized functions and helpers
-AddTeamResource = Spring.AddTeamResource
-AddUnitResource = Spring.AddUnitResource
-UseUnitResource = Spring.UseUnitResource
-UseTeamResource = Spring.UseTeamResource
+-- params:
+-- builderTeam = owner of the build power that we're using
+-- objectTeam = owner of the object that we are interacting with
+-- step = % of progress that is expected, < 0 for a reclaim step, > 0 for a build, repair, resurrect, repair wreck step
+-- currentProgress = % of progress that was already made, ranges from 0 to 1, used to clamp step value
+-- totalECost = absolute Ecost of the full (step = 1) interaction ( = 1* featureenergy for reclaimwreck, 0* unit energy for reclaimunit, 0* unitmetal for repair, 1* unit energy for building, 0.5*wreckDef unit energy for resurrecting, 1* featuremetal for repair wreck)
+-- totalECost = absolute Mcost of the full (step = 1) interaction ( = 1* featuremetal for reclaimwreck, 1* unit metal for reclaimunit, 0* unitmetal for repair, 1* unit metal for building, 0*wreckDef unit metal for resurrecting, 1* featuremetal for repair wreck)
+-- justBool = used to produce only a bool answer (allowed, not allowed) without any resourcing data (anticipated stop within function)
+-- returns:
+-- bool allowed
+-- table result == table of the resourcing deltas between engine and wanted behaviour, used in the resolve function to add/remove resources
+-- table stats == table of the stats deltas between engine and wanted behaviour, used in the resolve function to add/remove stats (but could be moved to a GameFramePost() thread instead
 
-local function AddResources(unitID, unitTeam, fundTeam, metal, energy)
-	local canReceive, canReceiveE, canReceiveM = true, true, true
-	local currentEnergy, maxEnergy
-	local currentMetal, maxMetal
-	if  unitTeam ~= fundTeam and disable_overflow == true then
-		currentEnergy,maxEnergy = Spring.GetTeamResources(fundTeam, "energy")
-		currentMetal, maxMetal = Spring.GetTeamResources(fundTeam, "metal")
-		canReceiveE = (maxEnergy - currentEnergy) >= (energy)
-		canReceiveM = (maxMetal - currentMetal) >= (metal)
-		canReceive = canReceiveE and canReceiveM
+function NewDecideOutcome(builderTeam, objectTeam, step, currentProgress, totalECost, totalMCost, justBool)
+
+	-- step 1: clamp step to valid range
+	local clampedStep = 0
+	if step > 0 then
+		clampedStep = math.min(1 - currentProgress, step)
+	elseif step < 0 then
+		clampedStep = math.max(-currentProgress, step)
 	end
-	if canReceive then
-		AddTeamResource(fundTeam, "metal", metal)
-		AddTeamResource(fundTeam, "energy", energy)
+	totalECost = - totalECost
+	totalMCost = - totalMCost
+	-- compute engine resourcing outcome: builder pays or gets the stepcost, objectteam gets/pays nothin
+	
+	
+	local builderResourcing = {metal = clampedStep * totalMCost, energy = clampedStep * totalECost}
+	local objectResourcing  = {metal = 0, energy = 0}
+
+	-- step 2: decide ownership & tax logic
+	
+	local samePerson = (builderTeam == objectTeam)
+	local sameAlly = (objectTeam ~= builderTeam) and Spring.AreTeamsAllied(objectTeam, builderTeam)
+	local applyTax = false
+	local objectOwner = objectTeam
+	local bpOwner = builderTeam
+	
+	if sameAlly and not samePerson then
+		if not disable_unit_sharing then
+			objectOwner = bpOwner
+		end
+		if disable_manual_resource_sharing and (bpOwner ~= objectOwner) then
+			bpOwner = objectOwner
+			if justBool and step > 0 then
+				return false
+			end
+		end
+		if (bpOwner ~= objectOwner) and (sharing_tax > 0) then
+			applyTax = true
+		end
+	else -- gaia, enemy or myself case
+		objectOwner = bpOwner
+		return true, {[builderTeam] = nil, [objectTeam] = nil}, {}
 	end
-	return canReceive
+	if justBool then
+		return true
+	end
+
+	-- step 3: compute wanted outcome
+	local wtdBuilderResourcing = {metal = 0, energy = 0}
+	local wtdObjectOwnerResourcing = {metal = 0, energy = 0}
+
+	if step > 0 then
+		if bpOwner ~= builderTeam then
+			return false, nil
+		end
+		if applyTax then
+			totalMCost = totalMCost * (1/(1 - sharing_tax))
+			totalECost = totalECost * (1/(1 - sharing_tax))
+		end
+	elseif step < 0 then
+		if applyTax then
+			totalMCost = totalMCost * (1 - sharing_tax)
+			totalECost = totalECost * (1 - sharing_tax)
+		end
+	end
+
+	if bpOwner == builderTeam then
+		wtdBuilderResourcing = {metal = clampedStep * totalMCost, energy = clampedStep * totalECost}
+		wtdObjectOwnerResourcing = {metal = 0, energy = 0}
+	elseif bpOwner == objectTeam then
+		wtdObjectOwnerResourcing = {metal = clampedStep * totalMCost, energy = clampedStep * totalECost}
+		wtdBuilderResourcing = {metal = 0, energy = 0}
+	end
+	
+
+	local deltaBuilder = {
+		metal  = ((wtdBuilderResourcing.metal  - builderResourcing.metal) ~= 0) and (wtdBuilderResourcing.metal  - builderResourcing.metal) or nil,
+		energy = ((wtdBuilderResourcing.energy  - builderResourcing.energy) ~= 0) and (wtdBuilderResourcing.energy  - builderResourcing.energy) or nil,
+		netPositive = step < 0,
+	}
+	local deltaObject = {
+		metal  = ((wtdObjectOwnerResourcing.metal  - objectResourcing.metal) ~= 0) and (wtdObjectOwnerResourcing.metal  - objectResourcing.metal) or nil,
+		energy = ((wtdObjectOwnerResourcing.energy  - objectResourcing.energy) ~= 0) and (wtdObjectOwnerResourcing.energy  - objectResourcing.energy) or nil
+	}
+
+	local result = {
+		[builderTeam] = deltaBuilder,
+		[objectTeam]  = deltaObject,
+	}
+	
+	local statsToManage = {metal = {}, energy = {}}
+	local absUntaxed = {metal = math.abs(builderResourcing.metal), energy = math.abs(builderResourcing.energy)}
+	local absTaxed = {metal = math.abs(clampedStep * totalMCost), energy = math.abs(clampedStep * totalECost)}
+	for resType, tab in pairs (statsToManage) do
+		statsToManage[resType] = {
+			produced = step < 0 and { -- reclaim situation
+				[objectTeam] = absUntaxed[resType], -- reclaim step object team produces untaxed value
+				[builderTeam] = -absUntaxed[resType], -- reclaim step, builder didn't produce untaxed value
+				} or nil,
+			used = step > 0 and { -- build situation
+				[objectTeam] = absUntaxed[resType], -- build step, object team uses untaxed value
+				[builderTeam] = -absUntaxed[resType], -- buildstep, builderteam didn't use untaxed value
+				} or nil,
+			sent = bpOwner == builderTeam and {
+				[objectTeam] = (step < 0 and absUntaxed[resType]) or nil, -- reclaim step, objectTeam sends untaxed (produced) value
+				[builderTeam] = (step > 0 and absTaxed[resType]) or nil, -- build step, builderTeam sends Taxed (increased) value
+				} or nil,
+			received = bpOwner == builderTeam and {
+				[objectTeam] =  (step > 0 and absUntaxed[resType]) or nil, -- buildstep, object team receives untaxed (used) value
+				[builderTeam] = (step < 0 and absTaxed[resType]) or nil, -- reclaimstep, builderteam receives taxed (decreased) value
+				} or nil,
+			}
+	end
+
+	return true, result, statsToManage
 end
 
-local function UseResources(unitID, unitTeam, fundTeam, metal, energy)
-	if unitTeam == fundTeam then
-		local hadEnoughM = UseUnitResource(unitID, "metal", metal)
-		local hadEnoughE = UseUnitResource(unitID, "energy", energy)
-		return hadEnoughM and hadEnoughE, hadEnoughM, hadEnoughE
+function gadget:AllowCommandAutoTargetUnit(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdOptions, cmdTag, targetID, targetDefID, targetTeam, wtdcmdID)
+	if wtdcmdID == CMD.RECLAIM then
+		return NewDecideOutcome(unitTeam, targetTeam,-1, 0.5,0,0,true )
+	elseif wtdcmdID == CMD.REPAIR then
+		local hp, maxHP,_,_ buildProgress = Spring.GetUnitHealth(unitID)
+		if buildProgress < 1 then
+			return NewDecideOutcome(unitTeam, targetTeam,1, 0.5,0,0,true )
+		else
+			return true
+		end
 	end
-	local hadEnoughM = UseTeamResource(fundTeam, "metal", metal)
-	local hadEnoughE = UseTeamResource(fundTeam, "energy", energy)
-	return hadEnoughM and hadEnoughE, hadEnoughM, hadEnoughE
+	return true
 end
 
+function gadget:AllowCommand(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdOptions, cmdTag)
+	if cmdID == CMD.RESURRECT then
+		if #cmdParams == 1 then
+			local featureID = cmdParams[1] - Game.maxUnits
+			return NewDecideOutcome(unitTeam, Spring.GetFeatureTeam(featureID),1, 0.5,0,0,true )
+		end
+	elseif cmdID == CMD.RECLAIM then
+		if #cmdParams == 1 then
+			if cmdParams[1] > Game.maxUnits then
+				local featureID = cmdParams[1] - Game.maxUnits
+				return NewDecideOutcome(unitTeam, Spring.GetFeatureTeam(featureID),-1, 0.5,0,0,true )
+			else
+				local targetID = cmdParams[1]
+				return NewDecideOutcome(unitTeam, Spring.GetUnitTeam(targetID),-1, 0.5,0,0,true )
+			end
+		end
+	elseif cmdID == CMD.REPAIR then
+		if #cmdParams == 1 then
+			local targetID = cmdParams[1]
+			local hp, maxHP,_,_, buildProgress = Spring.GetUnitHealth(targetID)
+			if buildProgress < 1 then
+				return NewDecideOutcome(unitTeam, Spring.GetUnitTeam(targetID),1, 0.5,0,0,true )
+			else
+				return true
+			end
+		end
+	end
+	return true
+end
+
+function gadget:AllowCommandAutoTargetFeature(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdOptions, cmdTag, targetID, targetDefID, targetTeam, wtdcmdID)
+	if wtdcmdID == CMD.RECLAIM then
+		return NewDecideOutcome(unitTeam, targetTeam,-1, 0.5,0,0,true )
+	elseif wtdcmdID == CMD.RESURRECT then
+		return NewDecideOutcome(unitTeam, targetTeam,1, 0.5,0,0,true )
+	end	
+	return true
+end
 
 for defID, defs in pairs (UnitDefs) do
 	local data = {
@@ -340,315 +486,153 @@ for defID, defs in pairs (FeatureDefs) do
 	fdefcost[defID] = data
 end
 
--------------------------- Repair Wreck Behaviour code
-function AddRepairStepToFeature(featureID, stepCostMetal, stepCostEnergy,step)
-	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
-	local newMetal = math.min(maxMetal, metal + stepCostMetal)
-	local newEnergy = math.min(maxEnergy, energy + stepCostEnergy)
-	local newReclaimLeft = math.min(1, reclaimLeft + step)
-	Spring.SetFeatureResources(featureID, newMetal, newEnergy)
-	Spring.SetFeatureReclaim(featureID, newReclaimLeft)
-end
-
-function ProcessRepairWreck(builderID, builderTeam, featureID, featureDefID, step)
-	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
-	step = math.min(1-reclaimLeft, step)
-	local costMetal = fdefcost[featureDefID].metal
-	local costEnergy = fdefcost[featureDefID].energy
-	local stepCostMetal = costMetal*step
-	local stepCostEnergy = costEnergy*step
-	
-	local bpOwner = builderTeam
-	local wreckOwner = Spring.GetFeatureTeam(featureID)
-
-	local samePerson = wreckOwner == bpOwner
-	local sameAlly = (wreckOwner ~= bpOwner) and Spring.AreTeamsAllied(wreckOwner, bpOwner)
-	local taxCostMetal, taxCostEnergy = 0,0
-	if sameAlly and not samePerson then
-		if not disable_unit_sharing then
-			wreckOwner = bpOwner
-		end
-		if disable_manual_resource_sharing and (bpOwner ~= wreckOwner) then
-			return false
-		end
-		if sharing_tax > 0 then
-			taxCostMetal = (bpOwner ~= wreckOwner and sharing_tax * stepCostMetal) or 0
-			taxCostEnergy = (bpOwner ~= wreckOwner and sharing_tax * stepCostEnergy) or 0
-		end
-	else
-		wreckOwner = bpOwner
-	end
-	
-	local hadEnough, hadEnoughM, hadEnoughE = UseResources(builderID, builderTeam, bpOwner, taxCostMetal +stepCostMetal, taxCostEnergy + stepCostEnergy)
-	
-	if hadEnough then
-		-- we refund just the stepCost part, engine will use it again, this allows us to actually return true
-		AddResources(builderID, builderTeam, bpOwner, stepCostMetal, stepCostEnergy)
-		return true
-	end
-	-- refund if didnt get through
-	if hadEnoughM then
-		AddResources(builderID, builderTeam, bpOwner, taxCostMetal +stepCostMetal, 0)
-	end
-	if hadEnoughE then
-		AddResources(builderID, builderTeam, bpOwner, 0, taxCostEnergy +stepCostEnergy)
-	end
-	return false
-end
--------------------------------
------------- Resurrect Wreck Behaviour Code
-
-function AddResurrectStepToFeature(featureID, stepCostEnergy, step, wreckOwner, wreckDefID, facing)
-	local health, maxHealth, resurrectProgress = Spring.GetFeatureHealth(featureID)
-	local newResurrectProgress = math.min(1, resurrectProgress + step)
-	if newResurrectProgress >= 1 then
-		Spring.TransferFeature(featureID, wreckOwner)
-	end
-	Spring.SetFeatureResurrect(featureID, wreckDefID, facing, newResurrectProgress)
-end
-
-function ProcessResurrectWreck(builderID, builderTeam, featureID, featureDefID, step)
-	local health, maxHealth, resurrectProgress = Spring.GetFeatureHealth(featureID)
-	step = math.min ( 1 - resurrectProgres, step)
-	local wreckDefName, facing = Spring.GetFeatureResurrect (featureID)
-	local wreckDefID = UnitDefNames[wreckDefName].id
-	local costEnergy = udefcost[wreckDefID].energy
-	local stepCostEnergy = costEnergy * step
-	
-	local bpOwner = builderTeam
-	local wreckOwner = Spring.GetFeatureTeam(featureID)
-	
-	local samePerson = wreckOwner == bpOwner
-	local sameAlly = (wreckOwner ~= bpOwner) and Spring.AreTeamsAllied(wreckOwner, bpOwner)
-	
-	local taxCostEnergy = 0
-	
-	if sameAlly and not samePerson then
-		if not disable_unit_sharing then
-			wreckOwner = bpOwner
-		end
-		if disable_manual_resource_sharing and (bpOwner ~= wreckOwner) then
-			return false
-		end
-		if sharing_tax > 0 then
-			taxCostEnergy = (bpOwner ~= wreckOwner and sharing_tax * stepCostEnergy) or 0
-		end
-	else
-		wreckOwner = bpOwner
-	end
-	local hadEnough = UseResources(builderID, builderTeam, bpOwner, 0, taxCostEnergy + stepCostEnergy)
-	if hadEnough then
-		-- we refund just the stepCost part, engine will use it again, this allows us to actually return true
-		AddResources(builderID, builderTeam, bpOwner, 0,  stepCostEnergy)
-		-- the issue here is that once we hit resurrectProgress >= 1, engine will spawn the unit as builderTeam's rather than wreckOwner's (which can be a different team in case of disable_unit_sharing = true but disable_manual_resource_sharing = false
-		-- transfering ownership of the wreck (as seen previously) is meaningless
-		-- what we need is to remove the final buildstep after processing its cost, and Spring.CreateUnit(wreckDefID) + Spring.DestroyFeature(featureID);
-		-- But because DestroyFeature will only take action at the end of the simFrame, we will still have other rezzers managing to "spawn" new units.
-		-- Causing 1 wreck + 15 rezzers => 15 live units + 15 rezzers; that's really an issue
-		-- I have to figure out a better way to do it; in the meantime i'll just leave it at that.
-		-- maybe with a clamped step and a step > 0 check i can avoid multiple create + destroy calls
-		return true
-	end
-	return false
-end
-----------------------------
------------------- Reclaim Wreck Behaviour Code
--- this is logical and all but missing the engineformula to barformula correction (semi constant reclaim rate)
-local amountMetalClaimedOnFeature = {}
-function AddReclaimStepToFeature(featureID, stepCostEnergy, stepCostMetal,step)
-	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
-	local newMetal = math.max(0, metal - stepCostMetal)
-	local newEnergy = math.max(0, energy - stepCostEnergy)
-	local newReclaimLeft = math.max(0, reclaimLeft - step)
-	if newReclaimLeft == 0 then
-		Spring.Echo("ended: "..(amountMetalClaimedOnFeature[featureID] - maxMetal))
-		Spring.DestroyFeature(featureID)
-		return
-	end
-	Spring.SetFeatureResources(featureID, newMetal, newEnergy)
-	Spring.SetFeatureReclaim(featureID, newReclaimLeft)
+function gadget:UnitCreated(unitID, unitDefID, teamID, builderID)
+  if not disable_unit_sharing then
+	return
+  end
+  if not builderID then -- definitely not rezzed
+    return
+  end
+  local cmdID, wreckID = Spring.GetUnitWorkerTask(builderID)
+  if cmdID ~= CMD.RESURRECT then -- also not rezzed
+    return
+  end
+  wreckID = wreckID - Game.maxUnits
+  local wreckTeamID = Spring.GetFeatureTeam(wreckID)
+  if Spring.AreTeamsAllied(wreckTeamID, teamID) then
+    Spring.TransferUnit(unitID, wreckTeamID, false)
+  end
 end
 
 
+-- params = 
+-- builderteam
+-- objectteam
+-- result from DecideOutcome function (= deltas that will have to be resolved)
+-- stats from decide outcome (= deltas that will have to be resolved
+-- return:
+-- bool resolved: returns true if the delta has been managed, it could fail because of insuffiscient resourcing or storage
 
-function ProcessReclaimWreck(builderID, builderTeam, featureID, featureDefID, step)
-	local metal,maxMetal,energy,maxEnergy,reclaimLeft = Spring.GetFeatureResources(featureID)
-	step = math.abs(step)
-	step = math.min( reclaimLeft, step)
-	local costMetal = fdefcost[featureDefID].metal
-	local costEnergy = fdefcost[featureDefID].energy
-	local stepCostMetal = costMetal*step
-	local stepCostEnergy = costEnergy*step
-	
-	local bpOwner = builderTeam
-	local wreckOwner = Spring.GetFeatureTeam(featureID)
-	
-	local samePerson = wreckOwner == bpOwner
-	local sameAlly = (wreckOwner ~= bpOwner) and Spring.AreTeamsAllied(wreckOwner, bpOwner)
-	
-	local taxCostEnergy = 0
-	local taxCostMetal = 0
-	
-	if sameAlly and not samePerson then
-		if not disable_unit_sharing then
-			wreckOwner = bpOwner
+local function ResolveDelta(builderTeam, objectTeam, result, stats)
+	-- preliminaryCheck, can we actually credit objectTeam?
+	if result[objectTeam] then
+		if disable_overflow == true then
+			if result[objectTeam].metal > 0 or  result[objectTeam].energy > 0 then
+				local ecurr, estor = Spring.GetTeamResources(objectTeam, "energy")
+				local mcurr, mstor = Spring.GetTeamResources(objectTeam, "metal")
+				local avE, avM = estor - ecurr, mstor - mcurr
+				if result[objectTeam].metal > avM or result[objectTeam].energy > avE then
+					return false
+				end
+			end
 		end
-		if disable_manual_resource_sharing and (bpOwner ~= wreckOwner) then
-			bpOwner = wreckOwner
-		end
-		if sharing_tax > 0 then
-			taxCostEnergy = (bpOwner ~= wreckOwner and sharing_tax * stepCostEnergy) or 0
-			taxCostMetal = (bpOwner ~= wreckOwner and sharing_tax * stepCostMetal) or 0
-		end
-	else
-		wreckOwner = bpOwner
 	end
-		
-	local canReceive = AddResources(builderID, builderTeam, bpOwner, stepCostMetal - taxCostMetal, stepCostEnergy - taxCostEnergy)
-		Spring.Echo(amountMetalClaimedOnFeature[featureID])
-		if canReceive then 
-			amountMetalClaimedOnFeature[featureID] = (amountMetalClaimedOnFeature[featureID] or 0) + stepCostMetal - taxCostMetal
-			AddReclaimStepToFeature(featureID, stepCostEnergy, stepCostMetal, step)
-		end
-	return false
-end
-----------------------------
--------------Build Unit Behaviour code
-function AddBuildStepToUnit(unitID, step)
-	local health, maxHealth, capture, paralyze, buildProgress = Spring.GetUnitHealth(unitID)
-	local newHealth = math.min(maxHealth, health + step*maxHealth)
-	local newBuildProgress = math.min(1, buildProgress + step)
-	local data = {
-	health = newHealth,
-	capture = capture,
-	paralyze = paralyze,
-	build = newBuildProgress,
-	}
-	Spring.SetUnitHealth(unitID, data)
-end
 
-function ProcessBuildUnit(builderID, builderTeam, unitID, unitDefID, step)
-	local health, maxHealth, capture, paralyze, buildProgress = Spring.GetUnitHealth(unitID)
-	step = math.min(1-buildProgress, step)
-	local costMetal = udefcost[unitDefID].metal
-	local costEnergy = udefcost[unitDefID].energy
-	local stepCostMetal = costMetal*step
-	local stepCostEnergy = costEnergy*step
-	
-	local bpOwner = builderTeam
-	local unitOwner = Spring.GetUnitTeam(unitID)
-
-	local samePerson = unitOwner == bpOwner
-	local sameAlly = (unitOwner ~= bpOwner) and Spring.AreTeamsAllied(unitOwner, bpOwner)
-	local taxCostMetal, taxCostEnergy = 0,0
-	if sameAlly and not samePerson then
-		if not disable_unit_sharing then
-			unitOwner = bpOwner
+	-- second check, can builderTeam sustain the taxed cost ?
+	local ecurr = Spring.GetTeamResources(builderTeam, "energy")
+	local mcurr = Spring.GetTeamResources(builderTeam, "metal")
+	if result[builderTeam] then
+		if not result[builderTeam].netPositive then --netPositive is used to define a step that despite causing a temporary loss, will grant resources to overcome that loss (generally all step < 0 cases)
+		-- This is to allow cases of temporary < 0 res pool, if we know for sure the end of gameframepost will be positive
+			if mcurr < math.abs(result[builderTeam].metal) then
+				return false
+			end
+			if ecurr < math.abs(result[builderTeam].energy) then
+				return false
+			end
 		end
-		if disable_manual_resource_sharing and (bpOwner ~= unitOwner) then
-			return false
+		result[builderTeam].netPositive = nil --remove entry as we processed it
+	end
+	-- We've checked out cases of not being able to perform the resource removals/adds
+	-- we can now proceed without any further caution
+	-- add or use resourceRaw
+	for teamID, subTable in pairs (result) do
+		for resType, value in pairs(subTable) do
+			if value > 0 then
+				Spring.AddResourceRaw(teamID, resType, value)
+			else
+				Spring.UseResourceRaw(teamID, resType, math.abs(value))
+			end
 		end
-		if sharing_tax > 0 then
-			taxCostMetal = (bpOwner ~= unitOwner and sharing_tax * stepCostMetal) or 0
-			taxCostEnergy = (bpOwner ~= unitOwner and sharing_tax * stepCostEnergy) or 0
-		end
-	else
-		unitOwner = bpOwner
 	end
 	
-	local hadEnough, hadEnoughM, hadEnoughE = UseResources(builderID, builderTeam, bpOwner, taxCostMetal +stepCostMetal, taxCostEnergy + stepCostEnergy)
+	-- optional: add to stats (maybe we can accumulate stats changes and apply once per second instead of doing this)
+	for resType, subTable in pairs(stats) do
+		for statType, subsubtable in pairs(subTable) do
+			for teamID, value in pairs (subsubtable) do
+				Spring.AdjustTeamResourceStats(teamID, resType, statType, value)
+			end
+		end
+	end
 	
-	if hadEnough then
-		AddResources(builderID, builderTeam, bpOwner, stepCostMetal, stepCostEnergy) -- refund the step cost that will be picked again by engine
-		return true
-	end
-	-- refund if didnt get through
-	if hadEnoughM then
-		AddResources(builderID, builderTeam, bpOwner, taxCostMetal +stepCostMetal, 0)
-	end
-	if hadEnoughE then
-		AddResources(builderID, builderTeam, bpOwner, 0, taxCostEnergy +stepCostEnergy)
-	end
-	return false
-end
-
---------------------------
---------------- Repair Unit Behaviour Code
-function ProcessRepairUnit(builderID, builderTeam, unitID, unitDefID, step)
-	-- placeHolder, but i can't foresee anything happening here since "lending" BP is fine, there is no cost nor benefit involved
 	return true
 end
-
---------------------------
--------------- Reclaim Unit Behaviour Code
-function DeleteReclaimedUnit(unitID, builderID)
-	Spring.DestroyUnit(unitID, false, true, builderID)
-end
-
-function ProcessReclaimUnit(builderID, builderTeam, unitID, unitDefID, step)
-	step = math.abs(step)
-	local costMetal = udefcost[unitDefID].metal
-	
-	local bpOwner = builderTeam
-	local unitOwner = Spring.GetUnitTeam(unitID)
-	
-	local samePerson = unitOwner == bpOwner
-	local sameAlly = (unitOwner ~= bpOwner) and Spring.AreTeamsAllied(unitOwner, bpOwner)
-	
-	local taxCostMetal = 0
-	
-	if sameAlly and not samePerson then
-		if not disable_unit_sharing then
-			unitOwner = bpOwner
-		end
-		if disable_manual_resource_sharing and (bpOwner ~= unitOwner) then
-			bpOwner = unitOwner
-		end
-		if sharing_tax > 0 then
-			taxCostMetal = (bpOwner ~= unitOwner and sharing_tax * costMetal) or 0
-		end
-	else
-		unitOwner = bpOwner
-	end 
-	--wanted to try returning true and managine resources, but could not, reason being paying a tax upfront (before getting the resources form engine) might be blocked due to not enough current resource
-	canReceive = AddResources(builderID, builderTeam, bpOwner, costMetal - taxCostMetal, 0)
-
-	if canReceive then
-		DeleteReclaimedUnit(unitID, builderID)
-	end
-	return false
-end
-
 ----------------------
 
 function gadget:AllowFeatureBuildStep(builderID, builderTeam, featureID, featureDefID, step)
-	if step > 0 then -- repair or rez step
+		local objectTeam = Spring.GetFeatureTeam(featureID)
 		local _,_,_,_, reclaimLeft = Spring.GetFeatureResources(featureID)
-		if reclaimLeft < 1 then -- repair step
-			return ProcessRepairWreck(builderID, builderTeam, featureID, featureDefID, step)
+		local _, _, resurrectProgress = Spring.GetFeatureHealth(featureID)
+	if step > 0 then -- repair or rez step
+		if reclaimLeft < 1 then -- repairing a feature
+			local totalECost = FeatureDefs[featureDefID].energy
+			local totalMCost = FeatureDefs[featureDefID].metal
+			local allowed, result, stats = NewDecideOutcome(builderTeam, objectTeam, step, reclaimLeft, totalECost, totalMCost)
+			if not allowed then -- anticipated resturn (no need to try and resolve anything)
+				return false
+			end
+			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			return allowed and resolved -- return true only once resolved
 		else -- rez step
-			return ProcessResurrectWreck(builderID, builderTeam, featureID, featureDefID, step)
+			local wreckDefName, facing = Spring.GetFeatureResurrect (featureID)
+			local wreckDefID = UnitDefNames[wreckDefName].id
+			local totalECost = 0.5 * UnitDefs[wreckDefID].energyCost
+			local totalMCost = 0
+			local allowed, result, stats = NewDecideOutcome(builderTeam, objectTeam, step, resurrectProgress, totalECost, totalMCost)
+			if not allowed then
+				return false
+			end
+			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			return allowed and resolved
 		end
     else -- reclaim step
-		return ProcessReclaimWreck(builderID, builderTeam, featureID, featureDefID, step)
+		local totalECost = FeatureDefs[featureDefID].energy
+		local totalMCost = FeatureDefs[featureDefID].metal
+		local allowed, result, stats = NewDecideOutcome(builderTeam, objectTeam, step, reclaimLeft, totalECost, totalMCost)
+		if not allowed then
+			return false
+		end
+		local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+		return allowed and resolved
 	end
 end
 
 function gadget:AllowUnitBuildStep(builderID, builderTeam, unitID, unitDefID, step)
 	local hp,maxhp,_,_,currentBuild = Spring.GetUnitHealth(unitID)
-	if step > 0 then -- repair or rez step
+	local objectTeam = Spring.GetUnitTeam(unitID)
+	if step > 0 then
 		if currentBuild < 1 then -- build step
-			return ProcessBuildUnit(builderID, builderTeam, unitID, unitDefID, step)
+			local totalECost = UnitDefs[unitDefID].energyCost
+			local totalMCost = UnitDefs[unitDefID].metalCost
+			local allowed, result, stats = NewDecideOutcome(builderTeam, objectTeam, step, currentBuild, totalECost, totalMCost)
+			if not allowed then
+				return false
+			end
+			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			return allowed and resolved
 		else -- repair step
-			return ProcessRepairUnit(builderID, builderTeam, unitID, unitDefID, step)
+			return true
 		end
     else -- reclaim step
 		if (hp + step * maxhp) <= 0 then -- we only care about the last bit
-			if hp > 0 then
-				return ProcessReclaimUnit(builderID, builderTeam, unitID, unitDefID, step)
-			else
+			local totalECost = 0
+			local totalMCost = UnitDefs[unitDefID].metalCost * currentBuild
+			local allowed, result , stats= NewDecideOutcome(builderTeam, objectTeam, -1, currentBuild, totalECost, totalMCost)
+			if not allowed then
 				return false
 			end
+			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			return allowed and resolved
 		else
 			return true
 		end
