@@ -327,8 +327,9 @@ function NewDecideOutcome(builderTeam, objectTeam, step, currentProgress, totalE
 	local bpOwner = builderTeam
 	
 	if sameAlly and not samePerson then
-		if not disable_unit_sharing then
+		if not disable_unit_sharing then 
 			objectOwner = bpOwner
+			return true, {[builderTeam] = nil, [objectTeam] = nil}, {} -- We consider owning the object, no tax nor limitation can be applied, resourcing stays ==
 		end
 		if disable_manual_resource_sharing and (bpOwner ~= objectOwner) then
 			bpOwner = objectOwner
@@ -341,10 +342,10 @@ function NewDecideOutcome(builderTeam, objectTeam, step, currentProgress, totalE
 		end
 	else -- gaia, enemy or myself case
 		objectOwner = bpOwner
-		return true, {[builderTeam] = nil, [objectTeam] = nil}, {}
+		return true, {[builderTeam] = nil, [objectTeam] = nil}, {} -- Similar to owning the object, no tax nor limitation can be applied, resourcing stays ==
 	end
 	if justBool then
-		return true
+		return true 
 	end
 
 	-- step 3: compute wanted outcome
@@ -395,11 +396,15 @@ function NewDecideOutcome(builderTeam, objectTeam, step, currentProgress, totalE
 	local absTaxed = {metal = math.abs(clampedStep * totalMCost), energy = math.abs(clampedStep * totalECost)}
 	for resType, tab in pairs (statsToManage) do
 		statsToManage[resType] = {
-			produced = step < 0 and { -- reclaim situation
+			income = step < 0 and { -- reclaim situation
 				[objectTeam] = absUntaxed[resType], -- reclaim step object team produces untaxed value
 				[builderTeam] = -absUntaxed[resType], -- reclaim step, builder didn't produce untaxed value
 				} or nil,
-			used = step > 0 and { -- build situation
+			expense = step > 0 and { -- build situation
+				[objectTeam] = absUntaxed[resType], -- build step, object team uses untaxed value
+				[builderTeam] = -absUntaxed[resType], -- buildstep, builderteam didn't use untaxed value
+				} or nil,
+			pull = step > 0 and { -- build situation
 				[objectTeam] = absUntaxed[resType], -- build step, object team uses untaxed value
 				[builderTeam] = -absUntaxed[resType], -- buildstep, builderteam didn't use untaxed value
 				} or nil,
@@ -513,11 +518,11 @@ end
 -- return:
 -- bool resolved: returns true if the delta has been managed, it could fail because of insuffiscient resourcing or storage
 
-local function ResolveDelta(builderTeam, objectTeam, result, stats)
+local function ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
 	-- preliminaryCheck, can we actually credit objectTeam?
 	if result[objectTeam] then
 		if disable_overflow == true then
-			if result[objectTeam].metal > 0 or  result[objectTeam].energy > 0 then
+			if (result[builderTeam].metal and result[objectTeam].metal > 0) or (result[builderTeam].energy and result[objectTeam].energy > 0) then
 				local ecurr, estor = Spring.GetTeamResources(objectTeam, "energy")
 				local mcurr, mstor = Spring.GetTeamResources(objectTeam, "metal")
 				local avE, avM = estor - ecurr, mstor - mcurr
@@ -534,10 +539,10 @@ local function ResolveDelta(builderTeam, objectTeam, result, stats)
 	if result[builderTeam] then
 		if not result[builderTeam].netPositive then --netPositive is used to define a step that despite causing a temporary loss, will grant resources to overcome that loss (generally all step < 0 cases)
 		-- This is to allow cases of temporary < 0 res pool, if we know for sure the end of gameframepost will be positive
-			if mcurr < math.abs(result[builderTeam].metal) then
+			if result[builderTeam].metal and mcurr < math.abs(result[builderTeam].metal) then
 				return false
 			end
-			if ecurr < math.abs(result[builderTeam].energy) then
+			if result[builderTeam].energy and ecurr < math.abs(result[builderTeam].energy) then
 				return false
 			end
 		end
@@ -559,8 +564,16 @@ local function ResolveDelta(builderTeam, objectTeam, result, stats)
 	-- optional: add to stats (maybe we can accumulate stats changes and apply once per second instead of doing this)
 	for resType, subTable in pairs(stats) do
 		for statType, subsubtable in pairs(subTable) do
-			for teamID, value in pairs (subsubtable) do
+			for teamID, value in pairs (subsubtable) do	
+				Spring.Echo("Adjusted ".. teamID, resType, statType, value)
 				Spring.AdjustTeamResourceStats(teamID, resType, statType, value)
+				if teamID == builderTeam then
+					if statType == "income" then
+						Spring.AdjustUnitResourceStats(builderID, resType, "m", value)
+					elseif statType == "expense" then
+						Spring.AdjustUnitResourceStats(builderID, resType, "u", value)
+					end
+				end
 			end
 		end
 	end
@@ -581,7 +594,7 @@ function gadget:AllowFeatureBuildStep(builderID, builderTeam, featureID, feature
 			if not allowed then -- anticipated resturn (no need to try and resolve anything)
 				return false
 			end
-			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
 			return allowed and resolved -- return true only once resolved
 		else -- rez step
 			local wreckDefName, facing = Spring.GetFeatureResurrect (featureID)
@@ -592,7 +605,7 @@ function gadget:AllowFeatureBuildStep(builderID, builderTeam, featureID, feature
 			if not allowed then
 				return false
 			end
-			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
 			return allowed and resolved
 		end
     else -- reclaim step
@@ -602,7 +615,7 @@ function gadget:AllowFeatureBuildStep(builderID, builderTeam, featureID, feature
 		if not allowed then
 			return false
 		end
-		local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+		local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
 		return allowed and resolved
 	end
 end
@@ -618,7 +631,7 @@ function gadget:AllowUnitBuildStep(builderID, builderTeam, unitID, unitDefID, st
 			if not allowed then
 				return false
 			end
-			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
 			return allowed and resolved
 		else -- repair step
 			return true
@@ -631,7 +644,7 @@ function gadget:AllowUnitBuildStep(builderID, builderTeam, unitID, unitDefID, st
 			if not allowed then
 				return false
 			end
-			local resolved = ResolveDelta(builderTeam, objectTeam, result, stats)
+			local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
 			return allowed and resolved
 		else
 			return true
