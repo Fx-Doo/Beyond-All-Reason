@@ -1,5 +1,5 @@
 local gadget = gadget ---@type Gadget
-local sharing_tax = Spring.GetModOptions().sharing_tax/100
+local sharing_tax = Spring.GetModOptions().sharing_tax / 100
 local disable_manual_resource_sharing = Spring.GetModOptions().disable_manual_resource_sharing
 local disable_overflow = Spring.GetModOptions().disable_overflow
 
@@ -19,79 +19,163 @@ if not gadgetHandler:IsSyncedCode() then
 	return false
 end
 
-if sharing_tax == 0 and disable_manual_resource_sharing == false and disable_overflow == false then -- remove ourselves
+if sharing_tax == 0 and disable_manual_resource_sharing == false and disable_overflow == false then
 	return false
 end
 
+local SpSetTeamShareLevel = Spring.SetTeamShareLevel
+local SpShareTeamResource = Spring.ShareTeamResource
+local SpUseTeamResource = Spring.UseTeamResource
+local SpAddTeamResource = Spring.AddTeamResource
 local ForcedRequests = {}
 local lastRecv = {}
+local lastSent = {}
+local lastExcess = {}
+local teamOverflowedLastFrame = {}
+local allyTeamOverflowedLastFrame = {}
 
-for _, teamID in pairs(Spring.GetTeamList()) do
+local teamList = Spring.GetTeamList()
+local allyTeamList = Spring.GetAllyTeamList()
+local allyteamTeamList = {}
+
+for _, teamID in pairs(teamList) do
+	teamOverflowedLastFrame[teamID] = {metal = 0, energy = 0}
 	lastRecv[teamID] = {metal = 0, energy = 0}
-	if disable_overflow then
-		Spring.SetTeamShareLevel(teamID, "metal", 1.0)
-		Spring.SetTeamShareLevel(teamID, "energy", 1.0)
+	lastSent[teamID] = {metal = 0, energy = 0}
+	lastExcess[teamID] = {metal = 0, energy = 0}
+	if disable_overflow or sharing_tax > 0 then
+		SpSetTeamShareLevel(teamID, "metal", 1.0)
+		SpSetTeamShareLevel(teamID, "energy", 1.0)
 	end
+end
+
+for _, allyTeam in pairs(allyTeamList) do
+	allyteamTeamList[allyTeam] = Spring.GetTeamList(allyTeam)
+	allyTeamOverflowedLastFrame[allyTeam] = {metal = 0, energy = 0}
 end
 
 function GG.ForcedResourceSharing(senderTeamId, receiverTeamId, resourceType, amount)
 	local hash = Hash(senderTeamId, receiverTeamId, resourceType, amount)
 	ForcedRequests[hash] = true
-	Spring.ShareTeamResource(senderTeamId, receiverTeamId, resourceType, amount)
+	SpShareTeamResource(senderTeamId, receiverTeamId, resourceType, amount)
+	lastSent[senderTeamId][resourceType] = lastSent[senderTeamId][resourceType] + amount
 	lastRecv[receiverTeamId][resourceType] = lastRecv[receiverTeamId][resourceType] + amount
 end
 
 function Hash(senderTeamId, receiverTeamId, resourceType, amount)
 	local frame = Spring.GetGameFrame()
-	local str = frame..senderTeamId..receiverTeamId..resourceType..amount
+	local str = frame .. senderTeamId .. receiverTeamId .. resourceType .. amount
 	return str
 end
 
 function gadget:AllowResourceTransfer(senderTeamId, receiverTeamId, resourceType, amount)
 	local hash = Hash(senderTeamId, receiverTeamId, resourceType, amount)
-	
 	if ForcedRequests[hash] == true then
 		ForcedRequests[hash] = nil
 		return true
 	end
-	
 	if disable_manual_resource_sharing then
 		return false
 	end
-
-	Spring.UseTeamResource(senderTeamId, resourceType, sharing_tax * amount) 
-	GG.ForcedResourceSharing(senderTeamId, receiverTeamId, resourceType, (1-sharing_tax)*amount)
+	SpUseTeamResource(senderTeamId, resourceType, sharing_tax * amount)
+	GG.ForcedResourceSharing(senderTeamId, receiverTeamId, resourceType, (1 - sharing_tax) * amount)
 	return false
 end
 
 if (sharing_tax > 0 or disable_overflow) then
 
+	function GetAvailableStorage(teamID, resType)
+		local current, storage = Spring.GetTeamResources(teamID, resType)
+		return math.max(0, storage - current)
+	end
+
 	local function KillOverflow(teamID, resType, amount)
 		if amount > 0 then
-			local taxedAmount = (disable_overflow and amount) or (amount * sharing_tax)
 			local curr = Spring.GetTeamResources(teamID, resType)
-			Spring.SetTeamResource(teamID, string.sub(resType,1,1), curr-taxedAmount) -- silently remove
+			Spring.SetTeamResource(teamID, string.sub(resType, 1, 1), curr - amount)
+		end
+	end
+
+	function Leak(allyTeam, metal, energy)
+		if metal == 0 then metal = nil end
+		if energy == 0 then energy = nil end
+
+		local preTaxValue = {metal = metal, energy = energy}
+		local totalAvailableAllyTeamStorages = {metal = 0, energy = 0}
+		local availableTeamStorage = {}
+
+		for _, teamID in pairs(allyteamTeamList[allyTeam]) do
+			availableTeamStorage[teamID] = {}
+			for resType, excess in pairs(preTaxValue) do
+				local availableStorage = GetAvailableStorage(teamID, resType)
+				if teamOverflowedLastFrame[teamID][resType] > 0 and availableStorage > 0 then
+					local shareBack = math.min(teamOverflowedLastFrame[teamID][resType], availableStorage)
+					SpAddTeamResource(teamID, resType, shareBack)
+					availableStorage = availableStorage - shareBack
+					teamOverflowedLastFrame[teamID][resType] = teamOverflowedLastFrame[teamID][resType] - shareBack
+					allyTeamOverflowedLastFrame[allyTeam][resType] = allyTeamOverflowedLastFrame[allyTeam][resType] - shareBack
+					preTaxValue[resType] = preTaxValue[resType] - shareBack
+				end
+				availableTeamStorage[teamID][resType] = availableStorage
+				totalAvailableAllyTeamStorages[resType] = totalAvailableAllyTeamStorages[resType] + availableStorage
+			end
+		end
+
+		if preTaxValue.metal == 0 then preTaxValue.metal = nil end
+		if preTaxValue.energy == 0 then preTaxValue.energy = nil end
+
+		for resType, excess in pairs(preTaxValue) do
+			if totalAvailableAllyTeamStorages[resType] <= 0 then
+				for _, teamID in pairs(allyteamTeamList[allyTeam]) do
+					local resExcessed = teamOverflowedLastFrame[teamID][resType]
+					preTaxValue[resType] = nil
+					teamOverflowedLastFrame[teamID][resType] = 0
+				end
+			end
+			allyTeamOverflowedLastFrame[allyTeam][resType] = 0
+		end
+
+		for resType, excess in pairs(preTaxValue) do
+			local postTaxValue = excess * (1 - sharing_tax)
+			local percent = math.min(1, postTaxValue / totalAvailableAllyTeamStorages[resType])
+			local SharedAmount = 0
+			for _, teamID in pairs(allyteamTeamList[allyTeam]) do
+				local aftTaxAmount = percent * availableTeamStorage[teamID][resType]
+				local preTaxAmount = aftTaxAmount / (1 - sharing_tax)
+				SpAddTeamResource(teamID, resType, aftTaxAmount)
+				SharedAmount = SharedAmount + preTaxAmount
+			end
+			local percentShared = SharedAmount / excess
+			for _, teamID in pairs(allyteamTeamList[allyTeam]) do
+				local resSent = percentShared * teamOverflowedLastFrame[teamID][resType]
+				local resExcessed = (1 - percentShared) * teamOverflowedLastFrame[teamID][resType]
+				teamOverflowedLastFrame[teamID][resType] = 0
+			end
+			allyTeamOverflowedLastFrame[allyTeam][resType] = 0
 		end
 	end
 
 	function gadget:GameFramePost(f)
-		if f%30 == 0 then
-			for _, teamID in pairs(Spring.GetTeamList()) do
-				local _,_,_,curRecvM = Spring.GetTeamResourceStats(teamID, "m")
-				local _,_,_,curRecvE = Spring.GetTeamResourceStats(teamID, "e")
-				local diffRecvM = curRecvM - lastRecv[teamID].metal
-				local diffRecvE = curRecvE - lastRecv[teamID].energy
+		if f % 30 == 0 then
+			for _, teamID in pairs(teamList) do
+				local _, _, _, _, _, allyTeam = Spring.GetTeamInfo(teamID)
+				local _, _, curExcessedM, curRecvM, curSentM = Spring.GetTeamResourceStats(teamID, "m")
+				local _, _, curExcessedE, curRecvE, curSentE = Spring.GetTeamResourceStats(teamID, "e")
+				local diffRecvM, diffRecvE, diffExcessM, diffExcessE, diffSentM, diffSentE = curRecvM - lastRecv[teamID].metal, curRecvE - lastRecv[teamID].energy, curExcessedM - lastExcess[teamID].metal, curExcessedE - lastExcess[teamID].energy, curSentM - lastSent[teamID].metal, curSentE - lastSent[teamID].energy
 				KillOverflow(teamID, "metal", diffRecvM)
 				KillOverflow(teamID, "energy", diffRecvE)
-				lastRecv[teamID].metal = curRecvM
-				lastRecv[teamID].energy = curRecvE
+				local overFlowedE, overFlowedM = diffExcessE + diffSentE, diffExcessM + diffSentM
+				allyTeamOverflowedLastFrame[allyTeam].energy, allyTeamOverflowedLastFrame[allyTeam].metal  = allyTeamOverflowedLastFrame[allyTeam].energy + overFlowedE, allyTeamOverflowedLastFrame[allyTeam].metal + overFlowedM
+				teamOverflowedLastFrame[teamID].energy, teamOverflowedLastFrame[teamID].metal  = overFlowedE, overFlowedM
+				lastRecv[teamID].metal,lastRecv[teamID].energy, lastExcess[teamID].metal,lastExcess[teamID].energy, lastSent[teamID].metal, lastSent[teamID].energy = curRecvM, curRecvE,curExcessedM, curExcessedE, curSentM, curSentE
+			end
+			for _, allyTeam in pairs(allyTeamList) do
+				Leak(allyTeam, allyTeamOverflowedLastFrame[allyTeam].metal, allyTeamOverflowedLastFrame[allyTeam].energy)
 			end
 		end
 	end
-	
-	if disable_overflow then	
-		function gadget:AllowResourceLevel()
-			return false
-		end
+
+	function gadget:AllowResourceLevel()
+		return false
 	end
 end
