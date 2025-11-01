@@ -244,12 +244,7 @@ local options = {
 		key		= "sharing_tax",
 		name	= "Resource Sharing Tax",
 		desc	=	"Taxes resource sharing".."\255\128\128\128".." and overflow (engine TODO:)\n"..
-<<<<<<< HEAD
 					"Set to [0] to turn off. Recommened: [40]. (Ranges: 0 - 99)",
-=======
-					"Set to [0] to turn off. Recommened: [0.4]. (Ranges: 0 - 0.99)\n"..
-					"*Disables: Reclaiming of Allied Units, [Unit Sharing] and [Assisting Ally Construction] to prevent loopholes",
->>>>>>> 546b19b389 (Revert "Merge remote-tracking branch 'upstream/master'")
 		type	= "number",
 		def		= 0,
 		min		= 0,
@@ -257,13 +252,8 @@ local options = {
 		step	= 1,
 		section	= "options_main",
 		column	= 1,
-<<<<<<< HEAD
 		-- lock	= {"disable_unit_sharing","disable_assist_ally_construction"},
 		-- unlock	= {"disable_unit_sharing_forced","disable_assist_ally_construction_forced"},
-=======
-		lock	= {"disable_unit_sharing","disable_assist_ally_construction"},
-		unlock	= {"disable_unit_sharing_forced","disable_assist_ally_construction_forced"},
->>>>>>> 546b19b389 (Revert "Merge remote-tracking branch 'upstream/master'")
 	},
 	{
 		key		= "disable_unit_sharing",
