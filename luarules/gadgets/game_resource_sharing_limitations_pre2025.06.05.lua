@@ -1,4 +1,6 @@
 local gadget = gadget ---@type Gadget
+
+-- localized modoptions
 local sharing_tax = Spring.GetModOptions().sharing_tax / 100
 local disable_manual_resource_sharing = Spring.GetModOptions().disable_manual_resource_sharing
 local disable_overflow = Spring.GetModOptions().disable_overflow
@@ -23,10 +25,19 @@ if sharing_tax == 0 and disable_manual_resource_sharing == false and disable_ove
 	return false
 end
 
+-- localized functions
 local SpSetTeamShareLevel = Spring.SetTeamShareLevel
 local SpShareTeamResource = Spring.ShareTeamResource
 local SpUseTeamResource = Spring.UseTeamResource
 local SpAddTeamResource = Spring.AddTeamResource
+
+
+-- localized lists
+local teamList = Spring.GetTeamList()
+local allyTeamList = Spring.GetAllyTeamList()
+local allyteamTeamList = {}
+
+
 local ForcedRequests = {}
 local lastRecv = {}
 local lastSent = {}
@@ -34,28 +45,29 @@ local lastExcess = {}
 local teamOverflowedLastFrame = {}
 local allyTeamOverflowedLastFrame = {}
 
-local teamList = Spring.GetTeamList()
-local allyTeamList = Spring.GetAllyTeamList()
-local allyteamTeamList = {}
-
 for _, teamID in pairs(teamList) do
-	teamOverflowedLastFrame[teamID] = {metal = 0, energy = 0}
+	teamOverflowedLastFrame[teamID] = {metal = 0, energy = 0} -- set to 0 for gamestart
 	lastRecv[teamID] = {metal = 0, energy = 0}
 	lastSent[teamID] = {metal = 0, energy = 0}
 	lastExcess[teamID] = {metal = 0, energy = 0}
-	if disable_overflow or sharing_tax > 0 then
+	if disable_overflow or sharing_tax > 0 then -- force to 1.0 when mod option is enabled
 		SpSetTeamShareLevel(teamID, "metal", 1.0)
 		SpSetTeamShareLevel(teamID, "energy", 1.0)
 	end
 end
 
 for _, allyTeam in pairs(allyTeamList) do
-	allyteamTeamList[allyTeam] = Spring.GetTeamList(allyTeam)
-	allyTeamOverflowedLastFrame[allyTeam] = {metal = 0, energy = 0}
+	allyteamTeamList[allyTeam] = Spring.GetTeamList(allyTeam) -- register our allyteamTeamLists
+	allyTeamOverflowedLastFrame[allyTeam] = {metal = 0, energy = 0} -- set to 0 for game start
 end
 
-function GG.ForcedResourceSharing(senderTeamId, receiverTeamId, resourceType, amount)
-	local hash = Hash(senderTeamId, receiverTeamId, resourceType, amount)
+function GetAvailableStorage(teamID, resType)
+	local current, storage = Spring.GetTeamResources(teamID, resType)
+	return math.max(0, storage - current)
+end
+
+function GG.ForcedResourceSharing(senderTeamId, receiverTeamId, resourceType, amount) -- set this as a global function in case we need some ways to override current limitations
+	local hash = Hash(senderTeamId, receiverTeamId, resourceType, amount) -- we hash, then register, then send a new ShareRequest with the proper value, which will be validated by our allowResourceTransfer process
 	ForcedRequests[hash] = true
 	SpShareTeamResource(senderTeamId, receiverTeamId, resourceType, amount)
 	lastSent[senderTeamId][resourceType] = lastSent[senderTeamId][resourceType] + amount
@@ -77,19 +89,15 @@ function gadget:AllowResourceTransfer(senderTeamId, receiverTeamId, resourceType
 	if disable_manual_resource_sharing then
 		return false
 	end
-	SpUseTeamResource(senderTeamId, resourceType, sharing_tax * amount)
+	SpUseTeamResource(senderTeamId, resourceType, sharing_tax * amount) -- we apply the tax here and not within ForcedResourceSharing because ForcedResourceSharing is supposed to be a method that bypasses AllowResourceTransfer process
 	GG.ForcedResourceSharing(senderTeamId, receiverTeamId, resourceType, (1 - sharing_tax) * amount)
 	return false
 end
 
-if (sharing_tax > 0 or disable_overflow) then
+if (sharing_tax > 0 or disable_overflow) then -- only enable this part if we need to manage overflow
 
-	function GetAvailableStorage(teamID, resType)
-		local current, storage = Spring.GetTeamResources(teamID, resType)
-		return math.max(0, storage - current)
-	end
 
-	local function KillOverflow(teamID, resType, amount)
+	function KillOverflow(teamID, resType, amount) -- cancel the overflow from last slowUpdate
 		if amount > 0 then
 			local curr = Spring.GetTeamResources(teamID, resType)
 			Spring.SetTeamResource(teamID, string.sub(resType, 1, 1), curr - amount)
@@ -169,8 +177,10 @@ if (sharing_tax > 0 or disable_overflow) then
 				teamOverflowedLastFrame[teamID].energy, teamOverflowedLastFrame[teamID].metal  = overFlowedE, overFlowedM
 				lastRecv[teamID].metal,lastRecv[teamID].energy, lastExcess[teamID].metal,lastExcess[teamID].energy, lastSent[teamID].metal, lastSent[teamID].energy = curRecvM, curRecvE,curExcessedM, curExcessedE, curSentM, curSentE
 			end
-			for _, allyTeam in pairs(allyTeamList) do
-				Leak(allyTeam, allyTeamOverflowedLastFrame[allyTeam].metal, allyTeamOverflowedLastFrame[allyTeam].energy)
+			if not disable_overflow then -- reapply overflow only if not disabled
+				for _, allyTeam in pairs(allyTeamList) do
+					Leak(allyTeam, allyTeamOverflowedLastFrame[allyTeam].metal, allyTeamOverflowedLastFrame[allyTeam].energy)
+				end
 			end
 		end
 	end
