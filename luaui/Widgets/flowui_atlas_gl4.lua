@@ -1,6 +1,4 @@
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name      = 'FlowUI GL4 Atlas',

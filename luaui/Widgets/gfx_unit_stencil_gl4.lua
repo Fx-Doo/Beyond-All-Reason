@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name      = "Unit Stencil GL4",
@@ -33,10 +31,9 @@ local addRadius = 10
 -----------------------------------------------------------------
 -- GL4 Backend Stuff
 
-local LuaShader = gl.LuaShader
-local InstanceVBOTable = gl.InstanceVBOTable
-local popElementInstance = InstanceVBOTable.popElementInstance
-local pushElementInstance = InstanceVBOTable.pushElementInstance
+local luaShaderDir = "LuaUI/Widgets/Include/"
+local LuaShader = VFS.Include(luaShaderDir.."LuaShader.lua")
+VFS.Include(luaShaderDir.."instancevbotable.lua")
 
 local vsSrc =  [[
 #version 420
@@ -236,7 +233,7 @@ local function InitDrawPrimitiveAtUnit(modifiedShaderConf, DPATname)
 		return
 	end
 
-	unitStencilVBO = InstanceVBOTable.makeInstanceVBOTable(
+	unitStencilVBO = makeInstanceVBOTable(
 		{
 			{id = 0, name = 'unitModelMinXYZ', size = 4},
 			{id = 1, name = 'unitModelMaxXYZ', size = 4},
@@ -250,7 +247,7 @@ local function InitDrawPrimitiveAtUnit(modifiedShaderConf, DPATname)
 	unitStencilVBO.VAO  = gl.GetVAO()
 	unitStencilVBO.VAO:AttachVertexBuffer(unitStencilVBO.instanceVBO)
 
-    featureStencilVBO = InstanceVBOTable.makeInstanceVBOTable(
+    featureStencilVBO = makeInstanceVBOTable(
 		{
 			{id = 0, name = 'unitModelMinXYZ', size = 4},
 			{id = 1, name = 'unitModelMaxXYZ', size = 4},
@@ -294,7 +291,7 @@ function widget:VisibleUnitAdded(unitID, unitDefID)
 	)
 end
 function widget:VisibleUnitsChanged(extVisibleUnits, extNumVisibleUnits)
-	InstanceVBOTable.clearInstanceTable(unitStencilVBO)
+	clearInstanceTable(unitStencilVBO)
 	for unitID, unitDefID in pairs(extVisibleUnits) do
 		widget:VisibleUnitAdded(unitID, unitDefID)
 	end
@@ -415,8 +412,7 @@ function widget:Initialize()
 end
 
 function widget:Shutdown()
-	gl.DeleteTexture(unitFeatureStencilTex)
-	unitFeatureStencilTex = nil
+	if unitFeatureStencilTex then gl.DeleteTexture(unitFeatureStencilTex) end
 	WG['unitstencilapi'] = nil
 	widgetHandler:DeregisterGlobal('GetUnitStencilTexture')
 end

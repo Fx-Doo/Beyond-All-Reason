@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
    return {
       name      = "API Unit Tracker DEVMODE GL4",
@@ -76,16 +74,9 @@ for unitDefID, unitDef in pairs(UnitDefs) do
 end
 
 --- GL4 STUFF ---
-
-local LuaShader = gl.LuaShader
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-local popElementInstance  = InstanceVBOTable.popElementInstance
-
 local unitTrackerVBO = nil
 local unitTrackerShader = nil
-local luaShaderDir = "LuaUI/Include/"
+local luaShaderDir = "LuaUI/Widgets/Include/"
 local texture = "luaui/images/solid.png"
 
 local function initGL4()
@@ -210,7 +201,7 @@ local instanceVBOCacheTable = {
 				0, 0, 0, 0 -- these are just padding zeros, that will get filled in
 			}
 
-local function visibleUnitsAdd(unitID, unitDefID, unitTeam, silent, reason)
+local function visibleUnitsAdd(unitID, unitDefID, unitTeam, silent)
 	if debuglevel >= 3 then Spring.Debug.TraceEcho(numVisibleUnits) end
 	if visibleUnits[unitID] then  -- already known
 		if debuglevel >= 2 then Spring.Echo("visibleUnitsAdd", "tried to add existing unitID", unitID) end
@@ -236,7 +227,7 @@ local function visibleUnitsAdd(unitID, unitDefID, unitTeam, silent, reason)
 	-- call all listeners:
 	if silent then return end
 	if Script.LuaUI('VisibleUnitAdded') then
-		Script.LuaUI.VisibleUnitAdded(unitID, unitDefID, unitTeam, reason)
+		Script.LuaUI.VisibleUnitAdded(unitID, unitDefID, unitTeam)
 	else
 		if debuglevel >= 1 then Spring.Echo("Script.LuaUI.VisibleUnitAdded() unavailable") end
 	end
@@ -259,7 +250,7 @@ local function visibleUnitsRemove(unitID, reason)
 		end
 		-- call all listeners
 		if Script.LuaUI('VisibleUnitRemoved') then
-			Script.LuaUI.VisibleUnitRemoved(unitID, unitDefID, unitTeam, reason)
+			Script.LuaUI.VisibleUnitRemoved(unitID, unitDefID, unitTeam)
 		end
 	else
 		if debuglevel >= 2 then Spring.Echo("visibleUnitsRemove", "tried to remove non-existing unitID", unitID, reason) end
@@ -383,7 +374,7 @@ function widget:UnitCreated(unitID, unitDefID, unitTeam, builderID, reason, sile
 
 	-- visibleUnits
 	if visibleUnits[unitID] == nil then
-		visibleUnitsAdd(unitID, unitDefID, unitTeam, silent, reason)
+		visibleUnitsAdd(unitID, unitDefID, unitTeam, silent)
 	end
 end
 
@@ -392,8 +383,8 @@ function widget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerD
 		unitDefID = unitDefID or spGetUnitDefID(unitID)
 		Spring.Echo("UnitDestroyed",unitID, unitDefID and UnitDefs[unitDefID].name, unitTeam, nil, nil, nil, nil, reason)
 	end
-	visibleUnitsRemove(unitID, reason or "UnitDestroyed")
-	alliedUnitsRemove(unitID, reason or "UnitDestroyed")
+	visibleUnitsRemove(unitID, reason or "destroyed")
+	alliedUnitsRemove(unitID, reason or "destroyed")
 end
 
 --function widget:CrashingAircraft(unitID, unitDefID, teamID)
@@ -506,7 +497,7 @@ function widget:GameFrame()
 		end
 
 		if drawdebugvisible then
-			InstanceVBOTable.locateInvalidUnits(unitTrackerVBO)
+			locateInvalidUnits(unitTrackerVBO)
 		end
 
 		local cntalliedunits = 0
@@ -573,7 +564,7 @@ local function initializeAllUnits()
 	end
 
 	if debugdrawvisible then
-		InstanceVBOTable.clearInstanceTable(unitTrackerVBO)
+		clearInstanceTable(unitTrackerVBO)
 	end
 
 	local allunits = Spring.GetAllUnits()
@@ -596,7 +587,7 @@ function widget:TextCommand(command)
 		if param and param == 'draw' then
 			Spring.Echo("Debug mode for API Unit Tracker GL4 set to draw:", not debugdrawvisible)
 			if debugdrawvisible then
-				InstanceVBOTable.clearInstanceTable(unitTrackerVBO)
+				clearInstanceTable(unitTrackerVBO)
 				debugdrawvisible = false
 			else
 				debugdrawvisible = true

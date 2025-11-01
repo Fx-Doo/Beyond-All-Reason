@@ -8,10 +8,10 @@ VFS.Include("gamedata/alldefs_post.lua")
 VFS.Include("gamedata/post_save_to_customparams.lua")
 
 -- handle unitdefs and the weapons they contain
-for name, explosionDef in pairs(ExplosionDefs) do
-	ExplosionDef_Post(name, explosionDef)
+for name,ed in pairs(ExplosionDefs) do
+	ExplosionDef_Post(name,ed)
 
 	if SaveDefsToCustomParams then
-		SaveDefToCustomParams("ExplosionDefs", name, explosionDef)
+		SaveDefToCustomParams("ExplosionDefs", name, ed)
 	end
 end

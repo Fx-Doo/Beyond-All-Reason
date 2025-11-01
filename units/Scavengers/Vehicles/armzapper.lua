@@ -137,6 +137,7 @@ return {
 				soundhitwet = "sizzle",
 				soundstart = "hackshot",
 				soundtrigger = 1,
+				targetmoveerror = 0.3,
 				thickness = 1.4,
 				tolerance = 10000,
 				turret = true,

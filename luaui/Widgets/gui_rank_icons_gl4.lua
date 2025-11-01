@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Rank Icons GL4",
@@ -15,9 +13,11 @@ end
 local iconsize = 1
 local iconoffset = 24
 
+local falloffDistance = 1300
 local cutoffDistance = 2300
 
 local distanceMult = 1
+local usedFalloffDistance = falloffDistance * distanceMult
 local usedCutoffDistance = cutoffDistance * distanceMult
 local iconsizeMult = 1
 local usedIconsize = iconsize * iconsizeMult
@@ -25,27 +25,22 @@ local usedIconsize = iconsize * iconsizeMult
 local maximumRankXP = 0.8
 local numRanks = #VFS.DirList('LuaUI/Images/ranks', '*.png')
 local rankTextures = {}
+local unitRanks = {}
 for i = 1,numRanks do
 	rankTextures[i] = 'LuaUI/Images/ranks/rank'..i..'.png'
 end
 local xpPerLevel = maximumRankXP/(numRanks-1)
 
 local unitHeights = {}
-local spec, fullview = Spring.GetSpectatingState()
 
 -- GL4 stuff:
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-local popElementInstance  = InstanceVBOTable.popElementInstance
-
 local atlasID = nil
 local atlasSize = 2048
---local atlassedImages = {}
+local atlassedImages = {}
 
 local rankVBO = nil
 local rankShader = nil
-local luaShaderDir = "LuaUI/Include/"
+local luaShaderDir = "LuaUI/Widgets/Include/"
 
 local debugmode = false
 
@@ -56,7 +51,7 @@ local function addDirToAtlas(atlas, path)
 	for i=1, #files do
 		if imgExts[string.sub(files[i],-3,-1)] then
 			gl.AddAtlasTexture(atlas,files[i])
-			--atlassedImages[files[i]] = true
+			atlassedImages[files[i]] = true
 			--if debugmode then Spring.Echo("added", files[i]) end
 		end
 	end
@@ -71,11 +66,12 @@ local function makeAtlas()
 	end
 end
 
+local spGetUnitMoveTypeData = Spring.GetUnitMoveTypeData
 local GetUnitDefID = Spring.GetUnitDefID
 local GetUnitExperience = Spring.GetUnitExperience
 local GetAllUnits = Spring.GetAllUnits
 local IsUnitAllied = Spring.IsUnitAllied
-local GetUnitTeam = Spring.GetUnitTeam
+local GetSpectatingState = Spring.GetSpectatingState
 
 local glDepthTest = gl.DepthTest
 local glDepthMask = gl.DepthMask
@@ -84,20 +80,12 @@ local glTexture = gl.Texture
 
 local GL_GREATER = GL.GREATER
 
-local ignoreTeams = {}
-for _, teamID in ipairs(Spring.GetTeamList()) do
-	if select(4, Spring.GetTeamInfo(teamID,false)) then	-- is AI?
-		local luaAI = Spring.GetTeamLuaAI(teamID)
-		if luaAI and luaAI ~= "" and (string.find(luaAI, 'Scavengers') or string.find(luaAI, 'Raptors')) then
-			ignoreTeams[teamID] = true
-		end
-	end
-end
-
 local unitIconMult = {}
-for unitDefID, unitDef in pairs(UnitDefs) do
-	if not unitDef.customParams.drone then
-		unitIconMult[unitDefID] = math.clamp((Spring.GetUnitDefDimensions(unitDefID).radius / 40) + math.min(unitDef.power / 400, 2), 1.25, 1.4)
+local isAirUnit = {}
+for udid, unitDef in pairs(UnitDefs) do
+	unitIconMult[udid] = math.min(1.4, math.max(1.25, (Spring.GetUnitDefDimensions(udid).radius / 40) + math.min(unitDef.power / 400, 2)))
+	if unitDef.canFly then
+		isAirUnit[udid] = true
 	end
 end
 
@@ -114,6 +102,7 @@ end
 function widget:SetConfigData(data)
 	if data.distanceMult ~= nil then
 		distanceMult = data.distanceMult
+		usedFalloffDistance = falloffDistance * distanceMult
 		usedCutoffDistance = cutoffDistance * distanceMult
 	end
 	if data.iconsizeMult ~= nil then
@@ -139,6 +128,9 @@ local function AddPrimitiveAtUnit(unitID, unitDefID, noUpload, reason, rank, fla
 	--local decalInfo = unitDefIDtoDecalInfo[unitDefID]
 
 	--local texname = "unittextures/decals/".. UnitDefs[unitDefID].name .. "_aoplane.dds" --unittextures/decals/armllt_aoplane.dds
+
+	local numVertices = 4 -- default to circle
+	local additionalheight = 0
 
 	--Spring.Echo (rank, rankTextures[rank], unitIconMult[unitDefID])
 	local p,q,s,t = gl.GetAtlasTexture(atlasID, rankTextures[rank])
@@ -169,6 +161,19 @@ local function AddPrimitiveAtUnit(unitID, unitDefID, noUpload, reason, rank, fla
 		true, -- update existing element
 		noUpload, -- noupload, dont use unless you know what you want to batch push/pop
 		unitID) -- last one should be UNITID!
+end
+
+local function ProcessAllUnits()
+	clearInstanceTable(rankVBO)
+	local units = Spring.GetAllUnits()
+	--Spring.Echo("Refreshing Ground Plates", #units)
+	for _, unitID in ipairs(units) do
+		local unitDefID = Spring.GetUnitDefID(unitID)
+		if unitDefID then
+			updateUnitRank(unitID, unitDefID, true)
+		end
+	end
+	uploadAllElements(rankVBO)
 end
 
 local function RemovePrimitive(unitID,reason)
@@ -225,33 +230,16 @@ local function getRank(unitDefID, xp)
 end
 
 local function updateUnitRank(unitID, unitDefID, noUpload)
-	if not unitIconMult[unitDefID] or ignoreTeams[GetUnitTeam(unitID)] then
-		return
-	end
+	local currentRank = unitRanks[unitID]
 	local xp = GetUnitExperience(unitID)
 	if xp then
 		local newrank = getRank(unitDefID, xp)
+		unitRanks[unitID] = newrank
 		if newrank > 1 then
 			AddPrimitiveAtUnit(unitID, unitDefID, noUpload, "updateUnitRank", newrank, false)
 		end
-	end
-end
 
-local function ProcessAllUnits()
-	InstanceVBOTable.clearInstanceTable(rankVBO)
-	local units = Spring.GetAllUnits()
-	--Spring.Echo("Refreshing Ground Plates", #units)
-	for _, unitID in ipairs(units) do
-		local unitDefID = Spring.GetUnitDefID(unitID)
-		if unitDefID then
-			updateUnitRank(unitID, unitDefID, true)
-		end
 	end
-	InstanceVBOTable.uploadAllElements(rankVBO)
-end
-
-function widget:PlayerChanged(playerID)
-	spec, fullview = Spring.GetSpectatingState()
 end
 
 
@@ -266,6 +254,7 @@ function widget:Initialize()
 	end
 	WG['rankicons'].setDrawDistance = function(value)
 		distanceMult = value
+		usedFalloffDistance = falloffDistance * distanceMult
 		usedCutoffDistance = cutoffDistance * distanceMult
 	end
 	WG['rankicons'].getScale = function()
@@ -305,10 +294,7 @@ end
 -------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------
 
-function widget:UnitExperience(unitID, unitDefID, teamID, xp, oldXP)
-	if not unitIconMult[unitDefID] or ignoreTeams[teamID] then
-		return
-	end
+function widget:UnitExperience(unitID, unitDefID, unitTeam, xp, oldXP)
 	if xp < 0 then
 		xp = 0
 	end
@@ -320,34 +306,64 @@ function widget:UnitExperience(unitID, unitDefID, teamID, xp, oldXP)
 	local oldRank = getRank(unitDefID, oldXP)
 
 	if oldRank < rank then
+		unitRanks[unitID] = rank
 		RemovePrimitive(unitID, "promoted")
 		AddPrimitiveAtUnit(unitID, unitDefID, false, "promoted", rank, 1)
 	end
 end
 
-function widget:CrashingAircraft(unitID, unitDefID, teamID)
+--[[
+-- Switch over to API
+function widget:UnitCreated(unitID, unitDefID, unitTeam)
+	if IsUnitAllied(unitID) or GetSpectatingState() then
+		updateUnitRank(unitID, GetUnitDefID(unitID))
+	end
+end
+
+function widget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
+	unitRanks[unitID] = nil
 	RemovePrimitive(unitID, "UnitDestroyed")
 end
 
+function widget:UnitDamaged(unitID, unitDefID, unitTeam, damage, paralyzer)
+	if isAirUnit[unitDefID] and spGetUnitMoveTypeData(unitID).aircraftState == "crashing" then
+		widget:UnitDestroyed(unitID, unitDefID, unitTeam)
+	end
+end
+
+function widget:UnitGiven(unitID, unitDefID, oldTeam, newTeam)
+	if not IsUnitAllied(unitID) and not GetSpectatingState() then
+		unitRanks[unitID] = nil
+		RemovePrimitive(unitID, "UnitGiven")
+	end
+end
+]]--
+
 function widget:VisibleUnitAdded(unitID, unitDefID, unitTeam)
-	if fullview or IsUnitAllied(unitID) then
+	if IsUnitAllied(unitID) or GetSpectatingState() then
 		updateUnitRank(unitID, GetUnitDefID(unitID))
 	end
 end
 
 function widget:VisibleUnitRemoved(unitID) -- E.g. when a unit dies
+	unitRanks[unitID] = nil
 	RemovePrimitive(unitID, "UnitDestroyed")
 end
 
 function widget:VisibleUnitsChanged(extVisibleUnits, extNumVisibleUnits)
-	InstanceVBOTable.clearInstanceTable(rankVBO)
+	clearInstanceTable(rankVBO)
 	doRefresh = true
+	unitRanks = {}
 	for unitID, unitDefID in pairs(extVisibleUnits) do
 		updateUnitRank(unitID, unitDefID, true)
 	end
-	InstanceVBOTable.uploadAllElements(rankVBO)
+	uploadAllElements(rankVBO)
 	doRefresh = false
 end
+
+-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+
 
 
 function widget:DrawWorld()
@@ -359,6 +375,7 @@ function widget:DrawWorld()
 		doRefresh = false
 	end
 	if rankVBO.usedElements > 0 then
+		local disticon = 27 * Spring.GetConfigInt("UnitIconDist", 200) -- iconLength = unitIconDist * unitIconDist * 750.0f;
 		--Spring.Echo(rankVBO.usedElements)
 		--gl.Culling(GL.BACK)
 

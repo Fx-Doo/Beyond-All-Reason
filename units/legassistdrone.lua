@@ -58,7 +58,7 @@ return {
 			"coruwes",
 			"corfmkr",
 			"corsy",
-			"legfdrag",
+			"corfdrag",
 			"cortl",
 			"corfrt",
 			"corfrad",

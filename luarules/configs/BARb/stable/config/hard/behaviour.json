@@ -23,8 +23,7 @@
 			"static": 1.0,  // additional 64-elmo-cells for static units
 			"speed": [0.75, 4.0]  // [<64elmo_cells_speed_mod>, <max_64elmo_cells>]
 		},
-		"num_batch": 3, //repeat unit build if response factory build is called
-		"anti_cap": 2.0  // probability 0.0~1.0 of AntiCapture action
+		"num_batch": 3 //repeat unit build if response factory build is called
 	},
 
     // If unit's health drops below specified percent it will retreat
@@ -119,7 +118,7 @@
 		"armshltx": {
 			"role": ["static"],
 			"attribute": ["support"],
-			"midposoffset": [0, 0, -16],
+			"midposoffset": [0, 0, 21],
 			"limit": 1,
 			"build_speed": 1.0 // bp 600
 		},
@@ -231,7 +230,7 @@
 		"armshltxuw": {
 			"role": ["static"],
 			"attribute": ["support"],
-			"midposoffset": [0, 0, -16],
+			"midposoffset": [0, 0, 21],
 			"build_speed": 1.0, //bp 300
 			"limit": 1
 		},
@@ -1408,7 +1407,7 @@
 
 
 
-		// CORTEX BOTLAB
+		// CORE BOTLAB
 
 		"corak": {
 			"role": ["raider"],
@@ -1519,7 +1518,7 @@
 
 
 
-		// T3 CORTEX EXPERIMENTAL - corgant
+		// T3 CORE EXPERIMENTAL - corgant
 		"corsok": {
 			"role": ["skirmish"],
 			"retreat": 0.6
@@ -1553,7 +1552,7 @@
 
 
 
-		// CORTEX T1 VEHICLE - corvp
+		// CORE T1 VEHICLE - corvp
 
 		"corfav": {
 			"role": ["scout"],
@@ -1592,7 +1591,7 @@
 
 
 
-		// 	CORTEX ADV VELICLE PLANT
+		// 	CORE ADV VELICLE PLANT
 		"corseal": {
 			"role": ["raider"]
 		},
@@ -1648,7 +1647,7 @@
 
 
 
-		// CORTEX SHIPS - corsy
+		// CORE SHIPS - corsy
 
 		"correcl": {
 			"role": ["support"],
@@ -1683,7 +1682,7 @@
 
 
 
-		// CORTEX ADV SHIPYARD - corasy
+		// CORE ADV SHIPYARD - corasy
 
 		"corshark": {
 			"role": ["anti_sub", "sub"],
@@ -1755,7 +1754,7 @@
 
 
 
-		// CORTEX ADV AIRCRAFT aircraft - coraap
+		// CORE ADV AIRCRAFT aircraft - coraap
 
 		"corawac": {
 			"role": ["scout", "air"],
@@ -1781,7 +1780,7 @@
 
 
 
-		// CORTEX NAVAL AIRCRAFT - corplat
+		// CORE NAVAL AIRCRAFT - corplat
 		"corcut": {
 			"role": ["raider", "air"],
 			"retreat": 0.8

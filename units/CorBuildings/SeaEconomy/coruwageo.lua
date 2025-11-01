@@ -14,7 +14,7 @@ return {
 		collisionvolumetype = "cylY",
 		energymake = 1250,
 		energystorage = 12000,
-		explodeas = "customfusionexplo",
+		explodeas = "advancedFusionExplosion",
 		footprintx = 5,
 		footprintz = 5,
 		idleautoheal = 5,

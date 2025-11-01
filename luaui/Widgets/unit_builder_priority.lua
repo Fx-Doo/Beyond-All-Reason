@@ -1,6 +1,4 @@
 -- depends on gadget: unit_builder_priority
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Builder Priority",
@@ -14,7 +12,7 @@ function widget:GetInfo()
 	}
 end
 
-local CMD_PRIORITY = GameCMD.PRIORITY
+local CMD_PRIORITY = 34571
 
 -- symbol localization optimization for engine calls
 local spGetUnitDefID = Spring.GetUnitDefID

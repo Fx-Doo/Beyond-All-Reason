@@ -2,8 +2,6 @@
 -- but can run out of fuel when they dont traight fly to maxrange
 
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Starburst Missile Liftoff",

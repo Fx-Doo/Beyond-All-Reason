@@ -2,6 +2,7 @@ return {
 	armmoho = {
 		activatewhenbuilt = true,
 		buildangle = 2048,
+		buildingmask = 0,
 		buildpic = "ARMMOHO.DDS",
 		buildtime = 14900,
 		canrepeat = false,

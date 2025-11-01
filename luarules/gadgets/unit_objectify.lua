@@ -1,6 +1,4 @@
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
     return {
         name      = "Objectify",
@@ -46,8 +44,7 @@ if gadgetHandler:IsSyncedCode() then
 	local spGetUnitDefID = Spring.GetUnitDefID
 
 	function gadget:Initialize()
-		gadgetHandler:RegisterAllowCommand(CMD.ATTACK)
-		gadgetHandler:RegisterAllowCommand(CMD.BUILD)
+		gadgetHandler:RegisterAllowCommand(CMD.ANY)
 		for _, unitID in pairs(Spring.GetAllUnits()) do
 			gadget:UnitCreated(unitID, spGetUnitDefID(unitID))
 		end
@@ -73,7 +70,7 @@ if gadgetHandler:IsSyncedCode() then
 		end
 		Spring.SetUnitNoSelect(unitID, true)
 		Spring.SetUnitNoMinimap(unitID, true)
-		Spring.SetUnitIconDraw(unitID, false)
+		Spring.UnitIconSetDraw(unitID, false)
 		Spring.SetUnitSensorRadius(unitID, 'los', 0)
 		Spring.SetUnitSensorRadius(unitID, 'airLos', 0)
 		Spring.SetUnitSensorRadius(unitID, 'radar', 0)
@@ -124,7 +121,7 @@ if gadgetHandler:IsSyncedCode() then
 			if cmdID == CMD_ATTACK then
 				if cmdParams and #cmdParams == 1 then
 					local uDefID = spGetUnitDefID(cmdParams[1])
-					if isDecoration[uDefID] then
+					if isObject[uDefID] or isDecoration[uDefID] then
 						return false
 					end
 				end

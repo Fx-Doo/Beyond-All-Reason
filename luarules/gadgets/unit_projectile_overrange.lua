@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Projectile Over-Range and Leashing",
@@ -107,7 +105,7 @@ for weaponDefID, weaponDef in pairs(WeaponDefs) do
 		end
 
 		defWatchTable[weaponDefID] = watchParams
-		Script.SetWatchProjectile(weaponDefID, true)
+		Script.SetWatchWeapon(weaponDefID, true)
 	end
 end
 
@@ -172,9 +170,6 @@ function gadget:ProjectileCreated(proID, proOwnerID, weaponDefID)
 
 	local metaData = { weaponDefID = weaponDefID, proOwnerID = proOwnerID }
 	local originX, _, originZ = spGetUnitPosition(proOwnerID)
-	if not originX then
-		originX, _, originZ = spGetProjectilePosition(proID)
-	end
 	metaData.originX = originX
 	metaData.originZ = originZ
 
@@ -193,17 +188,14 @@ function gadget:GameFrame(frame)
 			local projectileX, _, projectileZ = spGetProjectilePosition(proID)
 			if projectileX then
 				local proData = proMetaData[proID]
-				if proData then
-					local defData = defWatchTable[proData.weaponDefID]
-					local newFlightTime = recalculateFlightTime(proID, defData.overRange, proData.originX, proData.originZ, projectileX, projectileZ)
-					if newFlightTime then
-						setFlightTimeFrame(proID, newFlightTime)
+				local defData = defWatchTable[proData.weaponDefID]
+				local newFlightTime = recalculateFlightTime(proID, defData.overRange, proData.originX, proData.originZ, projectileX, projectileZ)
+				if newFlightTime then setFlightTimeFrame(proID, newFlightTime)
+				else
+					if defData.leashRangeSq then
+						leashWatch[proID] = defData.leashRangeSq
 					else
-						if defData.leashRangeSq then
-							leashWatch[proID] = defData.leashRangeSq
-						else
-							setDestructionFrame(proID, 1) --destroy next frame
-						end
+						setDestructionFrame(proID, 1) --destroy next frame
 					end
 				end
 			else

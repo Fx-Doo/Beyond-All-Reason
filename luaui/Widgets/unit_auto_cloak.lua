@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name      = "Auto Cloak Units",
@@ -14,6 +12,7 @@ end
 
 -- defaults
 local unitdefConfigNames = {
+	['armjamt'] = true,
 	['armdecom'] = false,
 	['cordecom'] = false,
 	['armferret'] = false,
@@ -27,7 +26,6 @@ local unitdefConfigNames = {
 	['armckfus'] = true,
 	['armspy'] = true,
 	['corspy'] = true,
-	['legaspy'] = true,
 	['corphantom'] = true,
 }
 -- convert unitname -> unitDefID

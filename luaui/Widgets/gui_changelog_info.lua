@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Changelog Info",
@@ -12,6 +10,7 @@ function widget:GetInfo()
 	}
 end
 
+local fontfile2 = "fonts/" .. Spring.GetConfigString("bar_font2", "Exo2-SemiBold.otf")
 local vsx, vsy = Spring.GetViewGeometry()
 
 local changelogFile = VFS.LoadFile("changelog.txt")
@@ -73,7 +72,7 @@ function widget:ViewResize()
 	screenY = math.floor((vsy * centerPosY) + (screenHeight / 2))
 
 	font, loadedFontSize = WG['fonts'].getFont()
-	font2 = WG['fonts'].getFont(2)
+	font2 = WG['fonts'].getFont(fontfile2)
 	bgpadding = WG.FlowUI.elementPadding
 	elementCorner = WG.FlowUI.elementCorner
 
@@ -320,7 +319,7 @@ function widget:DrawScreen()
 			end
 		end
 	elseif dlistcreated and WG['guishader'] then
-		WG['guishader'].RemoveDlist('changelog')
+		WG['guishader'].DeleteDlist('changelog')
 		dlistcreated = nil
 	end
 end
@@ -470,10 +469,7 @@ function widget:Shutdown()
 		changelogList = nil
 	end
 	if WG['guishader'] then
-		WG['guishader'].RemoveDlist('changelog')
-	end
-	if backgroundGuishader ~= nil then
-		glDeleteList(backgroundGuishader)
+		WG['guishader'].DeleteDlist('changelog')
 	end
 end
 

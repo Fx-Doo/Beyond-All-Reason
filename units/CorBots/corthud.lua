@@ -34,7 +34,7 @@ return {
 		turnrate = 1263.84998,
 		upright = true,
 		customparams = {
-			model_author = "jjackVII",
+			model_author = "Mr Bob, Flaka",
 			normaltex = "unittextures/cor_normal.dds",
 			subfolder = "CorBots",
 			unitgroup = "weapon",

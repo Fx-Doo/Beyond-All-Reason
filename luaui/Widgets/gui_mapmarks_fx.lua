@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
    return {
       name      = "Mapmarks FX",
@@ -88,7 +86,6 @@ local function AddEffect(cmdType, x, y, z, osClock, unitID, playerID)
 		playerID = false
 	end
 	local nickname,_,spec,teamID = spGetPlayerInfo(playerID,false)
-	nickname = ((WG.playernames and WG.playernames.getPlayername) and WG.playernames.getPlayername(playerID)) or nickname
 	local teamcolor = {}
 	teamcolor[1],teamcolor[2],teamcolor[3] = spGetTeamColor(teamID)
 
@@ -109,7 +106,7 @@ end
 
 function widget:ViewResize()
 	vsx,vsy = Spring.GetViewGeometry()
-	font = WG['fonts'].getFont(1, 1.5)
+	font = WG['fonts'].getFont(nil, 1, 0.2, 1.3)
 end
 
 

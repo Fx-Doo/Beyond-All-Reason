@@ -28,7 +28,7 @@ return {
 		script = "Units/CORVAMP.cob",
 		seismicsignature = 0,
 		selfdestructas = "smallExplosionGenericAir",
-		sightdistance = 430,
+		sightdistance = 250,
 		speed = 379.5,
 		speedtofront = 0.06475,
 		stealth = true,
@@ -37,7 +37,6 @@ return {
 		wingangle = 0.06363,
 		wingdrag = 0.21,
 		customparams = {
-			attacksafetydistance = 300,
 			fighter = 1,
 			model_author = "Mr Bob",
 			normaltex = "unittextures/cor_normal.dds",

@@ -2,8 +2,6 @@
 -- brings to megamap (overview camera).
 -- Scrolling up restores previous camera
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Scrolldown Toggleoverview",

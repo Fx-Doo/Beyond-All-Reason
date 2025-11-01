@@ -3,8 +3,6 @@ if not Spring.GetModOptions().emprework then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name      = "Wanted Speed",

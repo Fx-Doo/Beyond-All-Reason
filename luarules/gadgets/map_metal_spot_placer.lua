@@ -2,8 +2,6 @@ if not gadgetHandler:IsSyncedCode() then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Map Lua Metal Spot Placer",

@@ -48,7 +48,6 @@ return {
 			normaltex = "unittextures/Arm_normal.dds",
 			subfolder = "ArmAircraft/T2",
 			techlevel = 3,
-			attacksafetydistance = 20000,
 		},
 		sfxtypes = {
 			crashexplosiongenerators = {

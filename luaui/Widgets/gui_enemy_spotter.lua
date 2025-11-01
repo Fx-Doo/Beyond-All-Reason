@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "EnemySpotter", -- GL4
@@ -19,21 +17,16 @@ local skipOwnTeam = true
 local sizeMultiplier = 1.25
 
 ---- GL4 Backend Stuff----
-
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local popElementInstance  = InstanceVBOTable.popElementInstance
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-
 local enemyspotterVBO = nil
 local enemyspotterShader = nil
-local luaShaderDir = "LuaUI/Include/"
+local luaShaderDir = "LuaUI/Widgets/Include/"
 
 -- Localize for speedups:
 local glDepthTest           = gl.DepthTest
 local glTexture             = gl.Texture
 local GL_POINTS				= GL.POINTS
 
+local spGetUnitMoveTypeData = Spring.GetUnitMoveTypeData
 local spGetUnitAllyTeam = Spring.GetUnitAllyTeam
 
 local myAllyTeamID = Spring.GetMyAllyTeamID()
@@ -124,11 +117,11 @@ function widget:VisibleUnitAdded(unitID, unitDefID, unitTeam)
 end
 
 function widget:VisibleUnitsChanged(extVisibleUnits, extNumVisibleUnits)
-	InstanceVBOTable.clearInstanceTable(enemyspotterVBO) -- clear all instances
+	clearInstanceTable(enemyspotterVBO) -- clear all instances
 	for unitID, unitDefID in pairs(extVisibleUnits) do
 		AddUnit(unitID, unitDefID, Spring.GetUnitTeam(unitID), true) -- add them with noUpload = true
 	end
-	InstanceVBOTable.uploadAllElements(enemyspotterVBO) -- upload them all
+	uploadAllElements(enemyspotterVBO) -- upload them all
 end
 
 function widget:VisibleUnitRemoved(unitID) -- remove the corresponding ground plate if it exists

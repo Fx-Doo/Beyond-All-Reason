@@ -157,7 +157,7 @@ return {
 				turret = true,
 				weapontype = "Cannon",
 				--weapontype = "MissileLauncher",
-				weaponvelocity = 550,
+				weaponvelocity = 450,
 				--mygravity = 1.2,
 
 

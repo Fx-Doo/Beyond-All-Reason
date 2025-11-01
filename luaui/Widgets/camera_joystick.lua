@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name			= "Camera Joystick",
@@ -205,6 +203,7 @@ local buttonCommands = { -- key is button number, value is command like you woul
 
 --------------------------------------------------------------------------------
 local spGetCameraState	 = Spring.GetCameraState
+local spGetCameraVectors = Spring.GetCameraVectors
 local spSetCameraState	 = Spring.SetCameraState
 
 --------------------------------------------------------------------------------
@@ -212,6 +211,7 @@ local host = "127.0.0.1"
 local port = "51234"
 local client
 local set
+local isConnected = false
 local mincameraheight = 32 -- min camera Y in elmos
 local movemult = 3.0 -- move speed multiplier
 local rotmult = 0.2	-- rotation speed multiplier
@@ -381,6 +381,7 @@ end
 local Json = Json or VFS.Include('common/luaUtilities/json.lua')
 
 local buttonorder = { LeftXAxis, LeftYAxis, RightXAxis, RightYAxis, RightTrigger, LeftTrigger, DpadUp, DpadDown, DpadRight, DpadLeft, Abutton, Bbutton, Xbutton,Ybutton, LShoulderbutton ,RShoulderbutton, RStickButton , LStickButton }
+local oldjoystate = nil
 local function SocketDataReceived(sock, str)
 	--Spring.Echo(str)
 

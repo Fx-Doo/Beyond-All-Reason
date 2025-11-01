@@ -15,7 +15,7 @@ return {
 		explodeas = "smallexplosiongeneric-builder",
 		footprintx = 2,
 		footprintz = 2,
-		health = 750,
+		health = 660,
 		idleautoheal = 5,
 		idletime = 1800,
 		maxacc = 0.5244,
@@ -36,7 +36,7 @@ return {
 		turninplacespeedlimit = 0.759,
 		turnrate = 1201.75,
 		upright = true,
-		workertime = 85,
+		workertime = 80,
 		buildoptions = {
 			[1] = "corsolar",
 			[2] = "coradvsol",

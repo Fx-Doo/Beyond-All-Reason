@@ -27,7 +27,7 @@ return {
 		script = "Units/ARMCROC.cob",
 		seismicsignature = 0,
 		selfdestructas = "largeExplosionGenericSelfd-phib",
-		sightdistance = 500,
+		sightdistance = 372,
 		sonardistance = 279,
 		speed = 54,
 		trackoffset = 16,

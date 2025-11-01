@@ -1,8 +1,6 @@
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name    = "Lups Shield",
@@ -327,6 +325,7 @@ local HIT_POINT_FOLLOWS_PROJECTILE = false
 --x, y, z here are normalized vectors
 local function DoAddShieldHitData(unitData, hitFrame, dmg, x, y, z, onlyMove)
 	local hitData = unitData.hitData
+	local radius = unitData.radius
 
 	local found = false
 

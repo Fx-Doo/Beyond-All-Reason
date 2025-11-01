@@ -32,8 +32,8 @@ return {
 		customparams = {
 			usebuildinggrounddecal = true,
 			buildinggrounddecaltype = "decals/legadvsol_aoplane.dds",
-			buildinggrounddecalsizey = 7,
-			buildinggrounddecalsizex = 7,
+			buildinggrounddecalsizey = 6,
+			buildinggrounddecalsizex = 6,
 			buildinggrounddecaldecayspeed = 30,
 			unitgroup = 'energy',
 			model_author = "EnderRobo",

@@ -1,7 +1,5 @@
 include("keysym.h.lua")
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name      = "Blast Radius",
@@ -70,7 +68,7 @@ function widget:Initialize()
 end
 
 function widget:ViewResize()
-	font = WG['fonts'].getFont(1, 1.5)
+	font = WG['fonts'].getFont(nil, 1, 0.2, 1.3)
 end
 
 local selectedUnits = Spring.GetSelectedUnits()

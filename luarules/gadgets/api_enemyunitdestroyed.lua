@@ -1,6 +1,4 @@
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name    = "EnemyUnitDestroyed",

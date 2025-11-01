@@ -3,8 +3,6 @@ if not gadgetHandler:IsSyncedCode() then
 	return false
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Unit Carrier Spawner",
@@ -26,7 +24,7 @@ local SetUnitNoSelect			= Spring.SetUnitNoSelect
 local spGetUnitRulesParam		= Spring.GetUnitRulesParam
 local spUseTeamResource 		= Spring.UseTeamResource
 local spGetTeamResources 		= Spring.GetTeamResources
-local GetUnitCommands     		= Spring.GetUnitCommands
+local GetCommandQueue     		= Spring.GetCommandQueue
 local spSetUnitArmored 			= Spring.SetUnitArmored
 local spGetUnitStates			= Spring.GetUnitStates
 local spGetUnitDefID        	= Spring.GetUnitDefID
@@ -65,7 +63,6 @@ local strSplit = string.split
 local PI = math.pi
 local GAME_SPEED = Game.gameSpeed
 local PRIVATE = { private = true }
-local CMD_CARRIER_SPAWN_ONOFF = GameCMD.CARRIER_SPAWN_ONOFF
 
 local noCreate = false
 
@@ -76,7 +73,7 @@ local wantedList = {}
 local spawnList = {} -- [index] = {.spawnDef, .teamID, .x, .y, .z, .ownerID}
 local spawnCount = 0
 local spawnCmd = {
-	id = CMD_CARRIER_SPAWN_ONOFF,
+	id = 31200,
 	name = "csSpawning",
 	action = "csSpawning",
 	type = CMDTYPE.ICON_MODE,
@@ -159,9 +156,6 @@ local DEFAULT_DOCK_CHECK_FREQUENCY = 15		-- Checks the docking queue. Increasing
 	-- dronebomberinterval,			Used to stagger the launch of multiple bomber drones.
 	-- dronebomberminengagementrange = 200, Bomber drones will not launch to attack targets within this radius.
 	-- manualdrones					Allows manual control of drones within the control radius
-	-- stockpilelimit = 1			Used for stockpile weapons, but for carriers it also enables stockpile for dronespawning.
-	-- stockpilemetal = 10			Set it to the same as the drone cost when using stockpile for drones
-	-- stockpileenergy = 10			Set it to the same as the drone cost when using stockpile for drones
 
 
 
@@ -217,14 +211,7 @@ for weaponDefID = 1, #WeaponDefs do
 			dronebombingoffset = wdcp.dronebombingoffset,
 			dronebomberinterval = wdcp.dronebomberinterval,
 			dronebomberminengagementrange = wdcp.dronebomberminengagementrange,
-			manualDrones = wdcp.manualdrones,
-			stockpilelimit = wdcp.stockpilelimit,
-			usestockpile = wdcp.dronesusestockpile,
-			metalperstockpile = wdcp.stockpilemetal,
-			energyperstockpile = wdcp.stockpileenergy,
-			cobdockparam = wdcp.cobdockparam,
-			cobundockparam = wdcp.cobundockparam,
-
+			manualDrones = wdcp.manualdrones
 		}
 
 		if wdcp.spawn_blocked_by_shield then
@@ -350,7 +337,6 @@ local function UnDockUnit(unitID, subUnitID)
 		carrierMetaList[unitID].subUnitsList[subUnitID].docked = false
 		carrierMetaList[unitID].activeDocking = false
 		carrierMetaList[unitID].subUnitsList[subUnitID].activeDocking = false
-		unitUndocked = Spring.CallCOBScript(subUnitID, "Undocked", 0, carrierMetaList[unitID].cobundockparam, carrierMetaList[unitID].subUnitsList[subUnitID].dockingPiece)
 		if carrierMetaList[unitID].dockArmor then
 			spSetUnitArmored(subUnitID, false, 1)
 		end
@@ -377,154 +363,133 @@ local function SpawnUnit(spawnData)
 		local subUnitID = nil
 		local ownerID = spawnData.ownerID
 		if validSurface == true and ownerID then
+		    for dronetypeIndex, dronename in pairs(carrierMetaList[spawnData.ownerID].dronenames) do
+			if carrierMetaList[spawnData.ownerID].subUnitCount[dronetypeIndex] < carrierMetaList[spawnData.ownerID].maxunits[dronetypeIndex] then
+				local metalCost
+				local energyCost
+				if carrierMetaList[spawnData.ownerID].metalCost[dronetypeIndex] and carrierMetaList[spawnData.ownerID].energyCost[dronetypeIndex] then
+					metalCost = carrierMetaList[spawnData.ownerID].metalCost[dronetypeIndex]
+					energyCost = carrierMetaList[spawnData.ownerID].energyCost[dronetypeIndex]
 
-			local stockpilecount = Spring.GetUnitStockpile(spawnData.ownerID) or 0
-			local stockpilechange = stockpilecount - carrierMetaList[spawnData.ownerID].stockpilecount
-			local stockpiledMetal = 0
-			local stockpiledEnergy = 0
+				else
+					local subUnitDef = UnitDefNames[dronename]
+					metalCost = subUnitDef.metalCost
+					energyCost = subUnitDef.energyCost
+				end
 
-			if stockpilechange > 0 then
-				carrierMetaList[spawnData.ownerID].stockpilecount = stockpilecount
-				stockpiledMetal = carrierMetaList[spawnData.ownerID].metalperstockpile * stockpilechange --TODO: Make this the actual set stockpile values
-				stockpiledEnergy = carrierMetaList[spawnData.ownerID].energyperstockpile * stockpilechange -- TODO: Make this the actual set stockpile values
-			end
-
-			for dronetypeIndex, dronename in pairs(carrierMetaList[spawnData.ownerID].dronenames) do
-				if not(carrierMetaList[spawnData.ownerID].usestockpile) or carrierMetaList[spawnData.ownerID].subUnitCount[dronetypeIndex] < stockpilecount then
-					if carrierMetaList[spawnData.ownerID].subUnitCount[dronetypeIndex] < carrierMetaList[spawnData.ownerID].maxunits[dronetypeIndex] then
-						local metalCost
-						local energyCost
-						if carrierMetaList[spawnData.ownerID].metalCost[dronetypeIndex] and carrierMetaList[spawnData.ownerID].energyCost[dronetypeIndex] then
-							metalCost = carrierMetaList[spawnData.ownerID].metalCost[dronetypeIndex]
-							energyCost = carrierMetaList[spawnData.ownerID].energyCost[dronetypeIndex]
-
-						else
-							local subUnitDef = UnitDefNames[dronename]
-							metalCost = subUnitDef.metalCost
-							energyCost = subUnitDef.energyCost
-						end
-						---
-						if carrierMetaList[spawnData.ownerID].usestockpile and stockpilecount > 0 then
-							if stockpiledMetal >= metalCost and stockpiledEnergy >= energyCost then
-								subUnitID = spCreateUnit(dronename, spawnData.x, spawnData.y, spawnData.z, 0, spawnData.teamID)
-								stockpiledMetal = stockpiledMetal - metalCost
-								stockpiledEnergy = stockpiledEnergy - energyCost
-							end
-						else
-							local availableMetal = spGetTeamResources(spawnData.teamID, "metal")
-							local availableEnergy = spGetTeamResources(spawnData.teamID, "energy")
-							if availableMetal > metalCost and availableEnergy > energyCost then
-								spUseTeamResource(spawnData.teamID, "metal", metalCost)
-								spUseTeamResource(spawnData.teamID, "energy", energyCost)
-								subUnitID = spCreateUnit(dronename, spawnData.x, spawnData.y, spawnData.z, 0, spawnData.teamID)
-							end
-						end
+				local availableMetal = spGetTeamResources(spawnData.teamID, "metal")
+				local availableEnergy = spGetTeamResources(spawnData.teamID, "energy")
+				if availableMetal > metalCost and availableEnergy > energyCost then
+					spUseTeamResource(spawnData.teamID, "metal", metalCost)
+					spUseTeamResource(spawnData.teamID, "energy", energyCost)
+					subUnitID = spCreateUnit(dronename, spawnData.x, spawnData.y, spawnData.z, 0, spawnData.teamID)
+				end
 
 
-						------
-
-						if not subUnitID then
-							-- unit limit hit or invalid spawn surface
-							return
-						end
+				if not subUnitID then
+					-- unit limit hit or invalid spawn surface
+					return
+				end
 
 
-						local spareDock = false
-						local dockingpiece
-						if ownerID then
-							spSetUnitRulesParam(subUnitID, "carrier_host_unit_id", ownerID, PRIVATE)
-							local subUnitCount = carrierMetaList[ownerID].subUnitCount[dronetypeIndex]
-							local subunitDefID	= spGetUnitDefID(subUnitID)
-							subUnitCount = subUnitCount + 1
-							carrierMetaList[ownerID].subUnitCount[dronetypeIndex] = subUnitCount
-							local dockingpieceindex
-							for pieceIndex, piece in pairs(carrierMetaList[ownerID].availableSections[dronetypeIndex].availablePieces) do
-								if piece.dockingPieceAvailable then
-									spareDock = true
-									dockingpiece = piece.dockingPiece
-									dockingpieceindex = pieceIndex
-									carrierMetaList[ownerID].availableSections[dronetypeIndex].availablePieces[pieceIndex].dockingPieceAvailable = false
-									break
-								end
-							end
-							-- for i = 1, #carrierMetaList[ownerID].availablePieces do
-							-- 	if carrierMetaList[ownerID].availablePieces[i].dockingPieceAvailable then
-							-- 		spareDock = true
-							-- 		dockingpiece = carrierMetaList[ownerID].availablePieces[i].dockingPiece
-							-- 		dockingpieceindex = i
-							-- 		carrierMetaList[ownerID].availablePieces[i].dockingPieceAvailable = false
-							-- 		break
-							-- 	end
-							-- end
-							local droneData = {
-								dronetype =  carrierMetaList[spawnData.ownerID].dronetypes[dronetypeIndex],
-								dronetypeIndex = dronetypeIndex,
-								active = true,
-								docked = false, --
-								stayDocked = false,
-								activeDocking = false,
-								inFormation = false,
-								engaged = false,
-								bomberStage = 0,
-								lastBombing = 0,
-								originalmaxrudder = UnitDefs[subunitDefID].maxRudder,
-								fighterStage = 0,
-								dockingPiece = dockingpiece, --
-								dockingPieceIndex = dockingpieceindex,
-							}
-							carrierMetaList[ownerID].subUnitsList[subUnitID] = droneData
-							totalDroneCount = totalDroneCount + 1
-						end
-
-
-						mcEnable(subUnitID)
-						if spareDock == false then
-							mcSetPosition(subUnitID, spawnData.x, spawnData.y, spawnData.z)
-						else
-							--try to spawn in free dock point (offset relative to unit)
-							local dockPointx
-							local dockPointy
-							local dockPointz
-
-							local carrierx
-							local carriery
-							local carrierz
-							dockPointx,dockPointy, dockPointz = Spring.GetUnitPiecePosition(ownerID, dockingpiece)--Spring.GetUnitPieceInfo (ownerID, dockingpieceindex)
-							carrierx,carriery, carrierz = Spring.GetUnitPosition(ownerID)
-							mcSetPosition(subUnitID, carrierx+dockPointx, carriery+dockPointy, carrierz+dockPointz)
-						end
-						mcDisable(subUnitID)
-
-
-						if carrierMetaList[ownerID].docking and carrierMetaList[ownerID].subUnitsList[subUnitID].dockingPiece then
-							spUnitAttach(ownerID, subUnitID, carrierMetaList[ownerID].subUnitsList[subUnitID].dockingPiece)
-							spGiveOrderToUnit(subUnitID, CMD.STOP, {}, 0)
-							mcDisable(subUnitID)
-							spSetUnitVelocity(subUnitID, 0, 0, 0)
-							if not carrierMetaList[ownerID].manualDrones then
-								SetUnitNoSelect(subUnitID, true)
-							end
-
-							carrierMetaList[ownerID].subUnitsList[subUnitID].docked = true
-							carrierMetaList[ownerID].subUnitsList[subUnitID].activeDocking = false
-							if carrierMetaList[ownerID].dockArmor then
-								spSetUnitArmored(subUnitID, true, carrierMetaList[ownerID].dockArmor)
-							end
-							local _, carrierdockarg1, carrierdockarg2, carrierdockarg3  = Spring.CallCOBScript(ownerID, "Dronedocked", 5, carrierdockarg1, carrierMetaList[ownerID].subUnitsList[subUnitID].dockingPiece, carrierdockarg2, carrierdockarg3)
-							local unitDocked = Spring.CallCOBScript(subUnitID, "Docked", 0, carrierMetaList[ownerID].cobdockparam, carrierMetaList[ownerID].subUnitsList[subUnitID].dockingPiece, carrierdockarg1, carrierdockarg2, carrierdockarg3)
-							Spring.SetUnitCOBValue(subUnitID, COB.ACTIVATION, 0)
-						else
-							spGiveOrderToUnit(subUnitID, CMD.MOVE, {spawnData.x, spawnData.y, spawnData.z}, 0)
-						end
-
-						if not carrierMetaList[ownerID].manualDrones then
-							SetUnitNoSelect(subUnitID, true)
+				local spareDock = false
+				local dockingpiece
+				if ownerID then
+					spSetUnitRulesParam(subUnitID, "carrier_host_unit_id", ownerID, PRIVATE)
+					local subUnitCount = carrierMetaList[ownerID].subUnitCount[dronetypeIndex]
+					local subunitDefID	= spGetUnitDefID(subUnitID)
+					subUnitCount = subUnitCount + 1
+					carrierMetaList[ownerID].subUnitCount[dronetypeIndex] = subUnitCount
+					local dockingpieceindex
+					for pieceIndex, piece in pairs(carrierMetaList[ownerID].availableSections[dronetypeIndex].availablePieces) do
+						if piece.dockingPieceAvailable then
+							spareDock = true
+							dockingpiece = piece.dockingPiece
+							dockingpieceindex = pieceIndex
+							carrierMetaList[ownerID].availableSections[dronetypeIndex].availablePieces[pieceIndex].dockingPieceAvailable = false
+							break
 						end
 					end
+					-- for i = 1, #carrierMetaList[ownerID].availablePieces do
+					-- 	if carrierMetaList[ownerID].availablePieces[i].dockingPieceAvailable then
+					-- 		spareDock = true
+					-- 		dockingpiece = carrierMetaList[ownerID].availablePieces[i].dockingPiece
+					-- 		dockingpieceindex = i
+					-- 		carrierMetaList[ownerID].availablePieces[i].dockingPieceAvailable = false
+					-- 		break
+					-- 	end
+					-- end
+					local droneData = {
+						dronetype =  carrierMetaList[spawnData.ownerID].dronetypes[dronetypeIndex],
+						dronetypeIndex = dronetypeIndex,
+						active = true,
+						docked = false, --
+						stayDocked = false,
+						activeDocking = false,
+						inFormation = false,
+						engaged = false,
+						bomberStage = 0,
+						lastBombing = 0,
+						originalmaxrudder = UnitDefs[subunitDefID].maxRudder,
+						fighterStage = 0,
+						dockingPiece = dockingpiece, --
+						dockingPieceIndex = dockingpieceindex,
+					}
+					carrierMetaList[ownerID].subUnitsList[subUnitID] = droneData
+					totalDroneCount = totalDroneCount + 1
 				end
-				stockpilecount = stockpilecount - carrierMetaList[spawnData.ownerID].subUnitCount[dronetypeIndex]
+
+
+				mcEnable(subUnitID)
+				if spareDock == false then
+					mcSetPosition(subUnitID, spawnData.x, spawnData.y, spawnData.z)
+				else
+					--try to spawn in free dock point (offset relative to unit)
+					local dockPointx
+					local dockPointy
+					local dockPointz
+
+					local carrierx
+					local carriery
+					local carrierz
+					dockPointx,dockPointy, dockPointz = Spring.GetUnitPiecePosition(ownerID, dockingpiece)--Spring.GetUnitPieceInfo (ownerID, dockingpieceindex)
+					carrierx,carriery, carrierz = Spring.GetUnitPosition(ownerID)
+					mcSetPosition(subUnitID, carrierx+dockPointx, carriery+dockPointy, carrierz+dockPointz)
+				end
+				mcDisable(subUnitID)
+
+
+				if carrierMetaList[ownerID].docking and carrierMetaList[ownerID].subUnitsList[subUnitID].dockingPiece then
+					spUnitAttach(ownerID, subUnitID, carrierMetaList[ownerID].subUnitsList[subUnitID].dockingPiece)
+					spGiveOrderToUnit(subUnitID, CMD.STOP, {}, 0)
+					mcDisable(subUnitID)
+					spSetUnitVelocity(subUnitID, 0, 0, 0)
+					if not carrierMetaList[ownerID].manualDrones then
+						SetUnitNoSelect(subUnitID, true)
+					end
+
+					carrierMetaList[ownerID].subUnitsList[subUnitID].docked = true
+					carrierMetaList[ownerID].subUnitsList[subUnitID].activeDocking = false
+					if carrierMetaList[ownerID].dockArmor then
+						spSetUnitArmored(subUnitID, true, carrierMetaList[ownerID].dockArmor)
+					end
+					Spring.SetUnitCOBValue(subUnitID, COB.ACTIVATION, 0)
+				else
+					spGiveOrderToUnit(subUnitID, CMD.MOVE, {spawnData.x, spawnData.y, spawnData.z}, 0)
+				end
+
+				if not carrierMetaList[ownerID].manualDrones then
+					SetUnitNoSelect(subUnitID, true)
+				end
+
 			end
+			end
+
 		end
+
+
+
+
 	end
 end
 
@@ -583,127 +548,118 @@ function gadget:UnitCreated(unitID, unitDefID, unitTeam)
 		if weaponDefID and spawnDefs[weaponDefID] then
 
 			local spawnDef = spawnDefs[weaponDefID]
-			if spawnDef.radius then
 
-				spawnCount = spawnCount + 1
-				local spawnData = spawnList[spawnCount] or {}
-				spawnData.spawnDef = spawnDef
-				local x, y, z = spGetUnitPosition(unitID)
-				spawnData.x = x
-				spawnData.y = y
-				spawnData.z = z
-				spawnData.ownerID = unitID
-				spawnData.teamID = unitTeam
+			spawnCount = spawnCount + 1
+			local spawnData = spawnList[spawnCount] or {}
+			spawnData.spawnDef = spawnDef
+			local x, y, z = spGetUnitPosition(unitID)
+			spawnData.x = x
+			spawnData.y = y
+			spawnData.z = z
+			spawnData.ownerID = unitID
+			spawnData.teamID = unitTeam
 
 
-				if carrierMetaList[unitID] == nil then
-					local dronenames = spawnDef.name
-					local dronetypes = spawnDef.dronetype
-					local dockingsections = spawnDef.dockingsections
-					local maxunits = spawnDef.maxunits
-					local metalCost = spawnDef.metalPerUnit
-					local energyCost = spawnDef.energyPerUnit
+			if carrierMetaList[unitID] == nil then
+			    local dronenames = spawnDef.name
+			    local dronetypes = spawnDef.dronetype
+			    local dockingsections = spawnDef.dockingsections
+				local maxunits = spawnDef.maxunits
+				local metalCost = spawnDef.metalPerUnit
+				local energyCost = spawnDef.energyPerUnit
 
-					local availableSections = {}
+				local availableSections = {}
 
-					for sectionIndex, dockingpieces in pairs(dockingsections) do
-						local availableSectionsData = {
-							availablePieces = {}
-						}
-						local availablePieces = {}
-						local piecenumbers = strSplit(dockingpieces)
-						for pieceindex, piecenumber in pairs(piecenumbers) do
-							availablePieces[pieceindex] = {
-								dockingPieceAvailable = true,
-								dockingPieceIndex = pieceindex,
-								dockingPiece = tonumber(piecenumber),
-							}
-						end
-						availableSectionsData.availablePieces = availablePieces
-						availableSections[sectionIndex] = availableSectionsData
-
-					end
-
-					--####### remove #######
-					-- for i = 1, maxunits do
-					-- 	availablePieces[i] = {
-					-- 		dockingPieceAvailable = true,
-					-- 		dockingPieceIndex = i,
-					-- 		dockingPiece = dockingPiece,
-					-- 	}
-					-- 	dockingPiece = dockingPiece + dockingInterval
-					-- 	if dockingPiece > dockingCap then
-					-- 		dockingPiece = dockingOffset
-					-- 	end
-					-- end
-					--####### / remove #######
-					local carrierData = {
-						dronenames = dronenames,
-						dronetypes = dronetypes,
-						radius = tonumber(spawnDef.minRadius) or 65535,
-						controlRadius = tonumber(spawnDef.radius) or 65535,
-						subUnitsList = {}, -- list of subUnitIDs owned by this unit.
-						subUnitCount = {},
-						subUnitsCommand = {
-							cmdID = nil,
-							cmdParams = nil,
-						},
-						subInitialSpawnData = spawnData,
-						spawnRateFrames = tonumber(spawnDef.spawnRate) * 30 or 30,
-						lastSpawn = 0,
-						lastOrderUpdate = 0,
-						maxunits = {},
-						metalCost = {},
-						energyCost = {},
-						docking = tonumber(spawnDef.docking),
-						dockRadius = tonumber(spawnDef.dockingRadius) or 100,
-						dockHelperSpeed = tonumber(spawnDef.dockingHelperSpeed) or 10,
-						dockArmor = tonumber(spawnDef.dockingArmor),
-						dockedHealRate = tonumber(spawnDef.dockingHealrate) or 0,
-						dockToHealThreshold = tonumber(spawnDef.dockToHealThreshold) or 30,
-						attackFormationSpread = tonumber(spawnDef.attackFormationSpread) or 0,
-						attackFormationOffset = tonumber(spawnDef.attackFormationOffset) or 0,
-						decayRate = tonumber(spawnDef.decayRate) or 0,
-						deathdecayRate = tonumber(spawnDef.deathdecayRate) or tonumber(spawnDef.decayRate) or 0,
-						activeDocking = false, --currently not in use
-						activeRecall = false,
-						activeSpawning = 1,
-						--availablePieces = availablePieces,
-						availableSections = availableSections,
-						carrierDeaththroe =spawnDef.carrierdeaththroe or "death",
-						parasite = "all",
-						holdfireRadius = spawnDef.holdfireRadius or 0,
-						droneminimumidleradius = spawnDef.droneminimumidleradius or 0,
-						dronebombingruns = tonumber(spawnDef.dronebombingruns) or 1,
-						dronebombingoffset = tonumber(spawnDef.dronebombingoffset) or 0.5,
-						dronebombingside = 1,
-						dronebomberinterval = tonumber(spawnDef.dronebomberinterval) or 2,
-						dronebombertimer = 0,
-						dronebomberminengagementrange = tonumber(spawnDef.dronebomberminengagementrange) or 200,
-						manualDrones = tonumber(spawnDef.manualDrones),
-						weaponNr = i,
-						--ignorenextcommand = false,
-						stockpilelimit = tonumber(spawnDef.stockpilelimit) or 0,
-						usestockpile = tonumber(spawnDef.usestockpile),
-						stockpilecount = 0,
-						metalperstockpile = tonumber(spawnDef.metalperstockpile) or 0,
-						energyperstockpile = tonumber(spawnDef.energyperstockpile) or 0,
-						cobdockparam = tonumber(spawnDef.cobdockparam) or 0,
-						cobundockparam = tonumber(spawnDef.cobundockparam) or 0
+				for sectionIndex, dockingpieces in pairs(dockingsections) do
+					local availableSectionsData = {
+						availablePieces = {}
 					}
-					for dronetypeIndex, _ in pairs(carrierData.dronenames) do
-						carrierData.subUnitCount[dronetypeIndex] = 0
-						carrierData.maxunits[dronetypeIndex] = tonumber(maxunits[dronetypeIndex]) or 1
-						carrierData.metalCost[dronetypeIndex] = tonumber(metalCost[dronetypeIndex])
-						carrierData.energyCost[dronetypeIndex] = tonumber(energyCost[dronetypeIndex])
-					end
-					carrierMetaList[unitID] = carrierData
-					--spSetUnitRulesParam(unitID, "is_carrier_unit", "enabled", PRIVATE)
-					if not(carrierMetaList[unitID].usestockpile) then
-						InsertUnitCmdDesc(unitID, 500, spawnCmd) --temporary
-					end
+				    local availablePieces = {}
+				    local piecenumbers = strSplit(dockingpieces)
+				    for pieceindex, piecenumber in pairs(piecenumbers) do
+				        availablePieces[pieceindex] = {
+						    dockingPieceAvailable = true,
+						    dockingPieceIndex = pieceindex,
+						    dockingPiece = tonumber(piecenumber),
+    					}
+				    end
+					availableSectionsData.availablePieces = availablePieces
+			       	availableSections[sectionIndex] = availableSectionsData
+
 				end
+
+			    --####### remove #######
+				-- for i = 1, maxunits do
+				-- 	availablePieces[i] = {
+				-- 		dockingPieceAvailable = true,
+				-- 		dockingPieceIndex = i,
+				-- 		dockingPiece = dockingPiece,
+				-- 	}
+				-- 	dockingPiece = dockingPiece + dockingInterval
+				-- 	if dockingPiece > dockingCap then
+				-- 		dockingPiece = dockingOffset
+				-- 	end
+				-- end
+			    --####### / remove #######
+				local carrierData = {
+					dronenames = dronenames,
+					dronetypes = dronetypes,
+					radius = tonumber(spawnDef.minRadius) or 65535,
+					controlRadius = tonumber(spawnDef.radius) or 65535,
+					subUnitsList = {}, -- list of subUnitIDs owned by this unit.
+					subUnitCount = {},
+					subUnitsCommand = {
+						cmdID = nil,
+						cmdParams = nil,
+					},
+					subInitialSpawnData = spawnData,
+					spawnRateFrames = tonumber(spawnDef.spawnRate) * 30 or 30,
+					lastSpawn = 0,
+					lastOrderUpdate = 0,
+					maxunits = {},
+					metalCost = {},
+					energyCost = {},
+					docking = tonumber(spawnDef.docking),
+					dockRadius = tonumber(spawnDef.dockingRadius) or 100,
+					dockHelperSpeed = tonumber(spawnDef.dockingHelperSpeed) or 10,
+					dockArmor = tonumber(spawnDef.dockingArmor),
+					dockedHealRate = tonumber(spawnDef.dockingHealrate) or 0,
+					dockToHealThreshold = tonumber(spawnDef.dockToHealThreshold) or 30,
+					attackFormationSpread = tonumber(spawnDef.attackFormationSpread) or 0,
+					attackFormationOffset = tonumber(spawnDef.attackFormationOffset) or 0,
+					decayRate = tonumber(spawnDef.decayRate) or 0,
+					deathdecayRate = tonumber(spawnDef.deathdecayRate) or tonumber(spawnDef.decayRate) or 0,
+					activeDocking = false, --currently not in use
+					activeRecall = false,
+					activeSpawning = 1,
+					--availablePieces = availablePieces,
+					availableSections = availableSections,
+					carrierDeaththroe =spawnDef.carrierdeaththroe or "death",
+					parasite = "all",
+					holdfireRadius = spawnDef.holdfireRadius or 0,
+					droneminimumidleradius = spawnDef.droneminimumidleradius or 0,
+					dronebombingruns = tonumber(spawnDef.dronebombingruns) or 1,
+					dronebombingoffset = tonumber(spawnDef.dronebombingoffset) or 0.5,
+					dronebombingside = 1,
+					dronebomberinterval = tonumber(spawnDef.dronebomberinterval) or 2,
+					dronebombertimer = 0,
+					dronebomberminengagementrange = tonumber(spawnDef.dronebomberminengagementrange) or 200,
+					manualDrones = tonumber(spawnDef.manualDrones),
+					weaponNr = i,
+					ignorenextcommand = false
+				}
+				for dronetypeIndex, _ in pairs(carrierData.dronenames) do
+					carrierData.subUnitCount[dronetypeIndex] = 0
+					carrierData.maxunits[dronetypeIndex] = tonumber(maxunits[dronetypeIndex]) or 1
+					carrierData.metalCost[dronetypeIndex] = tonumber(metalCost[dronetypeIndex])
+					carrierData.energyCost[dronetypeIndex] = tonumber(energyCost[dronetypeIndex])
+				end
+				carrierMetaList[unitID] = carrierData
+				--spSetUnitRulesParam(unitID, "is_carrier_unit", "enabled", PRIVATE)
+
+				InsertUnitCmdDesc(unitID, 500, spawnCmd) --temporary
 			end
+
 		end
 	end
 end
@@ -728,7 +684,7 @@ function gadget:UnitGiven(unitID, unitDefID, unitTeam, oldTeam)
 end
 
 
-function gadget:UnitCmdDone(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdOpts, cmdTag)
+function gadget:UnitCmdDone(unitID, unitDefID, unitTeam, cmdID, cmdTag, cmdParams, cmdOpts)
 	local carrierUnitID = spGetUnitRulesParam(unitID, "carrier_host_unit_id")
 	if carrierUnitID then
 		if carrierMetaList[carrierUnitID].subUnitsList[unitID] then
@@ -782,16 +738,14 @@ end
 
 
 function gadget:AllowCommand(unitID, unitDefID, teamID, cmdID, cmdParams, cmdOptions, cmdTag, playerID, fromSynced, fromLua)
-	-- accepts: CMD_CARRIER_SPAWN_ONOFF
+	-- accepts: 31200 (spawning)
 	if carrierMetaList[unitID] then
-		if not(carrierMetaList[unitID].usestockpile) then
-			local cmdDescID = FindUnitCmdDesc(unitID, CMD_CARRIER_SPAWN_ONOFF)
-			spawnCmd.params[1] = cmdParams[1]
-			EditUnitCmdDesc(unitID, cmdDescID, spawnCmd)
-			carrierMetaList[unitID].activeSpawning = cmdParams[1]
-			spawnCmd.params[1] = 1
-			return false
-		end
+		local cmdDescID = FindUnitCmdDesc(unitID, 31200)
+		spawnCmd.params[1] = cmdParams[1]
+		EditUnitCmdDesc(unitID, cmdDescID, spawnCmd)
+		carrierMetaList[unitID].activeSpawning = cmdParams[1]
+		spawnCmd.params[1] = 1
+		return false
 	end
 	return true
 end
@@ -808,16 +762,6 @@ function gadget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerD
 					carrierMetaList[carrierUnitID].availableSections[dronetypeIndex].availablePieces[carrierMetaList[carrierUnitID].subUnitsList[unitID].dockingPieceIndex].dockingPieceAvailable = true
 				end
 				carrierMetaList[carrierUnitID].subUnitCount[dronetypeIndex] = carrierMetaList[carrierUnitID].subUnitCount[dronetypeIndex] - 1
-				if carrierMetaList[carrierUnitID].usestockpile and carrierMetaList[carrierUnitID].stockpilecount > 0 then
-					local stockpile,_,stockpilepercentage = Spring.GetUnitStockpile(carrierUnitID)
-					if stockpile > 0 then
-						stockpile = stockpile - 1
-						Spring.SetUnitStockpile(carrierUnitID, stockpile, stockpilepercentage)
-						spGiveOrderToUnit(carrierUnitID, CMD.STOCKPILE, {}, 0)
-					end
-					carrierMetaList[carrierUnitID].stockpilecount = carrierMetaList[carrierUnitID].stockpilecount - 1
-
-				end
 			end
 			carrierMetaList[carrierUnitID].subUnitsList[unitID] = nil
 			totalDroneCount = totalDroneCount - 1
@@ -930,7 +874,7 @@ local function UpdateStandaloneDrones(frame)
 	for unitID,value in pairs(droneMetaList) do
 		if droneMetaList[unitID].wild then
 			-- move around unless in combat
-			local cQueue = GetUnitCommands(unitID, -1)
+			local cQueue = GetCommandQueue(unitID, -1)
 			local engaged = false
 			for j = 1, (cQueue and #cQueue or 0) do
 				if cQueue[j].id == CMD.ATTACK then
@@ -945,12 +889,8 @@ local function UpdateStandaloneDrones(frame)
 				droneMetaList[unitID].lastOrderUpdate = frame
 
 				dronex, droney, dronez = spGetUnitPosition(unitID)
-				if not dronez then	-- this can happen so make sure its dealt with
-					gadget:UnitDestroyed(unitID)
-				else
-					rx, rz = RandomPointInUnitCircle(5)
-					spGiveOrderToUnit(unitID, CMD.MOVE, {dronex + rx*idleRadius, droney, dronez + rz*idleRadius}, 0)
-				end
+				rx, rz = RandomPointInUnitCircle(5)
+				spGiveOrderToUnit(unitID, CMD.MOVE, {dronex + rx*idleRadius, droney, dronez + rz*idleRadius}, 0)
 			end
 		end
 
@@ -962,7 +902,6 @@ local function UpdateStandaloneDrones(frame)
 end
 
 local function UpdateCarrier(carrierID, carrierMetaData, frame)
-
 	local carrierx, carriery, carrierz = spGetUnitPosition(carrierID)
 	if not carrierx then
 		gadget:UnitDestroyed(carrierID)
@@ -1161,12 +1100,12 @@ local function UpdateCarrier(carrierID, carrierMetaData, frame)
 						return
 					elseif droneSendDistance and droneSendDistance < carrierMetaData.radius or carrierMetaData.subUnitsList[subUnitID].dronetype == "bomber" then
 						-- attacking
-						if target and not (carrierMetaData.subUnitsList[subUnitID].dronetype == "nano") then
-						    --if cmdID == CMD.FIGHT and droneSendDistance < carrierMetaData.radius then   --Temporarily removed, as it takes away some player agency.
+						if target then
+						    if cmdID == CMD.FIGHT and droneSendDistance < carrierMetaData.radius then
 
-						        --carrierMetaData.ignorenextcommand = true
-						        --spGiveOrderToUnit(carrierID, CMD.STOP, 0, 0)
-						    --end
+						        carrierMetaData.ignorenextcommand = true
+						        spGiveOrderToUnit(carrierID, CMD.STOP, 0, 0)
+						    end
 							if carrierMetaData.subUnitsList[subUnitID].dronetype == "bomber" then
 								--Spring.Echo("bomberstage", carrierMetaData.subUnitsList[subUnitID].bomberStage)
 								local currenttime = spGetGameSeconds()
@@ -1184,6 +1123,8 @@ local function UpdateCarrier(carrierID, carrierMetaData, frame)
 										elseif carrierMetaData.dronebombingside == 1 then
 											carrierMetaData.dronebombingside = -1
 										end
+										local mt = Spring.GetUnitMoveTypeData(subUnitID)
+										--Spring.Echo("movetype: ", mt.name)
 										Spring.MoveCtrl.SetAirMoveTypeData(subUnitID, "maxRudder", 0.05)
 										carrierMetaData.dronebombertimer = spGetGameSeconds()
 										carrierMetaData.subUnitsList[subUnitID].bomberStage = 1
@@ -1240,7 +1181,7 @@ local function UpdateCarrier(carrierID, carrierMetaData, frame)
 									end
 								else
 									if fightOrder then
-										local cQueue = GetUnitCommands(subUnitID, -1)
+										local cQueue = GetCommandQueue(subUnitID, -1)
 										for j = 1, (cQueue and #cQueue or 0) do
 											if cQueue[j].id == CMD.ATTACK and carrierStates.firestate > 0 then
 													idleTarget = cQueue[j].params
@@ -1272,7 +1213,7 @@ local function UpdateCarrier(carrierID, carrierMetaData, frame)
 								if carrierMetaData.subUnitsList[subUnitID].dronetype == "bomber" then
 									spGiveOrderToUnit(subUnitID, CMD.MOVE, {carrierx + rx*idleRadius*0.2, carriery, carrierz + rz*idleRadius*0.2}, 0)
 								elseif carrierMetaData.subUnitsList[subUnitID].dronetype == "nano" then
-									spGiveOrderToUnit(subUnitID, CMD.REPAIR, {carrierx, carriery, carrierz, carrierMetaData.radius}, 0)
+									spGiveOrderToUnit(subUnitID, CMD.FIGHT, {carrierx + rx*idleRadius, carriery, carrierz + rz*idleRadius}, 0)
 								elseif carrierMetaData.subUnitsList[subUnitID].dronetype == "fighter" then
 									if carrierMetaData.subUnitsList[subUnitID].fighterStage == 0 then
 										--rx = cos(0*(-2)*PI)
@@ -1288,7 +1229,7 @@ local function UpdateCarrier(carrierID, carrierMetaData, frame)
 						end
 					elseif not carrierMetaData.subUnitsList[subUnitID].stayDocked and not (carrierMetaData.subUnitsList[subUnitID].dronetype == "bomber") then
 						-- return to carrier unless in combat
-						local cQueue = GetUnitCommands(subUnitID, -1)
+						local cQueue = GetCommandQueue(subUnitID, -1)
 						local engaged = false
 						for j = 1, (cQueue and #cQueue or 0) do
 							if cQueue[j].id == CMD.ATTACK and carrierStates.firestate > 0 then
@@ -1297,9 +1238,6 @@ local function UpdateCarrier(carrierID, carrierMetaData, frame)
 								if agressiveDrones then
 									idleTarget = cQueue[j].params
 								end
-								break
-							elseif cQueue[j].id == CMD.REPAIR then
-								engaged = true
 								break
 							end
 						end
@@ -1315,18 +1253,7 @@ local function UpdateCarrier(carrierID, carrierMetaData, frame)
 								rx, rz = RandomPointInUnitCircle(5)
 								UnDockUnit(carrierID, subUnitID)
 								if carrierMetaData.subUnitsList[subUnitID].dronetype == "nano" then
-									spGiveOrderToUnit(subUnitID, CMD.REPAIR, {carrierx, carriery, carrierz, carrierMetaData.radius}, 0)
-									local cQueue = GetUnitCommands(subUnitID, -1)
-									local engaged = false
-									for j = 1, (cQueue and #cQueue or 0) do
-										if cQueue[j].id == CMD.REPAIR then
-											engaged = true
-											break
-										end
-									end
-									if not engaged then
-										spGiveOrderToUnit(subUnitID, CMD.MOVE, {carrierx + rx*idleRadius, carriery, carrierz + rz*idleRadius}, 0)
-									end
+									spGiveOrderToUnit(subUnitID, CMD.FIGHT, {carrierx + rx*idleRadius, carriery, carrierz + rz*idleRadius}, 0)
 								elseif carrierMetaData.subUnitsList[subUnitID].dronetype == "fighter" then
 									if carrierMetaData.subUnitsList[subUnitID].fighterStage == 0 then
 										--rx = cos(0*(-2)*PI)
@@ -1357,10 +1284,10 @@ end
 
 
 function gadget:UnitCommand(unitID, unitDefID, unitTeamID, cmdID, cmdParams, cmdOptions, cmdTag, playerID, fromSynced, fromLua)
-    --if carrierMetaList[unitID] and carrierMetaList[unitID].ignorenextcommand then
-     --   carrierMetaList[unitID].ignorenextcommand = false
-	--else
-	if carrierMetaList[unitID] and (cmdID == CMD.STOP) then
+
+    if carrierMetaList[unitID] and carrierMetaList[unitID].ignorenextcommand then
+        carrierMetaList[unitID].ignorenextcommand = false
+	elseif carrierMetaList[unitID] and (cmdID == CMD.STOP) then
 		carrierMetaList[unitID].subUnitsCommand.cmdID = nil
 	 	carrierMetaList[unitID].subUnitsCommand.cmdParams = nil
 		for subUnitID,value in pairs(carrierMetaList[unitID].subUnitsList) do
@@ -1425,6 +1352,7 @@ local function DockUnits(dockingqueue, queuestart, queueend)
 								local vx, vy, vz = px-subx, py-suby, pz-subz
 								vx, vy, vz = landingspeed*vx/magnitude, landingspeed*vy/magnitude, landingspeed*vz/magnitude
 								spSetUnitVelocity(subUnitID, vx, vy, vz)
+
 							elseif distance < carrierMetaList[unitID].dockRadius then
 								local landingspeed = carrierMetaList[unitID].dockHelperSpeed
 								-- local vx, vy, vz = GetDirectionalVector(carrierMetaList[unitID].dockHelperSpeed, subx, px, suby, py, subz, pz)
@@ -1467,9 +1395,6 @@ local function DockUnits(dockingqueue, queuestart, queueend)
 								if carrierMetaList[unitID].dockArmor then
 									spSetUnitArmored(subUnitID, true, carrierMetaList[unitID].dockArmor)
 								end
-								local _, carrierdockarg1, carrierdockarg2, carrierdockarg3  = Spring.CallCOBScript(unitID, "Dronedocked", 5, carrierdockarg1, carrierMetaList[unitID].subUnitsList[subUnitID].dockingPiece, carrierdockarg2, carrierdockarg3)
-								local unitDocked = Spring.CallCOBScript(subUnitID, "Docked", 0, carrierMetaList[unitID].cobdockparam, carrierMetaList[unitID].subUnitsList[subUnitID].dockingPiece, carrierdockarg1, carrierdockarg2, carrierdockarg3)
-
 								if carrierMetaList[unitID].subUnitsList[subUnitID].dronetype == "turret" then
 								else
 									Spring.SetUnitCOBValue(subUnitID, COB.ACTIVATION, 0)
@@ -1501,20 +1426,6 @@ local function DockUnits(dockingqueue, queuestart, queueend)
 	end
 end
 
-function gadget:StockpileChanged(unitID, unitDefID, unitTeam, weaponNum, oldCount, newCount)
-	if carrierMetaList[unitID] then
-		if carrierMetaList[unitID].usestockpile and newCount > oldCount then
-			local spawnData = carrierMetaList[unitID].subInitialSpawnData
-				local x, y, z = spGetUnitPosition(unitID)
-				spawnData.x = x
-				spawnData.y = y
-				spawnData.z = z
-				if x then
-					SpawnUnit(spawnData)
-				end
-		end
-	end
-end
 
 function gadget:GameFrame(f)
 	UpdateCoroutines()
@@ -1528,7 +1439,7 @@ function gadget:GameFrame(f)
 		for unitID, _ in pairs(carrierMetaList) do
 			local isDoneBuilding = not Spring.GetUnitIsBeingBuilt(unitID)
 			if carrierMetaList[unitID].spawnRateFrames == 0 then
-			elseif ((carrierMetaList[unitID].spawnRateFrames + carrierMetaList[unitID].lastSpawn) < f and carrierMetaList[unitID].activeSpawning == 1 and isDoneBuilding) and not(carrierMetaList[unitID].usestockpile) then
+			elseif ((carrierMetaList[unitID].spawnRateFrames + carrierMetaList[unitID].lastSpawn) < f and carrierMetaList[unitID].activeSpawning == 1 and isDoneBuilding) then
 				local spawnData = carrierMetaList[unitID].subInitialSpawnData
 				local x, y, z = spGetUnitPosition(unitID)
 				spawnData.x = x
@@ -1577,7 +1488,7 @@ function gadget:GameFrame(f)
 end
 
 function gadget:Initialize()
-	gadgetHandler:RegisterAllowCommand(CMD_CARRIER_SPAWN_ONOFF)
+	gadgetHandler:RegisterAllowCommand(31200) -- Spawning
 	local allUnits = Spring.GetAllUnits()
 	for i = 1, #allUnits do
 		local unitID = allUnits[i]

@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "TeamPlatter", -- GL4
@@ -17,15 +15,9 @@ local opacity = 0.25
 local skipOwnTeam = false
 
 ---- GL4 Backend Stuff----
-
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local popElementInstance  = InstanceVBOTable.popElementInstance
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-
 local teamplatterVBO = nil
 local teamplatterShader = nil
-local luaShaderDir = "LuaUI/Include/"
+local luaShaderDir = "LuaUI/Widgets/Include/"
 
 -- Localize for speedups:
 local glStencilFunc         = gl.StencilFunc
@@ -43,6 +35,7 @@ local GL_POINTS				= GL.POINTS
 
 local hasBadCulling = ((Platform.gpuVendor == "AMD" and Platform.osFamily == "Linux") == true)
 
+local spGetUnitMoveTypeData = Spring.GetUnitMoveTypeData
 local spGetUnitTeam = Spring.GetUnitTeam
 
 local myTeamID = Spring.GetMyTeamID()
@@ -166,11 +159,11 @@ function widget:VisibleUnitAdded(unitID, unitDefID, unitTeam)
 end
 
 function widget:VisibleUnitsChanged(extVisibleUnits, extNumVisibleUnits)
-	InstanceVBOTable.clearInstanceTable(teamplatterVBO) -- clear all instances
+	clearInstanceTable(teamplatterVBO) -- clear all instances
 	for unitID, unitDefID in pairs(extVisibleUnits) do
 		AddPrimitiveAtUnit(unitID, unitDefID, spGetUnitTeam(unitID), true) -- add them with noUpload = true
 	end
-	InstanceVBOTable.uploadAllElements(teamplatterVBO) -- upload them all
+	uploadAllElements(teamplatterVBO) -- upload them all
 end
 
 function widget:VisibleUnitRemoved(unitID) -- remove the corresponding ground plate if it exists

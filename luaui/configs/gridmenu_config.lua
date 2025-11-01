@@ -174,13 +174,12 @@ local function getGridForCategory(builderId, buildOptions, currentCategory)
 		end
 
 		-- everything that doesn't have a defined position (i.e. scav units) gets placed into the grid in any empty spots.
-		local i = 1
-		while #undefinedOpts > 0 do
+		for i = 1, 24 do
+			if #undefinedOpts < 1 then break end
 			if not options[i] then
 				local opt = table.remove(undefinedOpts, 1)
 				options[i] = constructBuildOption(opt)
 			end
-			i = i + 1
 		end
 
 		return options
@@ -277,13 +276,12 @@ local function getSortedGridForLab(builderId, cmds)
 		end
 	end
 	-- go through the cmds with undefined positions (i.e. scav units) and put them in the next available empty spot
-	local i = 1
-	while #undefinedCmds > 0 do
+	for i = 1, 24 do
+		if #undefinedCmds < 1 then break end
 		if not options[i] then
 			local cmd = table.remove(undefinedCmds, 1)
 			options[i] = constructBuildOption(-cmd.id, cmd)
 		end
-		i = i + 1
 	end
 	return options
 end

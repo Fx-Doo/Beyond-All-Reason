@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
     return {
         name      = "Dragons Disguise",
@@ -18,6 +16,7 @@ end
 
 local GetUnitCOBValue = Spring.GetUnitCOBValue
 local SetUnitNeutral = Spring.SetUnitNeutral
+local GetUnitStates = Spring.GetUnitStates
 local ValidUnitID = Spring.ValidUnitID
 local neutralUnits = {}
 local armourTurrets = {}

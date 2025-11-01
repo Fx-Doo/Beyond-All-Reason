@@ -30,7 +30,7 @@ return {
 		script = "Units/legionnaire.cob",
 		seismicsignature = 0,
 		selfdestructas = "smallExplosionGenericAir",
-		sightdistance = 430,
+		sightdistance = 250,
 		speedtofront = 0.06475,
 		stealth = false,
 		turnradius = 32,
@@ -44,7 +44,6 @@ return {
 			normaltex = "unittextures/cor_normal.dds",
 			subfolder = "CorAircraft/T2",
 			techlevel = 2,
-			attacksafetydistance = 300,
 			fighter = 1,
 		},
 		sfxtypes = {
@@ -122,9 +121,6 @@ return {
 					commanders = 1,
 					default = 2,
 					vtol = 80,
-				},
-				customparams = {
-					noattackrangearc= 1,
 				},
 			},
 

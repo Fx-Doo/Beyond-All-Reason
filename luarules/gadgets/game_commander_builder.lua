@@ -12,8 +12,6 @@ if not spawnpadSpawnEnabled then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
     return {
       name      = "commander builder spawn",
@@ -47,15 +45,12 @@ function SpawnAssistTurret(unitID, unitDefID, unitTeam)
     local spawnpadunit = spawnpads[unitDefID]
     local spawnpadID
     for k = 1,10000 do
-        posx = math.ceil((posx + math.random(-k-64, k+64))/16)*16
-        posz = math.ceil((posz + math.random(-k-64, k+64))/16)*16
+        posx = posx + math.random(-k-64, k+64)
+        posz = posz + math.random(-k-64, k+64)
         posy = Spring.GetGroundHeight(posx, posz)
         local canSpawnTurret = positionCheckLibrary.FlatAreaCheck(posx, posy, posz, 96)
         if canSpawnTurret then
             canSpawnTurret = positionCheckLibrary.OccupancyCheck(posx, posy, posz, 96)
-        end
-        if canSpawnTurret then
-            canSpawnTurret = positionCheckLibrary.ResourceCheck(posx, posz, 96)
         end
         if canSpawnTurret then
             spawnpadID = Spring.CreateUnit(spawnpadunit, posx, posy, posz, 0, unitTeam)
@@ -63,7 +58,7 @@ function SpawnAssistTurret(unitID, unitDefID, unitTeam)
         end
     end
 	if spawnpadID then
-        GG.ScavengersSpawnEffectUnitID(spawnpadID)
+        Spring.SpawnCEG("scav-spawnexplo", posx, posy, posz,0,0,0)
 		Spring.GiveOrderToUnit(spawnpadID, CMD.GUARD, unitID, {})
         Spring.SetUnitCosts(spawnpadID, {buildTime = 20000, metalCost = 100, energyCost = 1000})
 		--Spring.SetUnitBlocking(spawnpadID, false)

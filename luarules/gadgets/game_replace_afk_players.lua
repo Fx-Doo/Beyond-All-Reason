@@ -6,8 +6,6 @@ disabled because of these problems:
  * replacement player cant give units/resources
 ]]
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Substitution",

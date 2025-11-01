@@ -121,9 +121,6 @@ return {
 				waterweapon = false,
 				weapontype = "Flame",
 				weaponvelocity = 500,
-				customparams = {
-					noattackrangearc = 1,
-				},
 				damage = {
 					default = 40,
 					subs = 10,
@@ -135,7 +132,7 @@ return {
 				avoidfeature = false,
 				burnblow = true,
 				canattackground = false,
-				cegtag = "missiletrailaa-medium",
+				cegtag = "missiletrailaa-large",
 				craterareaofeffect = 0,
 				craterboost = 0,
 				cratermult = 0,
@@ -201,7 +198,7 @@ return {
 				rgbcolor = "0 1 0",
 				soundhitdry = "",
 				soundhitwet = "sizzle",
-				soundstart = "lasrhvy3",
+				soundstart = "lasrhvy2",
 				soundtrigger = 1,
 				targetmoveerror = 0.3,
 				thickness = 4,
@@ -209,9 +206,6 @@ return {
 				turret = true,
 				weapontype = "BeamLaser",
 				weaponvelocity = 800,
-				customparams = {
-					noattackrangearc = 1,
-				},
 				damage = {
 					commanders = 200,
 					default = 2000,
@@ -246,14 +240,12 @@ return {
 				soundstart = "lasrhvy3",
 				soundstartvolume = 35,
 				soundtrigger = 1,
+				targetmoveerror = 0.15,
 				thickness = 6.7,
 				tolerance = 10000,
 				turret = true,
 				weapontype = "BeamLaser",
 				weaponvelocity = 800,
-				customparams = {
-					noattackrangearc = 1,
-				},
 				damage = {
 					commanders = 500,
 					default = 5000,

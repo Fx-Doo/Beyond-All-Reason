@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Save Game Menu",
@@ -195,28 +193,30 @@ local function DeleteSave(filename)
 	end
 end
 
-local function savegameCmd(_, _, params)
-	Spring.Echo("Trying to save:", params[1])
-	local savefilename = params[1]
-	SaveGame(savefilename, savefilename, true)
-
-	if Spring.GetMenuName and string.find(string.lower(Spring.GetMenuName()), 'chobby') ~= nil then
-		Spring.SendLuaMenuMsg("gameSaved")
-	end
-end
-
 function widget:Initialize()
 	WG['savegame'] = {}
-	widgetHandler:AddAction("savegame", savegameCmd, nil, 't')
 end
 
 function widget:Shutdown()
 	WG['savegame'] = nil
-	widgetHandler:RemoveAction("savegame")
+end
+
+local options = {}
+
+function widget:TextCommand(msg)
+	if string.sub(msg, 1, 8) == "savegame" then
+
+		Spring.Echo("Trying to save:", msg)
+		local savefilename = string.sub(msg, 10)
+		SaveGame(savefilename, savefilename, true)
+
+		if Spring.GetMenuName and string.find(string.lower(Spring.GetMenuName()), 'chobby') ~= nil then
+			Spring.SendLuaMenuMsg("gameSaved")
+		end
+	end
 end
 
 --[[
-local options = {}
 function widget:GameFrame(n)
 
 	if not options.enableautosave.value then

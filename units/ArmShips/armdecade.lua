@@ -128,9 +128,6 @@ return {
 				weapontimer = 0.1,
 				weapontype = "Cannon",
 				weaponvelocity = 500,
-				customparams = {
-					noattackrangearc = 1,
-				},
 				damage = {
 					default = 9,
 					vtol = 2,

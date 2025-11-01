@@ -46,13 +46,11 @@
 
 	"geo": {
 		"armada": "armgeo",
-		"cortex": "corgeo",
-		"legion": "armgeo"
+		"cortex": "corgeo"
 	},
 	"mex": {
 		"armada": "armmex",
-		"cortex": "cormex",
-		"legion": "armmex"
+		"cortex": "cormex"
 	},
 	"mex_up": 2,  // maximum number of simultaneous mex upgrades
 
@@ -98,8 +96,7 @@
 	// Unknown UnitDef replacer
 	"default": {
 		"armada": "armwin",
-		"cortex": "corwin",
-		"legion": "armwin"
+		"cortex": "corwin"
 	}
 }
 }

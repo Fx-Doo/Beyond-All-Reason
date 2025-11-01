@@ -261,8 +261,6 @@ return {
 				weapontype = "StarburstLauncher",
 				weaponvelocity = 1000,
 				customparams = {
-					overrange_distance = 501,
-					projectile_destruction_method = "descend",
 					stockpilelimit = 3,
 				},
 				damage = {
@@ -297,6 +295,7 @@ return {
 				soundhitdryvolume = 40,
 				soundhitwetvolume = 30,
 				soundtrigger = 1,
+				targetmoveerror = 0,
 				texture3 = "largebeam",
 				thickness = 1.5,
 				tilelength = 150,
@@ -336,6 +335,7 @@ return {
 				soundhitwet = "sizzle",
 				soundstart = "uwlasrfir1",
 				soundtrigger = 1,
+				targetmoveerror = 0.05,
 				thickness = 5,
 				tolerance = 10000,
 				turret = true,
@@ -500,6 +500,7 @@ return {
 				soundhitwet = "",
 				soundstart = "xplosml5",
 				soundtrigger = 1,
+				targetmoveerror = 0,
 				thickness = 6,
 				turret = true,
 				weapontype = "LaserCannon",

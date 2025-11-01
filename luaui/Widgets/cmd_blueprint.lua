@@ -1,8 +1,3 @@
-local widget = widget ---@type Widget
-
--- makes the intent of our usage of Spring.Echo clear
-local FeedbackForUser = Spring.Echo
-
 function widget:GetInfo()
 	return {
 		name = "Blueprint",
@@ -13,6 +8,8 @@ function widget:GetInfo()
 		handler = true,
 	}
 end
+
+VFS.Include("luarules/configs/customcmds.h.lua")
 
 -- types
 -- =====
@@ -184,9 +181,6 @@ local BLUEPRINT_UNIT_LIMIT = 100
 ---maximum total number of orders in a given blueprint placement command
 local BLUEPRINT_ORDER_LIMIT = 400
 
-local CMD_BLUEPRINT_PLACE = GameCMD.BLUEPRINT_PLACE
-local CMD_BLUEPRINT_CREATE = GameCMD.BLUEPRINT_CREATE
-
 local CMD_BLUEPRINT_PLACE_DESCRIPTION = {
 	id = CMD_BLUEPRINT_PLACE,
 	type = CMDTYPE.ICON_MAP,
@@ -211,8 +205,6 @@ local blueprints = {}
 local selectedBlueprintIndex = nil
 
 local blueprintPlacementActive = false
-
-local lastExplicitlySelectedBlueprintIndex = nil
 
 local state = {
 	---@type Point|nil
@@ -264,8 +256,6 @@ for builderUnitDefID, unitDef in pairs(UnitDefs) do
 	end
 end
 
-local selectedBuilderSide = nil
-
 local function getSelectedBlueprint()
 	return blueprints[selectedBlueprintIndex]
 end
@@ -278,52 +268,8 @@ local function setSelectedBlueprintIndex(index)
 	end
 
 	if blueprintPlacementActive and index ~= nil and index > 0 then
-		FeedbackForUser("[Blueprint] selected blueprint #" .. selectedBlueprintIndex)
+		Spring.Echo("[Blueprint] selected blueprint #" .. selectedBlueprintIndex)
 	end
-end
-
-local function isValidBlueprint(blueprint)
-	if blueprint == nil then
-		return false
-	end
-
-	if blueprint.hasInvalidUnits then
-		return false
-	end
-
-	local buildable, unbuildable = WG["api_blueprint"].getBuildableUnits(blueprint)
-
-	if buildable == 0 then
-		return false
-	end
-
-	return true
-end
-
-local function getNextFilteredBlueprintIndex(startIndex)
-	local newIndex = startIndex or selectedBlueprintIndex or 0
-
-	for _ = 1, #blueprints do
-		newIndex = nextIndex(newIndex, #blueprints)
-		if isValidBlueprint(blueprints[newIndex]) then
-			return newIndex
-		end
-	end
-
-	return nil
-end
-
-local function getPrevFilteredBlueprintIndex(startIndex)
-	local newIndex = startIndex or selectedBlueprintIndex or 0
-
-	for _ = 1, #blueprints do
-		newIndex = prevIndex(newIndex, #blueprints)
-		if isValidBlueprint(blueprints[newIndex]) then
-			return newIndex
-		end
-	end
-
-	return nil
 end
 
 local function getMouseWorldPosition(blueprint, x, y)
@@ -394,7 +340,7 @@ end
 
 local function createBlueprint(unitIDs, ordered)
 	if #unitIDs > BLUEPRINT_UNIT_LIMIT then
-		FeedbackForUser(string.format("[Blueprint] can only save %d units (attempted to save %d)", BLUEPRINT_UNIT_LIMIT, #unitIDs))
+		Spring.Echo(string.format("[Blueprint] can only save %d units (attempted to save %d)", BLUEPRINT_UNIT_LIMIT, #unitIDs))
 		return true
 	end
 
@@ -404,7 +350,7 @@ local function createBlueprint(unitIDs, ordered)
 	end)
 
 	if #buildableUnits == 0 then
-		FeedbackForUser("[Blueprint] no units saved")
+		Spring.Echo("[Blueprint] no units saved")
 		return
 	end
 
@@ -446,7 +392,7 @@ local function createBlueprint(unitIDs, ordered)
 
 	blueprints[#blueprints + 1] = blueprint
 
-	FeedbackForUser("[Blueprint] saved " .. #blueprint.units .. " units into blueprint #" .. #blueprints)
+	Spring.Echo("[Blueprint] saved " .. #blueprint.units .. " units into blueprint #" .. #blueprints)
 
 	if #blueprints == 1 then
 		setSelectedBlueprintIndex(1)
@@ -461,22 +407,14 @@ local function deleteBlueprint(index)
 
 	table.remove(blueprints, index)
 
-	FeedbackForUser("[Blueprint] deleted blueprint #" .. index)
+	Spring.Echo("[Blueprint] deleted blueprint #" .. index)
 
 	if #blueprints == 0 then
 		setSelectedBlueprintIndex(nil)
-	elseif index > selectedBlueprintIndex then
-		-- no need to do anything
-	elseif index == selectedBlueprintIndex then
-		-- find the closest valid blueprint, searching backwards
-		setSelectedBlueprintIndex(
-			getPrevFilteredBlueprintIndex(selectedBlueprintIndex)
-		)
-		lastExplicitlySelectedBlueprintIndex = selectedBlueprintIndex
-	else -- index < selectedBlueprintIndex
-		-- keep the same blueprint selected
+	elseif selectedBlueprintIndex > #blueprints then
 		setSelectedBlueprintIndex(selectedBlueprintIndex - 1)
-		lastExplicitlySelectedBlueprintIndex = selectedBlueprintIndex
+	elseif index < selectedBlueprintIndex then
+		setSelectedBlueprintIndex(selectedBlueprintIndex - 1)
 	end
 end
 
@@ -632,7 +570,7 @@ function widget:Update(dt)
 	if blueprint ~= state.blueprint or blueprint.dirty then
 		blueprintChanged = true
 		state.blueprint = blueprint
-		state.blueprint.dirty = false
+		blueprint.dirty = false
 
 		WG["api_blueprint"].setActiveBlueprint(blueprint)
 		updateBuildingGridState(true, blueprint)
@@ -733,7 +671,7 @@ end)
 
 local function reloadBindings()
 	currentLayout = Spring.GetConfigString("KeyboardLayout", "qwerty")
-	actionHotkeys = VFS.Include("luaui/Include/action_hotkeys.lua")
+	actionHotkeys = VFS.Include("luaui/Widgets/Include/action_hotkeys.lua")
 	drawCursorText.invalidate()
 end
 
@@ -811,12 +749,11 @@ local function handleBlueprintNextAction()
 	end
 
 	if #blueprints == 0 then
-		FeedbackForUser("[Blueprint] no saved blueprints")
+		Spring.Echo("[Blueprint] no saved blueprints")
 		return
 	end
 
-	setSelectedBlueprintIndex(getNextFilteredBlueprintIndex())
-	lastExplicitlySelectedBlueprintIndex = selectedBlueprintIndex
+	setSelectedBlueprintIndex(nextIndex(selectedBlueprintIndex, #blueprints))
 
 	Spring.PlaySoundFile(sounds.selectBlueprint, 0.75, "ui")
 
@@ -829,12 +766,11 @@ local function handleBlueprintPrevAction()
 	end
 
 	if #blueprints == 0 then
-		FeedbackForUser("[Blueprint] no blueprints")
+		Spring.Echo("[Blueprint] no blueprints")
 		return
 	end
 
-	setSelectedBlueprintIndex(getPrevFilteredBlueprintIndex())
-	lastExplicitlySelectedBlueprintIndex = selectedBlueprintIndex
+	setSelectedBlueprintIndex(prevIndex(selectedBlueprintIndex, #blueprints))
 
 	Spring.PlaySoundFile(sounds.selectBlueprint, 0.75, "ui")
 
@@ -858,12 +794,12 @@ local function handleBlueprintDeleteAction()
 	end
 
 	if #blueprints == 0 then
-		FeedbackForUser("[Blueprint] no blueprints to delete")
+		Spring.Echo("[Blueprint] no blueprints to delete")
 		return
 	end
 
 	if selectedBlueprintIndex == nil then
-		FeedbackForUser("[Blueprint] no blueprint selected")
+		Spring.Echo("[Blueprint] no blueprint selected")
 		return
 	end
 
@@ -988,11 +924,10 @@ function widget:CommandNotify(cmdID, cmdParams, cmdOpts)
 	if cmdID == CMD_BLUEPRINT_CREATE then
 		handleBlueprintCreateAction()
 	elseif cmdID == CMD_BLUEPRINT_PLACE then
-		-- Get the blueprint data *as processed and displayed by the API* but keep the original variable name
-		local selectedBlueprint = WG["api_blueprint"].getActiveBlueprint()
+		local selectedBlueprint = getSelectedBlueprint()
 
 		if not selectedBlueprint then
-			FeedbackForUser("[Blueprint] No active blueprint ready for placement.")
+			Spring.Echo("[Blueprint] no active blueprints")
 			return false
 		end
 
@@ -1029,7 +964,10 @@ function widget:CommandNotify(cmdID, cmdParams, cmdOpts)
 		-- combine the units from all blueprints into a single list
 		for i, pos in ipairs(state.buildPositions) do
 			if i > buildPositionsLimit then
-				FeedbackForUser(string.format("[Blueprint] limiting orders to no more than %d", BLUEPRINT_ORDER_LIMIT))
+				Spring.Echo(string.format(
+					"[Blueprint] limiting orders to no more than %d",
+					BLUEPRINT_ORDER_LIMIT
+				))
 				break
 			end
 			local facing = pos[4] or 0
@@ -1089,15 +1027,9 @@ end
 -- saving/loading
 -- ==============
 
-local serializedInvalidBlueprints = {}
-
 ---@param blueprint Blueprint
 ---@return SerializedBlueprint
 local function serializeBlueprint(blueprint)
-	if serializedInvalidBlueprints[blueprint] ~= nil then
-		return serializedInvalidBlueprints[blueprint]
-	end
-
 	return {
 		name = blueprint.name,
 		spacing = blueprint.spacing,
@@ -1117,48 +1049,40 @@ end
 ---@return Blueprint
 local function deserializeBlueprint(serializedBlueprint)
 	local result = table.copy(serializedBlueprint)
-	result.hasInvalidUnits = false
 	result.units = table.map(serializedBlueprint.units, function(serializedBlueprintUnit)
-		local unit = {
+		return {
 			blueprintUnitID = nextBlueprintUnitID(),
+			unitDefID = UnitDefNames[serializedBlueprintUnit.unitName].id,
 			position = serializedBlueprintUnit.position,
 			facing = serializedBlueprintUnit.facing
 		}
-
-		if UnitDefNames[serializedBlueprintUnit.unitName] then
-			unit.unitDefID = UnitDefNames[serializedBlueprintUnit.unitName].id
-		else
-			result.hasInvalidUnits = true
-		end
-
-		return unit
 	end)
 
-	if not result.hasInvalidUnits then
-		postProcessBlueprint(result)
-	else
-		serializedInvalidBlueprints[result] = serializedBlueprint
-	end
+	postProcessBlueprint(result)
 
 	return result
 end
 
 local function loadBlueprintsFromFile()
-	local content = VFS.LoadFile(BLUEPRINT_FILE_PATH)
+	local file = io.open(BLUEPRINT_FILE_PATH, "r")
 
-	if not content then
-		FeedbackForUser("Failed to read blueprints file: " .. BLUEPRINT_FILE_PATH)
+	if not file then
+		Spring.Echo("Failed to open blueprints file for reading: " .. BLUEPRINT_FILE_PATH)
 		return
 	end
+
+	local content = file:read("*all")
+
+	file:close()
 
 	local decoded = Json.decode(content)
 
 	if decoded == nil then
-		FeedbackForUser("Failed to decode blueprints file JSON: " .. BLUEPRINT_FILE_PATH)
+		Spring.Echo("Failed to decode blueprints file JSON: " .. BLUEPRINT_FILE_PATH)
 		return
 	end
 
-	if type(decoded.savedBlueprints) ~= "table" then
+	if decoded.savedBlueprints == 0 then
 		decoded.savedBlueprints = {}
 	end
 
@@ -1175,7 +1099,7 @@ local function saveBlueprintsToFile()
 	local file = io.open(BLUEPRINT_FILE_PATH, "w")
 
 	if not file then
-		FeedbackForUser("Failed to open blueprints file for writing: " .. BLUEPRINT_FILE_PATH)
+		Spring.Echo("Failed to open blueprints file for writing: " .. BLUEPRINT_FILE_PATH)
 		return
 	end
 
@@ -1191,7 +1115,7 @@ local function saveBlueprintsToFile()
 	})
 
 	if encoded == nil then
-		FeedbackForUser("Failed to encode blueprints file JSON: " .. BLUEPRINT_FILE_PATH)
+		Spring.Echo("Failed to encode blueprints file JSON: " .. BLUEPRINT_FILE_PATH)
 		return
 	end
 

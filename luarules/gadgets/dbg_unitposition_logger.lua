@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Unit Position Logger",
@@ -220,7 +218,8 @@ if not gadgetHandler:IsSyncedCode() then
 			end
 
 			-- adjust logRate based on number of units on the map (so earlygame log can stay frequent)
-			logRate = math.clamp(maxLogRate * (allUnitsTotal / maxLogRateUnits), minLogRate, maxLogRate)
+			logRate = maxLogRate * (allUnitsTotal / maxLogRateUnits)
+			logRate = math.min(maxLogRate, math.max(minLogRate, logRate))
 
 			-- find out which players/specs aren't lagged behind and available to send a part of all unit position data
 			local participants = {}

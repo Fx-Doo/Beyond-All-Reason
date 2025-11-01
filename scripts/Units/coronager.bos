@@ -3,7 +3,7 @@
 
 piece  rtube, ltube, flare1, flare2, base, tbrace, ring, wake, aimfrom, prop;
 
-static-var Stunned, restore_delay, timeLeft;
+static-var Stunned;
 
 // Signal definitions
 #define SIGNAL_AIM1				2
@@ -38,42 +38,31 @@ static-var  gun_1;
 
 
 
-Create ()
+Create()
 {
-	//spin prop around z-axis speed <400>;
+	spin prop around z-axis speed <400>;
 	hide wake;
 	hide flare1;
 	hide flare2;
 	gun_1 = 0;//0
 	
-	restore_delay = 3000;
-	timeLeft = restore_delay;//seems needed to avoid instant cancellation of first aiming anims
-	call-script TB_Init ();
-
+	
 	
 }
 
-Propcontrol ()
+
+
+SetStunned(State)
 {
-	var currentSpeed;
-	while (1)
-	{
-		currentSpeed = (get CURRENT_SPEED)*1000/TB_maxSpeed;
-		spin prop around z-axis speed <1.0>*currentSpeed accelerate <10.0>;
-		sleep 100;
-	}
+    Stunned = State;
 }
 
 
-
-
-StartMoving (reversing)
+StartMoving()
 {
 	signal SIGNAL_MOVE;
 	set-signal-mask SIGNAL_MOVE;
-	START_TILTBANK;
-	start-script Propcontrol ();
-	while ( TRUE )
+	while( TRUE )
 	{
 		emit-sfx 1024 + 0 from wake;
 		sleep 250;
@@ -81,39 +70,27 @@ StartMoving (reversing)
 		emit-sfx 1024 + 1 from wake;
 		sleep 250;
 	}
-	
 }
 
-StopMoving ()
+StopMoving()
 {
 	signal SIGNAL_MOVE;
-	STOP_TILTBANK;
-	stop-spin prop around z-axis decelerate <10.0>;
 }
 
-
-
-SetStunned (State)
+AimPrimary(heading, pitch)
 {
-    Stunned = State;
+	return(1);
 }
 
-
-
-AimWeapon1 (heading, pitch)
-{
-	return (1);
-}
-
-AimFromWeapon1 (piecenum)
+AimFromPrimary(piecenum)
 {
     piecenum=aimfrom;
 }
 
-FireWeapon1 ()
+FirePrimary()
 {
 	
-	if ( gun_1 == 0)
+	if( gun_1 == 0)
 	{
 		emit-sfx 1024 + 0 from flare1;
 		emit-sfx 1024 + 1 from flare1;
@@ -138,9 +115,9 @@ Shot1 () {
 	gun_1 = !gun_1;
 }
 
-QueryWeapon1 (piecenum)
+QueryPrimary(piecenum)
 {
-	if ( gun_1 == 0)
+	if( gun_1 == 0)
 	{
 		piecenum = flare1;
 	} else {
@@ -148,10 +125,14 @@ QueryWeapon1 (piecenum)
 	}
 }
 
-
-Killed (severity, corpsetype)
+SweetSpot(piecenum)
 {
-	if ( severity <= 25 )
+	piecenum = base;
+}
+
+Killed(severity, corpsetype)
+{
+	if( severity <= 25 )
 	{
 		corpsetype = 1 ;
 		explode base type BITMAPONLY | NOHEATCLOUD;
@@ -160,7 +141,7 @@ Killed (severity, corpsetype)
 		explode wake type BITMAPONLY | NOHEATCLOUD;
 		return(corpsetype);
 	}
-	if ( severity <= 50 )
+	if( severity <= 50 )
 	{
 		corpsetype = 2 ;
 		explode base type BITMAPONLY | NOHEATCLOUD;
@@ -169,7 +150,7 @@ Killed (severity, corpsetype)
 		//explode wake type FIRE | SMOKE | FALL | NOHEATCLOUD;
 		return(corpsetype);
 	}
-	if ( severity <= 99 )
+	if( severity <= 99 )
 	{
 		corpsetype = 3 ;
 		explode base type FIRE | SMOKE | NOHEATCLOUD;

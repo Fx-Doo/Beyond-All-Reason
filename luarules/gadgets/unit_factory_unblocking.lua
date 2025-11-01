@@ -3,8 +3,6 @@ if not gadgetHandler:IsSyncedCode() then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
   return {
     name      = "Factory Unblocking",
@@ -20,13 +18,9 @@ end
 local setBlockingOnFinished = {}
 local factoryUnits = {}
 local isFactory = {}
-local canFly = {}
 for unitDefID, unitDef in pairs(UnitDefs) do
 	if unitDef.isFactory and #unitDef.buildOptions > 0 then
 		isFactory[unitDefID] = true
-	end
-	if unitDef.canFly then
-		canFly[unitDefID] = true
 	end
 end
 
@@ -35,7 +29,7 @@ function gadget:UnitFinished(unitID, unitDefID, unitTeam)
 		factoryUnits[unitID] = isFactory[unitDefID]
 	end
 	if setBlockingOnFinished[unitID] then
-		if canFly[unitDefID] then
+		if UnitDefs[unitDefID].canFly == true then
 			-- to make sure air units do not set their ground to blocking
 			-- to prevent rare case of aircraft already in takeoff state perma-blocking a factory
 
@@ -57,7 +51,7 @@ function gadget:UnitCreated(unitID, unitDefID, unitTeam, builderID)
 	end
 end
 
-function gadget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam)
+function gadgetHandler:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam)
 	factoryUnits[unitID] = nil
 	setBlockingOnFinished[unitID] = nil
 end

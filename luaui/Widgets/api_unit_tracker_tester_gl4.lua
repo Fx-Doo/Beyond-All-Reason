@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
    return {
       name      = "API Unit Tracker Tester GL4",
@@ -16,13 +14,8 @@ local myvisibleUnits = {} -- table of unitID : unitDefID
 
 local unitTrackerVBO = nil
 local unitTrackerShader = nil
-local luaShaderDir = "LuaUI/Include/"
+local luaShaderDir = "LuaUI/Widgets/Include/"
 local texture = "luaui/images/solid.png"
-
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local popElementInstance  = InstanceVBOTable.popElementInstance
-local pushElementInstance = InstanceVBOTable.pushElementInstance
 
 local function initGL4()
 	local DrawPrimitiveAtUnit = VFS.Include(luaShaderDir.."DrawPrimitiveAtUnit.lua")
@@ -62,7 +55,7 @@ end
 
 function widget:VisibleUnitsChanged(extVisibleUnits, extNumVisibleUnits)
 	Spring.Echo("widget:VisibleUnitsChanged",extVisibleUnits, extNumVisibleUnits)
-	InstanceVBOTable.clearInstanceTable(unitTrackerVBO)
+	clearInstanceTable(unitTrackerVBO)
 	for unitID, unitDefID in pairs(extVisibleUnits) do 
 		widget:VisibleUnitAdded(unitID, unitDefID, Spring.GetUnitTeam(unitID))
 	end

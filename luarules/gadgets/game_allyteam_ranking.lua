@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name	= "AllyTeam ranking",
@@ -69,23 +67,19 @@ end
 function gadget:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
 	if unitTeam ~= GaiaTeamID then
 		local allyTeamID = teamAllyteam[unitTeam]
-		if unfinishedUnits[allyTeamID][unitID] then
-			unfinishedUnits[allyTeamID][unitID] = nil
-		else
-			allyteamCost[allyTeamID] = allyteamCost[allyTeamID] - unitCost[unitDefID]
-		end
+		allyteamCost[allyTeamID] = allyteamCost[allyTeamID] - unitCost[unitDefID]
+		unfinishedUnits[allyTeamID][unitID] = nil
 	end
 end
 
 function gadget:UnitGiven(unitID, unitDefID, unitTeam, oldTeam)
 	if unitTeam ~= GaiaTeamID then
 		local allyTeamID = teamAllyteam[unitTeam]
+		allyteamCost[allyTeamID] = allyteamCost[allyTeamID] + unitCost[unitDefID]
 		if spGetUnitIsBeingBuilt(unitID) then
 			local oldAllyTeamID = teamAllyteam[oldTeam]
 			unfinishedUnits[oldAllyTeamID][unitID] = nil
 			unfinishedUnits[allyTeamID][unitID] = unitDefID
-		else
-			allyteamCost[allyTeamID] = allyteamCost[allyTeamID] + unitCost[unitDefID]
 		end
 	end
 end
@@ -93,12 +87,11 @@ end
 function gadget:UnitTaken(unitID, unitDefID, unitTeam, oldTeam)
 	if unitTeam ~= GaiaTeamID then
 		local allyTeamID = teamAllyteam[unitTeam]
+		allyteamCost[allyTeamID] = allyteamCost[allyTeamID] - unitCost[unitDefID]
 		if spGetUnitIsBeingBuilt(unitID) then
 			local oldAllyTeamID = teamAllyteam[oldTeam]
 			unfinishedUnits[oldAllyTeamID][unitID] = nil
 			unfinishedUnits[allyTeamID][unitID] = unitDefID
-		else
-			allyteamCost[allyTeamID] = allyteamCost[allyTeamID] - unitCost[unitDefID]
 		end
 	end
 end
@@ -110,8 +103,8 @@ function gadget:Initialize()
 end
 
 function gadget:GameFrame(gf)
-	if gf % 200 == 1 then
-		if Script.LuaUI("RankingEvent") then
+	if gf % 150 == 1 then
+		if Script.LuaUI("rankingEvent") then
 			local temp = {}
 			for allyTeamID, totalCost in pairs(allyteamCost) do
 				-- get current resources in storage
@@ -125,12 +118,7 @@ function gadget:GameFrame(gf)
 				-- get unfinished units worth
 				local totalConstructionCost = 0
 				for unitID, unitDefID in pairs(unfinishedUnits[allyTeamID]) do
-					local completeness = select(2, spGetUnitIsBeingBuilt(unitID))
-					if not completeness then	-- this shouldnt occur
-						unfinishedUnits[allyTeamID][unitID] = nil
-					else
-						totalConstructionCost = totalConstructionCost + math.floor(unitCost[unitDefID] * completeness)
-					end
+					totalConstructionCost = totalConstructionCost + math.floor(unitCost[unitDefID] * select(2, spGetUnitIsBeingBuilt(unitID)))
 				end
 				temp[#temp+1] = { allyTeamID = allyTeamID, totalCost = totalCost + totalResCost + totalConstructionCost }
 			end
@@ -147,7 +135,7 @@ function gadget:GameFrame(gf)
 			end
 			if rankingChanged then
 				prevRanking = ranking
-				Script.LuaUI.RankingEvent(ranking)
+				Script.LuaUI.rankingEvent(ranking)
 			end
 		end
 	end

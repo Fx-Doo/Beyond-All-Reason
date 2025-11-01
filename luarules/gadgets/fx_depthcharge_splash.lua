@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
     return {
         name      = "Depthcharge splash",
@@ -18,6 +16,7 @@ if not gadgetHandler:IsSyncedCode() then
 end
 
 local GetProjectilePosition = Spring.GetProjectilePosition
+local random = math.random
 
 
 local depthChargeWeapons = {}

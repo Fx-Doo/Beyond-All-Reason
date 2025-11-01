@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Vote interface",
@@ -26,8 +24,11 @@ local voteEndDelay = 4
 local voteTimeout = 75	-- fallback timeout in case vote is aborted undetected
 
 local vsx, vsy = Spring.GetViewGeometry()
+local widgetScale = (0.5 + (vsx * vsy / 5700000)) * 1.55
 
 local ui_scale = tonumber(Spring.GetConfigFloat("ui_scale", 1) or 1)
+
+local fontfile2 = "fonts/" .. Spring.GetConfigString("bar_font2", "Exo2-SemiBold.otf")
 
 local myPlayerID = Spring.GetMyPlayerID()
 local myPlayerName, _, mySpec, myTeamID, myAllyTeamID = Spring.GetPlayerInfo(myPlayerID, false)
@@ -47,6 +48,7 @@ local voteEndTime, voteEndText
 
 local eligibleToVote = false
 
+local eligiblePlayers = {}
 local votesRequired, votesEligible
 local votesCountYes = 0
 local votesCountNo = 0
@@ -56,7 +58,7 @@ local voteStartTime
 local function isTeamPlayer(playerName)
 	local players = Spring.GetPlayerList()
 	for _, pID in ipairs(players) do
-		local name, _, _, _, allyTeamID = Spring.GetPlayerInfo(pID, false)
+		local name, _, spec, teamID, allyTeamID = Spring.GetPlayerInfo(pID, false)
 		if name == playerName then
 			if allyTeamID == myAllyTeamID then
 				return true
@@ -71,6 +73,7 @@ local function CloseVote()
 	voteEndText = nil
 	voteStartTime = nil
 	if voteDlist then
+		eligiblePlayers = {}
 		votesRequired = nil
 		votesEligible = nil
 		votesCountYes = 0
@@ -287,6 +290,7 @@ end
 
 function widget:ViewResize()
 	vsx, vsy = Spring.GetViewGeometry()
+	widgetScale = (0.5 + (vsx * vsy / 5700000)) * 1.55
 
 	widgetSpaceMargin = WG.FlowUI.elementMargin
 	bgpadding = WG.FlowUI.elementPadding
@@ -297,7 +301,7 @@ function widget:ViewResize()
 	UiButton = WG.FlowUI.Draw.Button
 
 	font = WG['fonts'].getFont()
-	font2 = WG['fonts'].getFont(2)
+	font2 = WG['fonts'].getFont(fontfile2)
 end
 
 function widget:PlayerChanged(playerID)
@@ -434,7 +438,6 @@ function widget:AddConsoleLine(lines, priority)
 						local players = Spring.GetPlayerList()
 						for _, pID in ipairs(players) do
 							local name, _, spec, teamID, allyTeamID = Spring.GetPlayerInfo(pID, false)
-							name = ((WG.playernames and WG.playernames.getPlayername) and WG.playernames.getPlayername(pID)) or name
 							local pos = sfind(title, ' '..name..' ', nil, true)
 							if pos then
 								title = ssub(title, 1, pos-1).. colourNames(teamID) ..' '.. name ..' '.. titlecolor .. ssub(title, pos + string.len(' '..name..' '))
@@ -444,6 +447,7 @@ function widget:AddConsoleLine(lines, priority)
 					end
 
 					if not isResignVote or isResignVoteMyTeam then
+						eligiblePlayers = {}
 						votesRequired = nil
 						votesEligible = nil
 						votesCountYes = 0

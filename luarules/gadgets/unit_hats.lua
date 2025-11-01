@@ -3,8 +3,6 @@ if Spring.GetModOptions().teamcolors_anonymous_mode ~= "disabled" then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Hats",
@@ -77,15 +75,12 @@ local unitDefCanWearHats = {
 	[144092] = true, -- [DmE]Wraxell
 	[42178] = true,  -- [pretor]
 	[119539] = true, -- [Stud]Lovish
-	[641] = true, -- ZLO
 }
-local champion = { --   Fight Night 1v1 and Master's League winners
+local champion = { --   Fight Night 1v1 winner
 	[139738] = true, -- [DmE]FlyingDuck
 	[82263] = true, -- PRO_Autopilot
 	[975] = true, -- StarDoM
 	[2377] = true, -- Therxyy
-	[439] = true, -- Goopy
-	[70311] = true, -- PRO_BTCV
 }
  local vikings = { -- Omega Series 3: Winners
 	[59340] = true,  -- Austin
@@ -96,37 +91,30 @@ local champion = { --   Fight Night 1v1 and Master's League winners
 	[87571] = true,  -- Nezah
 }
 local kings = {
-	[82263] = true,  -- PRO-autopilot
-}
-local goldMedals = { -- Nation Wars 1st place, last season finishers
 	[64215] = true,  -- XFactorLive
-	[116414] = true, -- [SG]random_variable
-	[3778] = true,   -- PRO_che
-	[9361] = true,   -- [DmE]ChickenDinner
-	[1422] = true,   -- ZaRxT4
+}
+local goldMedals = { -- Nation Wars 1st place
 	[59340] = true,  -- [HELO]Austin
-	[1332] = true,  -- Flash
-	[50820] = true,  -- Emre
+	[439] = true,    -- goopy
+	[2377] = true,   -- therxyy
+	[79095] = true,  -- GOD_HATES_COWARDS
+	[134184] = true, -- Raigeki
 }
-local silverMedals = { -- Nation Wars 2nd place, last season finishers
-	[63960] = true,  -- Delfea
-	[59916] = true,  -- Kuchy
-	[137454] = true, -- Chronopolize
-	[44807] = true,  -- Ezreal
-	[97867] = true,  -- [KILL]SirIcecream55
-	[119832] = true, -- Darkclone
-	[76221] = true, -- InDaClub
-	[82263] = true, -- PRO-autopilot
+local silverMedals = { -- Nation Wars 2nd place
+	[116414] = true, -- random_variable
+	[1422] = true,   -- ZaRxT4
+	[134481] = true, -- Blxssom
+	[71083] = true,  -- [Simple]Devil
+	[157708] = true, -- Luisb288
+	[179043] = true, -- TeriyakiThilo
 }
-local bronzeMedals = { -- Nation Wars 3rd place, last season finishers
-	[82811] = true,   -- [DmE]SlickLikeVik
-	[139750] = true,  -- TM_Sashkorin
-	[134499] = true,  -- Archangels
-	[60841] = true,   -- Alhazred
-	[8069] = true,    -- Grumpy
-	[151863] = true,  -- Blodir
-	[38971] = true, -- Yanami
-	[123900] = true, -- Narnuk
+local bronzeMedals = { -- Nation Wars 3rd place
+	[66696] = true,  -- Helicopter
+	[82279] = true,  -- Elydrid
+	[149904] = true, -- Zeff
+	[75569] = true,  -- Dunaa
+	[88594] = true,  -- Blackmelon
+	[42214] = true,  -- [BAB]Tenebos
 }
 local uniques = {--playername, hat ident, CaSe MaTtErS
 }
@@ -190,16 +178,16 @@ function gadget:GameFrame(gf)
 						if string.sub(UnitDefs[unitDefID].name, 1, 3) == 'arm' then
 							local scriptEnv = Spring.UnitScript.GetScriptEnv(unitID)
 							if scriptEnv then
-								if MatchPlayer(kings, playerName, accountID) and scriptEnv['ShowCrown'] then
+								if kings[playerName] and scriptEnv['ShowCrown'] then
 									Spring.UnitScript.CallAsUnit(unitID, scriptEnv['ShowCrown'], true)
 								end
-								if MatchPlayer(goldMedals, playerName, accountID) and scriptEnv['ShowMedalGold'] then
+								if goldMedals[playerName] and scriptEnv['ShowMedalGold'] then
 									Spring.UnitScript.CallAsUnit(unitID, scriptEnv['ShowMedalGold'], true)
 								end
-								if MatchPlayer(silverMedals, playerName, accountID) and scriptEnv['ShowMedalSilver'] then
+								if silverMedals[playerName] and scriptEnv['ShowMedalSilver'] then
 									Spring.UnitScript.CallAsUnit(unitID, scriptEnv['ShowMedalSilver'], true)
 								end
-								if MatchPlayer(bronzeMedals, playerName, accountID) and scriptEnv['ShowMedalBronze'] then
+								if bronzeMedals[playerName] and scriptEnv['ShowMedalBronze'] then
 									Spring.UnitScript.CallAsUnit(unitID, scriptEnv['ShowMedalBronze'], true)
 								end
 							end

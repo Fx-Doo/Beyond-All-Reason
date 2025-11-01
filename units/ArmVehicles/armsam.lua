@@ -4,9 +4,9 @@ return {
 		buildpic = "ARMSAM.DDS",
 		buildtime = 3420,
 		canmove = true,
-		collisionvolumeoffsets = "0 3 -1",
-		collisionvolumescales = "29 31 41",
-		collisionvolumetype = "ellipsoid",
+		collisionvolumeoffsets = "0 0 0",
+		collisionvolumescales = "26 15 41",
+		collisionvolumetype = "Box",
 		corpse = "DEAD",
 		energycost = 2100,
 		explodeas = "mediumexplosiongeneric",
@@ -158,6 +158,7 @@ return {
 			armtruck_missile = {
 				areaofeffect = 48,
 				avoidfeature = false,
+				burnblow = true,
 				castshadow = true,
 				cegtag = "missiletrailtiny",
 				craterareaofeffect = 0,
@@ -195,10 +196,6 @@ return {
 				weapontimer = 1.6,
 				weapontype = "MissileLauncher",
 				weaponvelocity = 350,
-				customparams = {
-					overrange_distance = 633,
-					projectile_destruction_method = "descend",
-				},
 				damage = {
 					default = 86,
 				},

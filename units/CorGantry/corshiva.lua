@@ -21,7 +21,7 @@ return {
 		maxslope = 36,
 		maxwaterdepth = 32,
 		metalcost = 1550,
-		movementclass = "HABOT5",
+		movementclass = "HABOT4",
 		nochasecategory = "VTOL",
 		objectname = "Units/CORSHIVA.s3o",
 		script = "Units/CORSHIVA.cob",
@@ -135,6 +135,7 @@ return {
 			shiva_rocket = {
 				areaofeffect = 60,
 				avoidfeature = false,
+				burnblow = true,
 				castshadow = true,
 				cegtag = "missiletrailmedium-starburst",
 				craterareaofeffect = 0,
@@ -168,10 +169,6 @@ return {
 				weapontimer = 2,
 				weapontype = "StarburstLauncher",
 				weaponvelocity = 800,
-				customparams = {
-					overrange_distance = 920,
-					projectile_destruction_method = "descend",
-				},
 				damage = {
 					default = 750,
 				},

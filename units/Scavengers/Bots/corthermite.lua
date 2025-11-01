@@ -133,6 +133,7 @@ return {
 				soundstart = "heatray1s",
 				soundstartvolume = 70,
 				soundtrigger = 1,
+				targetmoveerror = 0,
 				thickness = 6,
 				tolerance = 10000,
 				turret = true,

@@ -28,8 +28,8 @@ return {
 		yardmap = "oooooo oooooo oooooo oooooo",
 		customparams = {
 			buildinggrounddecaldecayspeed = 30,
-			buildinggrounddecalsizex = 8,
-			buildinggrounddecalsizey = 8,
+			buildinggrounddecalsizex = 6,
+			buildinggrounddecalsizey = 6,
 			buildinggrounddecaltype = "decals/armuwfus_aoplane.dds",
 			model_author = "FireStorm",
 			normaltex = "unittextures/Arm_normal.dds",

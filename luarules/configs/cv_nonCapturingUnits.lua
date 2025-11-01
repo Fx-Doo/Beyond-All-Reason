@@ -5,7 +5,6 @@ local nonCapturingUnits = {
 "corfort",
 "armfdrag",
 "corfdrag",
-"legfdrag",
 "armeyes",
 "coreyes",
 "cormine1",

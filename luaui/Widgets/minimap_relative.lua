@@ -11,8 +11,6 @@
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
   return {
     name      = "RelativeMinimap",
@@ -54,9 +52,6 @@ yoff = math.floor(yoff)
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-local getCurrentMiniMapRotationOption = VFS.Include("luaui/Include/minimap_utils.lua").getCurrentMiniMapRotationOption
-local ROTATION = VFS.Include("luaui/Include/minimap_utils.lua").ROTATION
-
 function widget:Initialize()
   widget:ViewResize(widgetHandler:GetViewSizes())
 end
@@ -67,13 +62,7 @@ function widget:ViewResize(viewSizeX, viewSizeY)
   local xp = math.floor(viewSizeX * xmax) - xoff - 2
   local yp = math.floor(viewSizeY * ymax) - yoff - 2
   local limitAspect = (xp / yp)
-  local currRot = getCurrentMiniMapRotationOption()
-  local mapAspect
-  if currRot == ROTATION.DEG_90 or currRot == ROTATION.DEG_270 then
-    mapAspect = (Game.mapSizeZ / Game.mapSizeX)
-  else
-    mapAspect = (Game.mapSizeX / Game.mapSizeZ)
-  end
+  local mapAspect = (Game.mapSizeX / Game.mapSizeZ)
 
   local sx, sy
   if (mapAspect > limitAspect) then

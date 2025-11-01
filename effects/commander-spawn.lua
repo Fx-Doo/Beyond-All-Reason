@@ -115,7 +115,7 @@ return {
         -- },
         groundflash_large_long = {
             class              = [[CSimpleGroundFlash]],
-            count              = 0,
+            count              = 1,
             air                = true,
             ground             = true,
             water              = true,

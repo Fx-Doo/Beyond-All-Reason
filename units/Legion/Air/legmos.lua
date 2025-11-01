@@ -87,7 +87,7 @@ return {
 				model = "legsmallrocket.s3o",
 				name = "Rockets",
 				noselfdamage = true,
-				range = 380,
+				range = 400,
 				reloadtime = 0.8,
 				smoketrail = true,
 				smokePeriod = 7,
@@ -101,7 +101,7 @@ return {
 				soundstart = "rocklit1",
 				startvelocity = 300,
 				stockpile = true,
-				stockpiletime = 2,
+				stockpiletime = 2.4,
 				texture1 = "null",
 				texture2 = "smoketraildark",
 				tolerance = 4000,
@@ -113,7 +113,7 @@ return {
 				weapontype = "MissileLauncher",
 				weaponvelocity = 400,
 				customparams = {
-					stockpilelimit = 4,
+					stockpilelimit = 8,
 				},
 				damage = {
 					default = 44,

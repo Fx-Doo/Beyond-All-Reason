@@ -23,7 +23,7 @@ return {
 		metalcost = 370,
 		minwaterdepth = 15,
 		objectname = "Units/CORUWMMM.s3o",
-		script = "Units/coruwmmm.cob",
+		script = "Units/CORUWMMM.cob",
 		seismicsignature = 0,
 		selfdestructas = "hugeBuildingExplosionGenericSelfd",
 		sightdistance = 143,

@@ -28,7 +28,7 @@ return {
 		script = "Units/ARMHAWK.cob",
 		seismicsignature = 0,
 		selfdestructas = "smallExplosionGenericAir",
-		sightdistance = 430,
+		sightdistance = 250,
 		speed = 358.79999,
 		speedtofront = 0.063,
 		stealth = true,
@@ -37,7 +37,6 @@ return {
 		wingangle = 0.06333,
 		wingdrag = 0.0575,
 		customparams = {
-			attacksafetydistance = 300,
 			fighter = 1,
 			model_author = "FireStorm",
 			normaltex = "unittextures/Arm_normal.dds",

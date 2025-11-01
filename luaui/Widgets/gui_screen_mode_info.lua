@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Screen Mode Info",
@@ -63,7 +61,7 @@ function widget:ViewResize()
 	vsx, vsy = spGetViewGeometry()
 	widgetScale = (0.80 + (vsx * vsy / 6000000))
 
-	font = WG['fonts'].getFont(1, 1.5)
+	font = WG['fonts'].getFont(nil, 1, 0.2, 1.3)
 end
 
 function widget:Initialize()

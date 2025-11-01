@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Tooltip",
@@ -7,7 +5,7 @@ function widget:GetInfo()
 		author = "Floris",
 		date = "April 2017",
 		license = "GNU GPL, v2 or later",
-		layer = -1000000,
+		layer = -991000,
 		enabled = true,
 	}
 end
@@ -33,6 +31,9 @@ local cfgFontSize = 14
 local xOffset = 12
 local yOffset = -xOffset
 
+local fontfile = "fonts/" .. Spring.GetConfigString("bar_font", "Poppins-Regular.otf")
+local fontfile2 = "fonts/" .. Spring.GetConfigString("bar_font2", "Exo2-SemiBold.otf")
+
 local vsx, vsy = Spring.GetViewGeometry()
 local widgetScale = 1
 local usedFontSize = cfgFontSize
@@ -53,6 +54,7 @@ local uiSec = 0
 
 function widget:Initialize()
 	widget:ViewResize(vsx, vsy)
+	Spring.Echo(math.huge)
 
 	if WG['tooltip'] == nil then
 		WG['tooltip'] = {}
@@ -142,10 +144,8 @@ end
 
 function widget:ViewResize(x, y)
 	vsx, vsy = Spring.GetViewGeometry()
-
-	font, loadedFontSize = WG['fonts'].getFont()
-	font2 = WG['fonts'].getFont(2, 1.6)
-
+	font = WG['fonts'].getFont(fontfile)
+	font2 = WG['fonts'].getFont(fontfile2)
 	widgetScale = (1 + ((vsy - 850) / 900)) * (0.95 + (ui_scale - 1) / 2.5)
 	usedFontSize = cfgFontSize * widgetScale
 	yOffset = -math.floor(xOffset*0.5) - usedFontSize
@@ -153,17 +153,6 @@ function widget:ViewResize(x, y)
 	bgpadding = math.ceil(WG.FlowUI.elementPadding * 0.66)
 	RectRound = WG.FlowUI.Draw.RectRound
 	UiElement = WG.FlowUI.Draw.Element
-
-	for name, tooltip in pairs(tooltips) do
-		if WG['guishader'] then
-			WG['guishader'].RemoveScreenRect('tooltip_' .. name)
-			WG['guishader'].RemoveScreenRect('2tooltip_' .. name)
-		end
-		if tooltip.dlist then
-			gl.DeleteList(tooltip.dlist)
-			tooltip.dlist = nil
-		end
-	end
 end
 
 local function drawTooltip(name, x, y)
@@ -207,7 +196,6 @@ local function drawTooltip(name, x, y)
 			if tooltips[name].title and tooltips[name].title ~= '' then
 				maxHeight = math_ceil(maxHeight - (titleFontSize * 0.1))
 				font2:Begin()
-				font2:SetOutlineColor(0,0,0,0.6)
 				font2:Print('\255\205\255\205'..tooltips[name].title, addX, maxHeight+addY, titleFontSize, "o")
 				font2:End()
 				maxHeight = math_ceil(maxHeight - (titleFontSize * 1.12))
@@ -215,7 +203,6 @@ local function drawTooltip(name, x, y)
 
 			if tooltips[name].value and tooltips[name].value ~= '' then
 				font:Begin()
-				font:SetOutlineColor(0,0,0,0.4)
 				for i, line in ipairs(lines) do
 					font:Print('\255\244\244\244' .. line, addX, maxHeight+addY, fontSize, "o")
 					maxHeight = maxHeight - lineHeight

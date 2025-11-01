@@ -22,7 +22,7 @@ return {
 		movementclass = "UBOAT4",
 		nochasecategory = "VTOL",
 		objectname = "Units/coronager.s3o",
-		script = "Units/coronager.cob",
+		script = "Units/coronager_clean.cob",
 		seismicsignature = 0,
 		selfdestructas = "mediumExplosionGenericSelfd-uw",
 		sightdistance = 500,

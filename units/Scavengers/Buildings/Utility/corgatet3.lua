@@ -14,7 +14,7 @@ return {
 		energycost = 275000,
 		energystorage = 5000,
 		exemptcategory = "WEAPON",
-		explodeas = "customfusionexplo",
+		explodeas = "advancedFusionExplosion",
 		footprintx = 6,
 		footprintz = 6,
 		health = 12500,

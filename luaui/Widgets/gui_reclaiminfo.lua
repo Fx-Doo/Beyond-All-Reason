@@ -11,8 +11,6 @@
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "ReclaimInfo",
@@ -55,7 +53,7 @@ end
 
 function widget:ViewResize()
 	vsx, vsy = Spring.GetViewGeometry()
-	font = WG['fonts'].getFont(1, 1.5)
+	font = WG['fonts'].getFont(nil, 1, 0.2, 1.3)
 	form = math.floor(vsx / 87)
 end
 

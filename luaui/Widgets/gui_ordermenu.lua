@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Order menu",
@@ -11,8 +9,6 @@ function widget:GetInfo()
 		enabled = true
 	}
 end
-
-local useRenderToTexture = Spring.GetConfigFloat("ui_rendertotexture", 1) == 1		-- much faster than drawing via DisplayLists only
 
 local keyConfig = VFS.Include("luaui/configs/keyboard_layouts.lua")
 local currentLayout
@@ -63,7 +59,9 @@ local isStateCommand = {}
 
 local disabledCommand = {}
 
-local vsx, vsy = Spring.GetViewGeometry()
+local viewSizeX, viewSizeY = Spring.GetViewGeometry()
+
+local fontFile = "fonts/" .. Spring.GetConfigString("bar_font2", "Exo2-SemiBold.otf")
 
 local barGlowCenterTexture = ":l:LuaUI/Images/barglow-center.png"
 local barGlowEdgeTexture = ":l:LuaUI/Images/barglow-edge.png"
@@ -127,7 +125,6 @@ local GL_ONE = GL.ONE
 
 local math_min = math.min
 local math_max = math.max
-local math_clamp = math.clamp
 local math_ceil = math.ceil
 local math_floor = math.floor
 
@@ -280,56 +277,27 @@ local function refreshCommands()
 		commands[i + stateCommandsCount + waitCommandCount] = otherCommands[i]
 	end
 
-	-- OPTIMIZATION: Cache the display text for each command
-	for _, cmd in ipairs(commands) do
-		local text
-		-- First element of params represents selected state index, but Spring engine implementation returns a value 2 less than the actual index
-		local stateOffset = 2
-
-		if isStateCommand[cmd.id] then
-			local currentStateIndex = cmd.params[1]
-			if currentStateIndex then
-				local commandState = cmd.params[currentStateIndex + stateOffset]
-				if commandState then
-					text = Spring.I18N('ui.orderMenu.' .. commandState)
-				else
-					text = '?'
-				end
-			else
-				text = '?'
-			end
-		else
-			if cmd.action == 'stockpile' then
-				-- Stockpile command name gets mutated to reflect the current status, so can just pass it in
-				text  = Spring.I18N('ui.orderMenu.' .. cmd.action, { stockpileStatus = cmd.name })
-			else
-				text = Spring.I18N('ui.orderMenu.' .. cmd.action)
-			end
-		end
-		cmd.cachedText = text -- Store the translated text
-	end
-
 	setupCellGrid(false)
 end
 
 function widget:ViewResize()
-	vsx, vsy = Spring.GetViewGeometry()
+	viewSizeX, viewSizeY = Spring.GetViewGeometry()
 
 	width = 0.2125
 	height = 0.14 * uiScale
 
-	width = width / (vsx / vsy) * 1.78        -- make smaller for ultrawide screens
+	width = width / (viewSizeX / viewSizeY) * 1.78        -- make smaller for ultrawide screens
 	width = width * uiScale
 
 	-- make pixel aligned
-	width = math.floor(width * vsx) / vsx
-	height = math.floor(height * vsy) / vsy
+	width = math.floor(width * viewSizeX) / viewSizeX
+	height = math.floor(height * viewSizeY) / viewSizeY
 
 	if WG['buildmenu'] then
 		buildmenuBottomPosition = WG['buildmenu'].getBottomPosition()
 	end
 
-	font = WG['fonts'].getFont(2)
+	font = WG['fonts'].getFont(fontFile)
 
 	elementCorner = WG.FlowUI.elementCorner
 	backgroundPadding = WG.FlowUI.elementPadding
@@ -346,49 +314,40 @@ function widget:ViewResize()
 	end
 	if stickToBottom then
 		posY = height
-		posX = width + (widgetSpaceMargin/vsx)
+		posX = width + (widgetSpaceMargin/viewSizeX)
 	else
 		if buildmenuBottomPosition then
 			posX = 0
-			posY = height + height + (widgetSpaceMargin/vsy)
+			posY = height + height + (widgetSpaceMargin/viewSizeY)
 		elseif WG['buildmenu'] then
 			local posY2, _ = WG['buildmenu'].getSize()
-			posY2 = posY2 + (widgetSpaceMargin/vsy)
+			posY2 = posY2 + (widgetSpaceMargin/viewSizeY)
 			posY = posY2 + height
 			if WG['minimap'] then
-				posY = 1 - (minimapHeight / vsy) - (widgetSpaceMargin/vsy)
+				posY = 1 - (minimapHeight / viewSizeY) - (widgetSpaceMargin/viewSizeY)
 			end
 			posX = 0
 		end
 	end
 
-	backgroundRect = { posX * vsx, (posY - height) * vsy, (posX + width) * vsx, posY * vsy }
+	backgroundRect = { posX * viewSizeX, (posY - height) * viewSizeY, (posX + width) * viewSizeX, posY * viewSizeY }
 	local activeBgpadding = math_floor((backgroundPadding * 1.4) + 0.5)
 	activeRect = {
-		(posX * vsx) + (posX > 0 and activeBgpadding or math.ceil(backgroundPadding * 0.6)),
-		((posY - height) * vsy) + (posY-height > 0 and math_floor(activeBgpadding) or math_floor(activeBgpadding / 3)),
-		((posX + width) * vsx) - activeBgpadding,
-		(posY * vsy) - activeBgpadding
+		(posX * viewSizeX) + (posX > 0 and activeBgpadding or math.ceil(backgroundPadding * 0.6)),
+		((posY - height) * viewSizeY) + (posY-height > 0 and math_floor(activeBgpadding) or math_floor(activeBgpadding / 3)),
+		((posX + width) * viewSizeX) - activeBgpadding,
+		(posY * viewSizeY) - activeBgpadding
 	}
-	if displayListOrders then
-		displayListOrders = gl.DeleteList(displayListOrders)
-	end
+	displayListOrders = gl.DeleteList(displayListOrders)
 
 	checkGuiShader(true)
 	setupCellGrid(true)
 	doUpdate = true
-
-	if ordermenuTex then
-		gl.DeleteTexture(ordermenuBgTex)
-		ordermenuBgTex = nil
-		gl.DeleteTexture(ordermenuTex)
-		ordermenuTex = nil
-	end
 end
 
 local function reloadBindings()
 	currentLayout = Spring.GetConfigString("KeyboardLayout", "qwerty")
-	actionHotkeys = VFS.Include("luaui/Include/action_hotkeys.lua")
+	actionHotkeys = VFS.Include("luaui/Widgets/Include/action_hotkeys.lua")
 end
 
 function widget:Initialize()
@@ -446,17 +405,7 @@ function widget:Shutdown()
 		WG['guishader'].DeleteDlist('ordermenu')
 		displayListGuiShader = nil
 	end
-	if displayListOrders then
-		displayListOrders = gl.DeleteList(displayListOrders)
-	end
-	if ordermenuBgTex then
-		gl.DeleteTexture(ordermenuBgTex)
-		ordermenuBgTex = nil
-	end
-	if ordermenuTex then
-		gl.DeleteTexture(ordermenuTex)
-		ordermenuTex = nil
-	end
+	displayListOrders = gl.DeleteList(displayListOrders)
 	WG['ordermenu'] = nil
 end
 
@@ -554,31 +503,31 @@ local function drawCell(cell, zoom)
 		local color1, color2
 		if isActiveCmd then
 			zoom = cellClickedZoom
-			color1 = { 0.66, 0.66, 0.66, math_clamp(uiOpacity, 0.75, 0.95) }	-- bottom
-			color2 = { 1, 1, 1, math_clamp(uiOpacity, 0.75, 0.95) }			-- top
+			color1 = { 0.66, 0.66, 0.66, math_max(0.75, math_min(0.95, uiOpacity)) }	-- bottom
+			color2 = { 1, 1, 1, math_max(0.75, math_min(0.95, uiOpacity)) }			-- top
 		else
 			if WG['guishader'] then
-				color1 = (isStateCommand[cmd.id]) and { 0.5, 0.5, 0.5, math_clamp(uiOpacity/1.5, 0.35, 0.55) } or { 0.6, 0.6, 0.6, math_clamp(uiOpacity/1.5, 0.35, 0.55) }
-				color1[4] = math_clamp(uiOpacity-0.3, 0, 0.35)
-				color2 = { 1,1,1, math_clamp(uiOpacity-0.3, 0, 0.35) }
+				color1 = (isStateCommand[cmd.id]) and { 0.5, 0.5, 0.5, math_max(0.35, math_min(0.55, uiOpacity/1.5)) } or { 0.6, 0.6, 0.6, math_max(0.35, math_min(0.55, uiOpacity/1.5)) }
+				color1[4] = math_max(0, math_min(0.35, (uiOpacity-0.3)))
+				color2 = { 1,1,1, math_max(0, math_min(0.35, (uiOpacity-0.3))) }
 			else
 				color1 = (isStateCommand[cmd.id]) and { 0.33, 0.33, 0.33, 1 } or { 0.33, 0.33, 0.33, 1 }
-				color1[4] = math_clamp(uiOpacity-0.4, 0, 0.35)
-				color2 = { 1,1,1, math_clamp(uiOpacity-0.4, 0, 0.35) }
+				color1[4] = math_max(0, math_min(0.4, (uiOpacity-0.3)))
+				color2 = { 1,1,1, math_max(0, math_min(0.4, (uiOpacity-0.3))) }
 			end
 			if color1[4] > 0.06 then
 				-- white bg (outline)
 				RectRound(cellRects[cell][1] + leftMargin, cellRects[cell][2] + bottomMargin, cellRects[cell][3] - rightMargin, cellRects[cell][4] - topMargin, cellWidth * 0.021, 2, 2, 2, 2, color1, color2)
 				-- darken inside
-				color1 = {0,0,0, color1[4]*2}
-				color2 = {0,0,0, color2[4]*2}
-				RectRound(cellRects[cell][1] + leftMargin + padding, cellRects[cell][2] + bottomMargin + padding, cellRects[cell][3] - rightMargin - padding, cellRects[cell][4] - topMargin - padding, cellWidth * 0.019, 2, 2, 2, 2, color1, color2)
+				color1 = {0,0,0, color1[4]*0.85}
+				color2 = {0,0,0, color2[4]*0.85}
+				RectRound(cellRects[cell][1] + leftMargin + padding, cellRects[cell][2] + bottomMargin + padding, cellRects[cell][3] - rightMargin - padding, cellRects[cell][4] - topMargin - padding, padding, 2, 2, 2, 2, color1, color2)
 			end
-			color1 = { 0, 0, 0, math_clamp(uiOpacity, 0.55, 0.95) }	-- bottom
-			color2 = { 0, 0, 0,  math_clamp(uiOpacity, 0.55, 0.95) }	-- top
+			color1 = { 0, 0, 0, math_max(0.55, math_min(0.95, uiOpacity)) }	-- bottom
+			color2 = { 0, 0, 0, math_max(0.55, math_min(0.95, uiOpacity)) }	-- top
 		end
 
-		UiButton(cellRects[cell][1] + leftMargin + padding, cellRects[cell][2] + bottomMargin + padding, cellRects[cell][3] - rightMargin - padding, cellRects[cell][4] - topMargin - padding, 1,1,1,1, 1,1,1,1, nil, color1, color2, padding, 1)
+		UiButton(cellRects[cell][1] + leftMargin + padding, cellRects[cell][2] + bottomMargin + padding, cellRects[cell][3] - rightMargin - padding, cellRects[cell][4] - topMargin - padding, 1,1,1,1, 1,1,1,1, nil, color1, color2, padding)
 
 		-- icon
 		if showIcons then
@@ -603,8 +552,26 @@ local function drawCell(cell, zoom)
 
 		-- text
 		if not showIcons or not cursorTextures[cmd.cursor] then
-			-- OPTIMIZATION: Use the cached text instead of recalculating it
-			local text = cmd.cachedText or '?'
+			local text
+			-- First element of params represents selected state index, but Spring engine implementation returns a value 2 less than the actual index
+			local stateOffset = 2
+
+			if isStateCommand[cmd.id] then
+				local currentStateIndex = cmd.params[1]
+				local commandState = cmd.params[currentStateIndex + stateOffset]
+				if commandState then
+					text = Spring.I18N('ui.orderMenu.' .. commandState)
+				else
+					text = '?'
+				end
+			else
+				if cmd.action == 'stockpile' then
+					-- Stockpile command name gets mutated to reflect the current status, so can just pass it in
+					text  = Spring.I18N('ui.orderMenu.' .. cmd.action, { stockpileStatus = cmd.name })
+				else
+					text = Spring.I18N('ui.orderMenu.' .. cmd.action)
+				end
+			end
 
 			local fontSize = cellInnerWidth / font:GetTextWidth('  ' .. text .. ' ') * math_min(1, (cellInnerHeight / (rows * 6)))
 			if fontSize > cellInnerWidth / 7 then
@@ -649,7 +616,7 @@ local function drawCell(cell, zoom)
 					if isFactory[Spring.GetUnitDefID(referenceUnit)] then
 						commandQueue = Spring.GetFactoryCommands(referenceUnit, 1)
 					else
-						commandQueue = Spring.GetUnitCommands(referenceUnit, 1)
+						commandQueue = Spring.GetCommandQueue(referenceUnit, 1)
 					end
 					if commandQueue and commandQueue[1] and commandQueue[1].id == CMD.WAIT then
 						curstate = 2
@@ -717,14 +684,14 @@ local function drawCell(cell, zoom)
 	end
 end
 
-local function drawOrdersBackground()
-	UiElement(backgroundRect[1], backgroundRect[2], backgroundRect[3], backgroundRect[4], ((posX <= 0) and 0 or 1), 1, ((posY-height > 0 or posX <= 0) and 1 or 0), ((posY-height > 0 and posX > 0) and 1 or 0), nil, nil, nil, nil, nil, nil, nil, nil)
-end
-
 local function drawOrders()
+	-- just making sure blending mode is correct
+	glBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+	UiElement(backgroundRect[1], backgroundRect[2], backgroundRect[3], backgroundRect[4], ((posX <= 0) and 0 or 1), 1, ((posY-height > 0 or posX <= 0) and 1 or 0), ((posY-height > 0 and posX > 0) and 1 or 0))
+
 	if #commands > 0 then
-		glBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-		font:Begin(useRenderToTexture)
+		font:Begin()
 		for cell = 1, #commands do
 			drawCell(cell, cellZoom)
 		end
@@ -733,7 +700,7 @@ local function drawOrders()
 end
 
 function widget:DrawScreen()
-	local x, y = Spring.GetMouseState()
+	local x, y, b = Spring.GetMouseState()
 	local cellHovered
 	if not WG['topbar'] or not WG['topbar'].showingQuit() then
 		if math_isInRect(x, y, backgroundRect[1], backgroundRect[2], backgroundRect[3], backgroundRect[4]) then
@@ -797,72 +764,16 @@ function widget:DrawScreen()
 		if displayListGuiShader and WG['guishader'] then
 			WG['guishader'].InsertDlist(displayListGuiShader, 'ordermenu')
 		end
-		if doUpdate and displayListOrders then
+		if doUpdate then
 			displayListOrders = gl.DeleteList(displayListOrders)
 		end
-
-		if not displayListOrders and not useRenderToTexture then
+		if not displayListOrders then
 			displayListOrders = gl.CreateList(function()
-				if not useRenderToTexture then
-					drawOrdersBackground()
-					drawOrders()
-				end
+				drawOrders()
 			end)
 		end
 
-		if useRenderToTexture then
-			if not ordermenuBgTex then
-				ordermenuBgTex = gl.CreateTexture(math_floor(width*vsx), math_floor(height*vsy), {
-					target = GL.TEXTURE_2D,
-					format = GL.ALPHA,
-					fbo = true,
-				})
-				if ordermenuBgTex then
-					gl.R2tHelper.RenderToTexture(ordermenuBgTex,
-						function()
-							gl.Translate(-1, -1, 0)
-							gl.Scale(2 / (width*vsx), 2 / (height*vsy),	0)
-							gl.Translate(-backgroundRect[1], -backgroundRect[2], 0)
-							drawOrdersBackground()
-						end,
-						useRenderToTexture
-					)
-				end
-			end
-		end
-		if useRenderToTexture then
-			if not ordermenuTex then
-				ordermenuTex = gl.CreateTexture(math_floor(width*vsx)*(vsy<1400 and 2 or 1), math_floor(height*vsy)*(vsy<1400 and 2 or 1), {	--*(vsy<1400 and 2 or 1)
-					target = GL.TEXTURE_2D,
-					format = GL.ALPHA,
-					fbo = true,
-				})
-			end
-		end
-		if ordermenuTex and doUpdate then
-			gl.R2tHelper.RenderToTexture(ordermenuTex,
-				function()
-					gl.Translate(-1, -1, 0)
-					gl.Scale(2 / (width*vsx), 2 / (height*vsy),	0)
-					gl.Translate(-backgroundRect[1], -backgroundRect[2], 0)
-					drawOrders()
-				end,
-				useRenderToTexture
-			)
-		end
-
-		if useRenderToTexture then
-			if ordermenuBgTex then
-				-- background element
-				gl.R2tHelper.BlendTexRect(ordermenuBgTex, backgroundRect[1], backgroundRect[2], backgroundRect[3], backgroundRect[4], useRenderToTexture)
-			end
-			if ordermenuTex then
-				-- content
-				gl.R2tHelper.BlendTexRect(ordermenuTex, backgroundRect[1], backgroundRect[2], backgroundRect[3], backgroundRect[4], useRenderToTexture)
-			end
-		else
-			gl.CallList(displayListOrders)
-		end
+		gl.CallList(displayListOrders)
 
 		if #commands >0 then
 			-- draw highlight on top of button
@@ -896,8 +807,8 @@ function widget:DrawScreen()
 						local pad = math_max(1, math_floor(backgroundPadding * 0.52))
 						local pad2 = pad
 						glBlending(GL_SRC_ALPHA, GL_ONE)
-						RectRound(cellRects[cell][1] + leftMargin + pad + pad2, cellRects[cell][4] - topMargin - backgroundPadding - pad - pad2 - ((cellRects[cell][4] - cellRects[cell][2]) * 0.42), cellRects[cell][3] - rightMargin - pad - pad2, (cellRects[cell][4] - topMargin - pad - pad2), cellMargin * 0.025, 2, 2, 0, 0, { 1, 1, 1, 0.035 * colorMult }, { 1, 1, 1, (disableInput and 0.14 * colorMult or 0.28 * colorMult) })
-						RectRound(cellRects[cell][1] + leftMargin + pad + pad2, cellRects[cell][2] + bottomMargin + pad + pad2, cellRects[cell][3] - rightMargin - pad - pad2, (cellRects[cell][2] - bottomMargin - pad - pad2) + ((cellRects[cell][4] - cellRects[cell][2]) * 0.5), cellMargin * 0.025, 0, 0, 2, 2, { 1, 1, 1, (disableInput and 0.045 * colorMult or 0.095 * colorMult) }, { 1, 1, 1, 0 })
+						RectRound(cellRects[cell][1] + leftMargin + pad + pad2, cellRects[cell][4] - topMargin - backgroundPadding - pad - pad2 - ((cellRects[cell][4] - cellRects[cell][2]) * 0.42), cellRects[cell][3] - rightMargin - pad - pad2, (cellRects[cell][4] - topMargin - pad - pad2), cellMargin * 0.025, 2, 2, 0, 0, { 1, 1, 1, 0.035 * colorMult }, { 1, 1, 1, (disableInput and 0.11 * colorMult or 0.24 * colorMult) })
+						RectRound(cellRects[cell][1] + leftMargin + pad + pad2, cellRects[cell][2] + bottomMargin + pad + pad2, cellRects[cell][3] - rightMargin - pad - pad2, (cellRects[cell][2] - bottomMargin - pad - pad2) + ((cellRects[cell][4] - cellRects[cell][2]) * 0.5), cellMargin * 0.025, 0, 0, 2, 2, { 1, 1, 1, (disableInput and 0.035 * colorMult or 0.075 * colorMult) }, { 1, 1, 1, 0 })
 						glBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 					end
 				end
@@ -937,9 +848,10 @@ function widget:DrawScreen()
 						if cols/cell >= 1  then
 							topMargin = math_floor(((cellMarginPx + cellMarginPx2) / 2) + 0.5)
 						end
+
 						-- gloss highlight
 						local pad = math_max(1, math_floor(backgroundPadding * 0.52))
-						RectRound(cellRects[cell][1] + leftMargin + pad, cellRects[cell][2] + bottomMargin + pad, cellRects[cell][3] - rightMargin - pad, cellRects[cell][4] - topMargin - pad, cellWidth * 0.019, 2, 2, 2, 2)
+						RectRound(cellRects[cell][1] + leftMargin + pad, cellRects[cell][2] + bottomMargin + pad, cellRects[cell][3] - rightMargin - pad, cellRects[cell][4] - topMargin - pad, pad, 2, 2, 2, 2)
 					else
 						clickedCellTime = nil
 					end

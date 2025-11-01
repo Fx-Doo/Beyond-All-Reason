@@ -2,8 +2,6 @@ if not Spring.Utilities.IsDevMode() then -- and not Spring.Utilities.ShowDevUI()
 	return
 end
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "CEG Auto Reloader",

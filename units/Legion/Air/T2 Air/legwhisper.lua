@@ -41,15 +41,12 @@ return {
 		wingdrag = 0.11,
 		customparams = {
 			unitgroup = 'util',
-			model_author = "ZephyrSkies",
-			normaltex = "unittextures/leg_normal.dds",
-			subfolder = "Legion/Air/T2 Air",
+			model_author = "Unknown (c/o Hornet)",
+			normaltex = "unittextures/cor_normal.dds",
+			subfolder = "CorAircraft/T2",
 			techlevel = 2,
 		},
 		sfxtypes = {
-			explosiongenerators = {
-				[1] = "custom:radarpulse_t2",
-			},
 			crashexplosiongenerators = {
 				[1] = "crashing-small",
 				[2] = "crashing-small",

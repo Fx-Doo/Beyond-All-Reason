@@ -1,14 +1,14 @@
 
+#define TA			// This is a TA script
 
-#include "../recoil_common_includes.h"
+#include "sfxtype.h"
+#include "exptype.h"
 #include "smart_weapon_select.h"
 
 piece  base, flare, turret, door1, door2, barrel, bore, aimpoint, turretmidpoint;
 
-static-var  turretOpen, restoreDelay, stunned, trajectoryMode, lastHeading, cardinalHeading;
+static-var  turretOpen, restoreDelay, stunned;
 #define SIGNAL_AIM			1
-#define LOW_TRAJECTORY		0
-#define HIGH_TRAJECTORY		1
 
 openTurret()
 {
@@ -32,27 +32,6 @@ openTurret()
 
 closeTurret()
 { 
-    if (lastHeading <= <-135.000000>)
-    {
-        cardinalHeading = <180.000000>;
-    }
-    else if (lastHeading <= <-45.000000>)
-    {
-        cardinalHeading = <270.000000>;
-    }
-    else if (lastHeading <= <45.000000>)
-    {
-        cardinalHeading = <0.000000>;
-    }
-    else if (lastHeading <= <135.000000>)
-    {
-        cardinalHeading = <90.000000>;
-    }
-    else
-    {
-        cardinalHeading = <180.000000>;
-    }
-
 	turn turret to y-axis <0> speed <100>;
 	move bore to z-axis [-6] speed [12];
 	move barrel to z-axis [-9] speed [18];
@@ -67,7 +46,7 @@ closeTurret()
 	turn door2 to z-axis <90> speed <300>;
 	wait-for-turn door1 around z-axis;
 	sleep 100;
-	turn turret to y-axis cardinalHeading speed <100>;
+
 	sleep 10;
 	return (0);;
 }
@@ -91,7 +70,6 @@ Stop()
 	return (0);
 }
 
-
 ExecuteRestoreAfterDelay()
 {
     if (stunned)
@@ -100,8 +78,8 @@ ExecuteRestoreAfterDelay()
     }
 
 	set-signal-mask 0;
-	turn turret to y-axis <0.0> speed <100.016484>;
-	turn turret to x-axis <0.0> speed <50.005495>;
+	turn turret to y-axis <0.000000> speed <100.016484>;
+	turn turret to x-axis <0.000000> speed <50.005495>;
 	wait-for-turn turret around y-axis;
 	wait-for-turn turret around x-axis;
 	
@@ -131,16 +109,17 @@ Create()
 	turretOpen = 0;
 	restoreDelay = 10000;
 
-	SLEEP_UNTIL_UNITFINISHED;
+	while( get BUILD_PERCENT_LEFT )
+	{
+		sleep 1000;
+	}
 
 	start-script RestoreAfterDelay();
 	return (0);
 }
 
-
-#define BASEPIECE base
-#define MAXTILT 0
-#include "../unit_hitbyweaponid_and_smoke.h"
+#define SMOKEPIECE base
+#include "smokeunit_thread_nohit.h"
 
 aimCommon(heading, pitch)
 {
@@ -149,21 +128,20 @@ aimCommon(heading, pitch)
 		sleep 250;
 	}
 
-	turn turret to y-axis heading speed <30.0>;
-	turn turret to x-axis <0.0> - pitch speed <45.0>;
-	lastHeading = heading;
+	turn turret to y-axis heading speed <30.000000>;
+	turn turret to x-axis <0.000000> - pitch speed <45.000000>;
 	wait-for-turn turret around y-axis;
 	wait-for-turn turret around x-axis;
 }
 
-AimWeapon1(heading, pitch)
+AimPrimary(heading, pitch)
 {
 	if (AimingState != AIMING_PRIORITY)
 	{
 		return(0);
 	}
-	start-script Go();
 
+	start-script Go();
 
 	signal SIGNAL_AIM;
 	set-signal-mask SIGNAL_AIM;
@@ -171,18 +149,18 @@ AimWeapon1(heading, pitch)
 	call-script aimCommon(heading, pitch);
 	start-script RestoreAfterDelay();
 
-	// Prevent low-trajectory "bonus shots" while high-trajectory is reloading
+	// Prevent "bonus shots" while alternative weapon is reloading
 	var reloading;
 	reloading = (get GAME_FRAME) < (get WEAPON_RELOADSTATE(2));
 	if( reloading )
 	{
 		return(0);
 	}
-	
+
 	return (1);
 }
 
-AimWeapon2(heading, pitch)
+AimSecondary(heading, pitch)
 {
 	if (AimingState != AIMING_BACKUP)
 	{
@@ -197,7 +175,7 @@ AimWeapon2(heading, pitch)
 	call-script aimCommon(heading, pitch);
 	start-script RestoreAfterDelay();
 
-	// Prevent high-trajectory "bonus shots" while low-trajectory is reloading
+	// Prevent "bonus shots" while alternative weapon is reloading
 	var reloading;
 	reloading = (get GAME_FRAME) < (get WEAPON_RELOADSTATE(1));
 	if( reloading )
@@ -208,7 +186,7 @@ AimWeapon2(heading, pitch)
 	return (1);
 }
 
-AimWeapon3(heading, pitch)
+AimTertiary(piecenum)
 {
 	return (0);
 }
@@ -216,58 +194,52 @@ AimWeapon3(heading, pitch)
 fireCommon()
 {
 	emit-sfx 1024 + 0 from flare;
-	move barrel to z-axis [-3.0] speed [375.0];
-	move bore to z-axis [-2.0] speed [250.0];
+	move barrel to z-axis [-3.000000] speed [375.000000];
+	move bore to z-axis [-2.000000] speed [250.000000];
 	sleep 150;
-	move barrel to z-axis [0.0] speed [2.250000];
-	move bore to z-axis [0.0] speed [1.500000];
+	move barrel to z-axis [0.000000] speed [2.250000];
+	move bore to z-axis [0.000000] speed [1.500000];
 }
 
-FireWeapon1()
+FirePrimary()
 {
 	call-script fireCommon();
 }
 
-FireWeapon2()
+FireSecondary()
 {
 	call-script fireCommon();
 }
 
-FireWeapon3()
+AimFromPrimary(piecenum)
 {
-	call-script fireCommon();
+	piecenum = aimpoint;
 }
 
-AimFromWeapon1(pieceIndex)
+AimFromSecondary(piecenum)
 {
-	pieceIndex = aimpoint;
+	piecenum = aimpoint;
 }
 
-AimFromWeapon2(pieceIndex)
+QueryPrimary(piecenum)
 {
-	pieceIndex = aimpoint;
+	piecenum = flare;
 }
 
-AimFromWeapon3(pieceIndex)
+QuerySecondary(piecenum)
 {
-	pieceIndex = aimpoint;
+	piecenum = flare;
 }
 
-QueryWeapon1(pieceIndex)
+QueryTertiary(piecenum)
 {
-	pieceIndex = flare;
+	piecenum = turretmidpoint;
 }
 
-QueryWeapon2(pieceIndex)
+SweetSpot(piecenum)
 {
-	pieceIndex = flare;
+	piecenum = base;
 }
-QueryWeapon3(pieceIndex)
-{
-	pieceIndex = turretmidpoint;
-}
-
-
 
 Killed(severity, corpsetype)
 {

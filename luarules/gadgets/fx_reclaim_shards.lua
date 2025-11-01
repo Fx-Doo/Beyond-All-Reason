@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "fx_reclaim_shards",

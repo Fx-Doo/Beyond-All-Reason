@@ -67,8 +67,7 @@ function LabsHST:factoriesRating()
 		if self.ai.armyhst.factoryMobilities[i][1] == 'hov' or self.ai.armyhst.factoryMobilities[i][1] == 'amp' then
 			if not t['armsy'] or  t['armsy'] < 0.33 then
 				t[i] = nil
-			elseif i == 'armamsub' or i == 'coramsub' then
-				t[i] = (t['armsy'] + t['armvp']) * 0.5
+
 			elseif not t['armvp'] or  (t['armvp'] < 0.6 and t['armsy'] < 0.6) then
 
 				t[i] = 1
@@ -210,19 +209,10 @@ function LabsHST:PrePositionFilter()
 		local T2 = level == 3
 		local T3 = level == 5
 		local mtype = self.ai.armyhst.factoryMobilities[factoryName][1]
-		self:EchoDebug(factoryName, 'rank', rank, 'level', level, 'mtype', mtype)
+		self:EchoDebug(factoryName,isAdvanced,isExperimental)
 		if self.game:GetTeamUnitDefCount(self.ai.id,utn.defId) > 0 then
 			self:EchoDebug(' already have a ',factoryName)
 			buildMe = false
-		end
-		if self.ai.armyhst.factoryMobilities[factoryName][1] == 'hov'  then
-			for id,lab in pairs(self.labs) do
-				if lab.mtype == 'hov' then
-					buildMe = false
-					self:EchoDebug(' already have a ',lab.name,' another hover factory',factoryName, 'is duplicated')
-					buildMe = false
-				end
-			end
 		end
 		if buildMe and mtype == 'bot' and level == 1 then--dont start bot if veh is up and we d not have t3
 			for id,lab in pairs(self.labs) do
@@ -276,49 +266,36 @@ function LabsHST:PrePositionFilter()
 	return factoriesPreCleaned
 end
 
-function LabsHST:FactoryPosition(factoryName,builder)--TODO test ildpos with bigger labs and do a check for exitside with bigger units
-	if not factoryName or not builder then self:EchoDebug('no factory or builder')return end
+function LabsHST:FactoryPosition(factoryName,builder)
+	if not factoryName or not builder then return end
 	local utype = self.game:GetTypeByName(factoryName)
 	local site = self.ai.buildingshst
-	
 	local p = site:BuildNearNano(builder, utype)
 
-
-	if not p then
-		self:EchoDebug(' not position to build', factoryName, 'near nano')
-	else
-		self:EchoDebug(' position to build', factoryName, 'near nano')
+	if p then
+		self:EchoDebug(' position to build', factoryName, 'found at', p.x,p.z,'near nano')
 		return p
 	end
 	p = site:searchPosNearCategories(utype, builder,50,390,{'_nano_'})
-	if not p then
-		self:EchoDebug(' not position to build', factoryName, 'near _nano_ ')
-	else
-		self:EchoDebug(' position to build', factoryName, 'near _nano_')
+	if p then
+		self:EchoDebug(' position to build', factoryName, 'found at', p.x,p.z,'near _nano_ ')
 		return p
 	end
 	p = site:searchPosNearCategories(utype, builder,250,780,{'factoryMobilities'})
-	if not p then
-		self:EchoDebug('not position to build', factoryName, 'near factory')
-	else
-		self:EchoDebug(' position to build', factoryName, 'near factory')
+	if p then
+		self:EchoDebug(' position to build', factoryName, 'found at', p.x,p.z,'near factory')
 		return p
 	end
-	p = site:searchPosNearCategories(utype, builder,150,nil,{'_mex_'})
-	if not p then
-		self:EchoDebug(' not position to build', factoryName, 'near mex')
-	else
-		self:EchoDebug(' position to build', factoryName, 'near _mex_')
+	p = site:searchPosNearCategories(utype, builder,50,nil,{'_mex_'})
+	if p then
+		self:EchoDebug(' position to build', factoryName, 'found at', p.x,p.z,'near mex')
 		return p
 	end
 	p = site:searchPosNearCategories(utype, builder,50,nil,{'_llt_'})
-	if not p then
-		self:EchoDebug(' not position to build', factoryName, 'near _llt_')
-	else
-		self:EchoDebug(' position to build', factoryName, 'near _llt_')
+	if p then
+		self:EchoDebug(' position to build', factoryName, 'found at', p.x,p.z,'near llt')
 		return p
 	end
-	
 end
 
 function LabsHST:PostPositionalFilter(p,factoryName)
@@ -336,56 +313,24 @@ function LabsHST:PostPositionalFilter(p,factoryName)
 	return p,factoryName
 end
 
-function LabsHST:LandOrWaterType(builder,factory)
-	local _,y,_ = builder:GetRawPos()
-	local water = y < 0
-	local factoryName = factory
-	if water then
-		if factoryName == 'corhp' then
-			factoryName = 'corfhp'
-		end
-		if factoryName == 'armhp' then
-			factoryName = 'armfhp'
-		end
-	else
-		if factoryName == 'corfhp' then
-			factoryName = 'corhp'
-		end
-		if factoryName == 'armfhp' then
-			factoryName = 'armhp'
-		end
-	end
-	return factoryName
-end
-
 function LabsHST:GetBuilderFactory(builder)
 
 	if self:FactoriesUnderConstruction() then
-		self:EchoDebug('factory under construction')
 		return
 	end
 	if not self:EconomyToBuildFactories() then
-		self:EchoDebug('not enough economy to build factory')
 		return
 	end
 	local availableFactories = self:UpdateFactories()
-	local factoryName = self:LandOrWaterType(builder,availableFactories[1])
-	if not builder:CanBuild(factoryName) then
-		self:EchoDebug('builder cant build',factoryName)
-		return
+	if builder:CanBuild(availableFactories[1]) then
+		local p = self:FactoryPosition(availableFactories[1],builder)
+		if p then
+			p = self:PostPositionalFilter(p,availableFactories[1])
+			if p then
+				return p,availableFactories[1]
+			end
+		end
 	end
-
-	local p = self:FactoryPosition(factoryName,builder)
-	if not p then
-		self:EchoDebug('no position to build',factoryName)
-		return
-	end
-	p = self:PostPositionalFilter(p,factoryName)
-	if not p then
-		self:EchoDebug('post position failed to build',factoryName)
-		return
-	end
-	return p,factoryName
 end
 
 function LabsHST:ClosestHighestLevelFactory(builder, maxDist)
@@ -395,7 +340,7 @@ function LabsHST:ClosestHighestLevelFactory(builder, maxDist)
 	local Lab
 	local maxLevel = 0
 	for id, lab in pairs(self.ai.labshst.labs) do
-		if self.ai.maphst:UnitCanGoHere(builder, self.ai.tool:RandomAway(lab.position,300)) then
+		if self.ai.maphst:UnitCanGoHere(builder, lab.position) then
 			local dist = self.ai.tool:distance(builderPos, lab.position)
 			if lab.level >= maxLevel and dist <= minDist then
 				minDist = dist

@@ -1,7 +1,5 @@
 local gadgetEnabled = true
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name      = "preventcombomb",

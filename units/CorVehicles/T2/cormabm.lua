@@ -28,7 +28,7 @@ return {
 		nochasecategory = "ALL",
 		objectname = "Units/CORMABM.s3o",
 		radardistance = 50,
-		script = "Units/cormabm.cob",
+		script = "Units/CORMABM.cob",
 		seismicsignature = 0,
 		selfdestructas = "largeExplosionGenericSelfd",
 		sightdistance = 450,

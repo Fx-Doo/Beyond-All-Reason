@@ -1,26 +1,31 @@
+#define TA			// This is a TA script
 
-#include "../../recoil_common_includes.h"
-
-#define SIGNAL_BUILD 2
+#include "sfxtype.h"
+#include "exptype.h"
 
 piece  base, tracks, attach, emitnano;
 
-static-var  readyToBuild,restore_delay;
+static-var  restore_delay, nano_heading;
+static-var open_state;
 
+// Signal definitions
+#define SIG_AIM			2
+#define SIG_BUILD		4
 
-#define TB_BASE base 
-#define TB_TURNRATE <15.0> 
-#define TB_TILT_X <0.1>
-#define TB_BANK_Z <0.1> // Do not define this if you dont want banking
-#include "../../tilt_bank_mobileunit.h"
+#define BASEPIECE base
+#define HITSPEED <55.0>
+//how 'heavy' the unit is, on a scale of 1-10
+#define UNITSIZE 3
+#define MAXTILT 100
+
+#include "unit_hitbyweaponid_and_smoke.h"
 
 Create()
 {
-
-	restore_delay = 6000;
-	readyToBuild = FALSE;
-	call-script TB_Init();
-	SLEEP_UNTIL_UNITFINISHED;
+	restore_delay = 3000;
+	open_state = 0;
+	nano_heading = 0;
+	return (0);
 }
 
 static-var  Stunned;
@@ -35,8 +40,9 @@ SetStunned(State)
 
 StartBuilding(heading, pitch)
 {
-	signal SIGNAL_BUILD;	
-	set-signal-mask SIGNAL_BUILD;
+	signal SIG_BUILD;
+	set-signal-mask SIG_BUILD;
+	nano_heading = heading;
 	if (heading > 0) {
 		move emitnano to x-axis [-11.75] now;
 	}
@@ -50,17 +56,22 @@ StartBuilding(heading, pitch)
 
 StopBuilding()
 {
-	signal SIGNAL_BUILD;	
-	set-signal-mask SIGNAL_BUILD;
-
-	sleep 6000;
+	//signal SIG_BUILD;
+	set-signal-mask SIG_BUILD;
+	//start-script Restore_Nano();
 	set INBUILDSTANCE to 0;
-	readyToBuild = FALSE;
 }
 
-QueryNanoPiece(pieceIndex)
+QueryNanoPiece(piecenum)
 {
-	pieceIndex = emitnano;
+	piecenum = emitnano;
+}
+
+
+SweetSpot(piecenum)
+{
+	piecenum = base;
+	return (0);
 }
 
 Killed(severity, corpsetype)

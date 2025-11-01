@@ -3,8 +3,6 @@ if gadgetHandler:IsSyncedCode() then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name 	= "GUI Sound Effects player",

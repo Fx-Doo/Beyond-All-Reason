@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "SmartSelect",
@@ -12,8 +10,8 @@ function widget:GetInfo()
 	}
 end
 
-local minimapToWorld = VFS.Include("luaui/Include/minimap_utils.lua").minimapToWorld
-local selectApi = VFS.Include("luaui/Include/select_api.lua")
+local minimapToWorld = VFS.Include("luaui/Widgets/Include/minimap_utils.lua").minimapToWorld
+local selectApi = VFS.Include("luaui/Widgets/Include/select_api.lua")
 
 local skipSel
 local inSelection = false
@@ -30,10 +28,8 @@ local mods = {
  idle     = false, -- whether to select only idle units
  same     = false, -- whether to select only units that share type with current selection
  deselect = false, -- whether to select units not present in current selection
- all      = false, -- whether to select without filters and append (backwards compatibility, it's like append+any)
+ all      = false, -- whether to select all units
  mobile   = false, -- whether to select only mobile units
- append   = false, -- whether to append units to current selection
- any      = false, -- whether to select without filters
 }
 local customFilterDef = ""
 local lastMods = mods
@@ -45,7 +41,7 @@ local spGetMouseState = Spring.GetMouseState
 local spGetModKeyState = Spring.GetModKeyState
 local spGetSelectionBox = Spring.GetSelectionBox
 
-local spGetUnitCommandCount = Spring.GetUnitCommandCount
+local spGetCommandQueue = Spring.GetCommandQueue
 local spIsGodModeEnabled = Spring.IsGodModeEnabled
 
 local spGetUnitsInScreenRectangle = Spring.GetUnitsInScreenRectangle
@@ -82,7 +78,7 @@ for udid, udef in pairs(UnitDefs) do
 	local building = (isMobile == false)
 	local combat = (not builder) and isMobile and (#udef.weapons > 0)
 
-	if string.find(udef.name, 'armspid') or string.find(udef.name, 'leginfestor') then
+	if string.find(udef.name, 'armspid') then
 		builder = false
 	end
 	combatFilter[udid] = combat
@@ -112,7 +108,7 @@ local function GetUnitsInMinimapRectangle(x, y)
 	left, right = sort(left, right)
 	bottom, top = sort(bottom, top)
 
-	return spGetUnitsInRectangle(left, bottom, right, top, not spec and -2)		-- -2 = own units
+	return spGetUnitsInRectangle(left, bottom, right, top)
 end
 
 local function handleSetModifier(_, _, _, data)
@@ -146,9 +142,9 @@ function widget:SelectionChanged(sel)
 		if #sel == 0 and not select(2, spGetModKeyState()) then -- ctrl
 			-- if empty selection box and engine hardcoded deselect modifier is not
 			-- pressed, user is selected empty space
-			-- let engine deselect everything by itself since we didn't modify its provided value
+			-- we must clear selection to disambiguate from our own deselect modifier
 			selectedUnits = {}
-			return false
+			spSelectUnitArray({})
 		else
 			-- we also want to override back from engine selection to our selection
 			spSelectUnitArray(selectedUnits)
@@ -189,28 +185,16 @@ function widget:PlayerChanged()
 	myTeamID = Spring.GetMyTeamID()
 end
 
-local sec = 0
-local prevSelRect = {}
-function widget:Update(dt)
-	sec = sec + dt
-
+function widget:Update()
 	if skipSel or spGetActiveCommand() ~= 0 then
 		return
 	end
 
-	local x, y, lmb = spGetMouseState()
+	local x, y, lmb = Spring.GetMouseState()
 	if lmb == false then inMiniMapSel = false end
 
+	-- get all units within selection rectangle
 	local x1, y1, x2, y2 = spGetSelectionBox()
-	local selRectChanged = false
-	if (prevSelRect[1] and prevSelRect[1] ~= x1) or (not prevSelRect[1] and x1) or
-		(prevSelRect[2] and prevSelRect[2] ~= y1) or (not prevSelRect[2] and y1) or
-		(prevSelRect[3] and prevSelRect[3] ~= x2) or (not prevSelRect[3] and x2) or
-		(prevSelRect[4] and prevSelRect[4] ~= y2) or (not prevSelRect[4] and y2)
-	then
-		selRectChanged = true
-	end
-	prevSelRect = {x1, y1, x2, y2}
 
 	inSelection = inMiniMapSel or (x1 ~= nil)
 	if not inSelection then return end -- not in valid selection box (mouserelease/minimum threshold/chorded/etc)
@@ -219,41 +203,25 @@ function widget:Update(dt)
 		mods.deselect = false
 	end
 
-	-- limit updaterate  (cause Spring.GetUnitsIn.... expensive mem alloc wise)
-	if (not selRectChanged and sec < 1/30) -- limit to 30 updates per sec when selection rectangle didnt change
-		or selRectChanged and  sec < 1/60	-- limit to 60 updates per sec
-	then
-		return
-	end
-	sec = 0
-
-	-- get units under selection rectangle
-	local isGodMode = spIsGodModeEnabled()
 	local mouseSelection
 	if inMiniMapSel then
 		mouseSelection = GetUnitsInMinimapRectangle(x, y)
 	else
-		mouseSelection = spGetUnitsInScreenRectangle(x1, y1, x2, y2, not spec and not isGodMode and -2) or {}		-- -2 = own units
+		mouseSelection = spGetUnitsInScreenRectangle(x1, y1, x2, y2, nil) or {}
 	end
 
 	local newSelection = {}
-	local uid, udid
+	local uid, udid, tmp
 
-	local tmp = {}
+	tmp = {}
 	local n = 0
 	local equalsMouseSelection = #mouseSelection == lastMouseSelectionCount
-	if equalsMouseSelection and lastMouseSelectionCount == 0 and not mods.deselect and not mods.append then
-		-- if its an empty selection but reference selection isn't empty consider
-		-- it non equal so deselect by selecting empty space always works.
-		-- skip if deselect or append since it won't deselect on empty selection.
-		equalsMouseSelection = #referenceSelection == 0
-	end
+	local isGodMode = spIsGodModeEnabled()
 
 	for i = 1, #mouseSelection do
 		uid = mouseSelection[i]
 		if not spGetUnitNoSelect(uid) and -- filter unselectable units
-			 -- filter gaia units + ignored units (objects)
-			(isGodMode or ((not spec or spGetUnitTeam(uid) ~= GaiaTeamID) and not ignoreUnits[spGetUnitDefID(uid)])) then
+			(isGodMode or (spGetUnitTeam(uid) ~= GaiaTeamID and not ignoreUnits[spGetUnitDefID(uid)] and (spec or spGetUnitTeam(uid) == myTeamID))) then -- filter gaia units + ignored units (objects) + only own units when not spectating
 			n = n + 1
 			tmp[n] = uid
 			if equalsMouseSelection and not lastMouseSelection[uid] then
@@ -261,20 +229,19 @@ function widget:Update(dt)
 			end
 		end
 	end
+
 	if equalsMouseSelection
 		and mods.idle == lastMods[1]
 		and mods.same == lastMods[2]
 		and mods.deselect == lastMods[3]
 		and mods.all == lastMods[4]
 		and mods.mobile == lastMods[5]
-		and mods.append == lastMods[6]
-		and mods.any == lastMods[7]
 		and customFilterDef == lastCustomFilterDef
 	then
 		return
 	end
 
-	lastMods = { mods.idle, mods.same, mods.deselect, mods.all, mods.mobile, mods.append, mods.any }
+	lastMods = { mods.idle, mods.same, mods.deselect, mods.all, mods.mobile }
 	lastCustomFilterDef = customFilterDef
 
 	-- Fill dictionary for set comparison
@@ -309,7 +276,7 @@ function widget:Update(dt)
 		for i = 1, #mouseSelection do
 			uid = mouseSelection[i]
 			udid = spGetUnitDefID(uid)
-			if spGetUnitCommandCount(uid) == 0 then
+			if spGetCommandQueue(uid, 0) == 0 then
 				tmp[#tmp + 1] = uid
 			end
 		end
@@ -349,7 +316,7 @@ function widget:Update(dt)
 		end
 		mouseSelection = tmp
 
-	elseif selectBuildingsWithMobile == false and (mods.any == false and mods.all == false) and mods.deselect == false then
+	elseif selectBuildingsWithMobile == false and mods.all == false and mods.deselect == false then
 		-- only select mobile units, not buildings
 		local mobiles = false
 		for i = 1, #mouseSelection do
@@ -403,7 +370,7 @@ function widget:Update(dt)
 		selectedUnits = newSelection
 		spSelectUnitArray(selectedUnits)
 
-	elseif (mods.append or mods.all) then  -- append units inside selection rectangle to current selection
+	elseif mods.all then  -- append units inside selection rectangle to current selection
 		spSelectUnitArray(newSelection)
 		spSelectUnitArray(mouseSelection, true)
 		selectedUnits = Spring.GetSelectedUnits()

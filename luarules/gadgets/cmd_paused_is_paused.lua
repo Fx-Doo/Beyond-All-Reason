@@ -6,8 +6,6 @@ if not gadgetHandler:IsSyncedCode() then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name 	= "Paused is paused",

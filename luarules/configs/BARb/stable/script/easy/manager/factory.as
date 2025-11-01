@@ -17,12 +17,6 @@ string coravp ("coravp");
 string corasy ("corasy");
 string corap  ("corap");
 
-string leglab  ("leglab");
-string legalab ("legalab");
-string legvp   ("legvp");
-string legavp  ("legavp");
-string legap   ("legap");
-
 int switchInterval = MakeSwitchInterval();
 int switchFrame = 0;
 
@@ -97,11 +91,6 @@ bool AiIsSwitchAllowed(CCircuitDef@ facDef)
 		return true;
 	}
 	return false;
-}
-
-CCircuitDef@ AiGetFactoryToBuild(const AIFloat3& in pos, bool isStart, bool isReset)
-{
-	return aiFactoryMgr.DefaultGetFactoryToBuild(pos, isStart, isReset);
 }
 
 /* --- Utils --- */

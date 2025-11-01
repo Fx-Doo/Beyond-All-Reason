@@ -39,7 +39,7 @@ teamleader=0;
 
 	[modoptions]
 	{
-		forceallunits = 1;
+		loadallunits = 1;
 	}
 	
 gametype=Beyond All Reason $VERSION;

@@ -130,10 +130,6 @@ return {
 				turret = true,
 				weapontype = "Cannon",
 				weaponvelocity = 450,
-				customparams = {
-					exclude_preaim = true,
-					smart_priority = true,
-				},
 				damage = {
 					default = 420,
 					hvyboats = 420,
@@ -141,6 +137,10 @@ return {
 					subs = 90,
 					vtol = 90,
 				},
+				customparams = {
+					exclude_preaim = true,
+					smart_priority = true,
+				}
 			},
 			cortoast_gun_high = {
 				accuracy = 450,
@@ -165,10 +165,6 @@ return {
 				turret = true,
 				weapontype = "Cannon",
 				weaponvelocity = 450,
-				customparams = {
-					exclude_preaim = true,
-					smart_backup = true,
-				},
 				damage = {
 					default = 420,
 					hvyboats = 420,
@@ -176,6 +172,10 @@ return {
 					subs = 90,
 					vtol = 90,
 				},
+				customparams = {
+					exclude_preaim = true,
+					smart_backup = true,
+				}
 			},
 			smart_trajectory_dummy = {
 				accuracy = 450,
@@ -200,30 +200,28 @@ return {
 				turret = true,
 				weapontype = "Cannon",
 				weaponvelocity = 450,
-				customparams = {
-					exclude_preaim = true,
-					smart_trajectory_checker = true,
-				},
 				damage = {
 					default = 0,
 				},
+				customparams = {
+					exclude_preaim = true,
+					smart_trajectory_checker = true,
+				}
 			},
 		},
 		weapons = {
 			[1] = {
-				badtargetcategory = "VTOL GROUNDSCOUT",
 				def = "CORTOAST_GUN",
 				maindir = "0 1 0",
 				maxangledif = 230,
 				onlytargetcategory = "SURFACE",
 			},
 			[2] = {
-				badtargetcategory = "VTOL GROUNDSCOUT",
+				badtargetcategory = "SURFACERAIDER",
 				def = "CORTOAST_GUN_HIGH",
 				onlytargetcategory = "SURFACE",
 			},
 			[3] = {
-				badtargetcategory = "VTOL GROUNDSCOUT",
 				def = "smart_trajectory_dummy",
 				maindir = "0 1 0",
 				maxangledif = 230,

@@ -9,7 +9,9 @@ function STAI:internalName()
 end
 
 function STAI:test()
+	Spring:Echo('test')
+
 	for i,v in pairs(STAI) do
-		Spring.Echo('H.I.V.E. ST AI module:',i,v)
+		Spring.Echo('STAI AI module:',i,v)
 	end
 end

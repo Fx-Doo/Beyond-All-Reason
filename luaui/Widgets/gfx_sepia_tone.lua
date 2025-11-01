@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
    return {
       name      = "Sepia Tone",
@@ -21,7 +19,7 @@ local params = {gamma = 0.5, saturation = 0.5, contrast = 0.5, sepia = 0, shadeU
 -- skip draw if this matches:
 local defaultParams = {gamma = 0.5, saturation = 0.5, contrast = 0.5, sepia = 0.0}
 
-local luaShaderDir = "LuaUI/Include/"
+local luaShaderDir = "LuaUI/Widgets/Include/"
 
 -----------------------------------------------------------------
 -- Shader Sources
@@ -114,7 +112,7 @@ void main()
 -- Global Variables
 -----------------------------------------------------------------
 
-local LuaShader = gl.LuaShader
+local LuaShader = VFS.Include(luaShaderDir.."LuaShader.lua")
 
 local vsx, vsy, vpx, vpy
 local screenCopyTex
@@ -220,7 +218,6 @@ end
 
 function widget:Shutdown()
 	gl.DeleteTexture(screenCopyTex)
-	screenCopyTex = nil
 	if sepiaShader then
 		sepiaShader:Finalize()
 	end

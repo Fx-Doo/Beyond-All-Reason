@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name    = "No Rush Mode",
@@ -66,22 +64,11 @@ for _, teamID in ipairs(Spring.GetTeamList()) do
 	end
 end
 
+
 if gadgetHandler:IsSyncedCode() then
 	function gadget:Initialize()
-		gadgetHandler:RegisterAllowCommand(CMD.BUILD)
-
-		local registered = { [CMD.BUILD] = true }
-
-		for _, commandList in ipairs { CommandsToCatchMap, CommandsToCatchUnit, CommandsToCatchFeature } do
-			for command in pairs(commandList) do
-				if not registered[command] then
-					gadgetHandler:RegisterAllowCommand(command)
-					registered[command] = true
-				end
-			end
-		end
+		gadgetHandler:RegisterAllowCommand(CMD.ANY)
 	end
-
 	function gadget:AllowCommand(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdOptions, cmdTag, synced)
 		local allowed = true
 		local frame = Spring.GetGameFrame()

@@ -2,7 +2,7 @@ return {
 	corhlt = {
 		buildangle = 4096,
 		buildpic = "CORHLT.DDS",
-		buildtime = 11400,
+		buildtime = 12650,
 		canrepeat = false,
 		collisionvolumeoffsets = "0 -8 0",
 		collisionvolumescales = "38 90 38",
@@ -127,6 +127,7 @@ return {
 				soundhitwet = "sizzle",
 				soundstart = "Lasrmas2",
 				soundtrigger = 1,
+				targetmoveerror = 0.2,
 				thickness = 2.7,
 				tolerance = 10000,
 				turret = true,

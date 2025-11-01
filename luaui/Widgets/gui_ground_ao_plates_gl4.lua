@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Ground AO Plates GL4",
@@ -23,12 +21,7 @@ local unitDefIDtoDecalInfo = {} -- key unitdef, table of {texfile = "", sizex = 
 
 local groundPlateVBO = nil
 local groundPlateShader = nil
-
-local luaShaderDir = "LuaUI/Include/"
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-local popElementInstance  = InstanceVBOTable.popElementInstance
+local luaShaderDir = "LuaUI/Widgets/Include/"
 
 local debugmode = false
 
@@ -42,6 +35,8 @@ local GL_LEQUAL = GL.LEQUAL
 local GL_POINTS = GL.POINTS
 local spGetUnitDefID = Spring.GetUnitDefID
 local spGetGameFrame = Spring.GetGameFrame
+local spGetGameFrame = Spring.GetGameFrame
+local glGetAtlasTexture = gl.GetAtlasTexture
 
 local function AddPrimitiveAtUnit(unitID, unitDefID, noUpload,reason)
 	local gf = spGetGameFrame()
@@ -151,11 +146,11 @@ function widget:VisibleUnitAdded(unitID, unitDefID, unitTeam)
 end
 
 function widget:VisibleUnitsChanged(extVisibleUnits, extNumVisibleUnits)
-	InstanceVBOTable.clearInstanceTable(groundPlateVBO) -- clear all instances
+	clearInstanceTable(groundPlateVBO) -- clear all instances
 	for unitID, unitDefID in pairs(extVisibleUnits) do
 		AddPrimitiveAtUnit(unitID, unitDefID, true, "VisibleUnitsChanged") -- add them with noUpload = true
 	end
-	InstanceVBOTable.uploadAllElements(groundPlateVBO) -- upload them all
+	uploadAllElements(groundPlateVBO) -- upload them all
 end
 
 function widget:VisibleUnitRemoved(unitID) -- remove the corresponding ground plate if it exists

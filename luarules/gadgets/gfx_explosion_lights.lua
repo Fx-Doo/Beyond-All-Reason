@@ -1,6 +1,4 @@
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
     return {
         name      = "Explosion_lights",
@@ -42,15 +40,6 @@ if gadgetHandler:IsSyncedCode() then
 			if wd.type == "MissileLauncher" then
 				Script.SetWatchExplosion(wdid, true)
 			end
-            if wd.type == "AircraftBomb" then
-                Script.SetWatchExplosion(wdid, true)
-            end
-            if wd.type == "StarburstLauncher" then
-                Script.SetWatchExplosion(wdid, true)
-            end
-            if wd.type == "TorpedoLauncher" then
-                Script.SetWatchExplosion(wdid, true)
-            end
         end
     end
     function gadget:Shutdown()

@@ -3,10 +3,10 @@ return {
 		maxacc = 0,
 		maxdec = 0,
 		buildangle = 32000,
-		energycost = 550,
-		metalcost = 70,
+		energycost = 550,--700
+		metalcost = 70,--90
 		buildpic = "LEGLHT.DDS",
-		buildtime = 2200,
+		buildtime = 2450,--2720
 		canrepeat = false,
 		cantbetransported = false,
 		collisionvolumeoffsets = "0 -7 0",
@@ -134,6 +134,7 @@ return {
 				soundhitwet = "sizzle",
 				soundstart = "lasrfir3",
 				soundtrigger = 1,
+				targetmoveerror = 0.2,
 				thickness = 2.66,
 				tolerance = 10000,
 				turret = true,

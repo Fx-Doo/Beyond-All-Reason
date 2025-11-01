@@ -3,8 +3,6 @@ if not Spring.GetModOptions().map_atmosphere then
 	return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Map Atmosphere CEGs",

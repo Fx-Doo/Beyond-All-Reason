@@ -20,11 +20,18 @@ DEFS = {}
 --------------------------------------------------------------------------------
 local section='defs.lua'
 
-VFS_MODES = VFS.MAP .. VFS.MOD .. VFS.BASE
+-- https://springrts.com/mantis/view.php?id=6088, remove this when no longer needed!
+if not VFS.BASE then --readded for mission editor backwards compat (engine 104.0.1-287)
+	VFS.BASE = "b"
+	VFS.MOD = "M"
+	VFS.MAP = "m"
+end
+
+vfs_modes = VFS.MAP .. VFS.MOD .. VFS.BASE
 
 local function LoadDefs(name)
 	local filename = 'gamedata/' .. name .. '.lua'
-	local success, result = pcall(VFS.Include, filename, nil, VFS_MODES)
+	local success, result = pcall(VFS.Include, filename, nil, vfs_modes)
 
 	if (not success) then
 		Spring.Log(section, LOG.ERROR, 'Failed to load ' .. name)

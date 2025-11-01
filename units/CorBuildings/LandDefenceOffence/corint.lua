@@ -21,7 +21,7 @@ return {
 		maxwaterdepth = 0,
 		metalcost = 4600,
 		objectname = "Units/CORINT.s3o",
-		script = "Units/corint.cob",
+		script = "Units/CORINT.cob",
 		seismicsignature = 0,
 		selfdestructas = "hugeBuildingExplosionGenericSelfd",
 		sightdistance = 273,

@@ -32,7 +32,7 @@ return {
 		turninplace = true,
 		turninplaceanglelimit = 90,
 		turninplacespeedlimit = 1.518,
-		turnrate = 600,
+		turnrate = 768.20001,
 		upright = true,
 		customparams = {
 			model_author = "PtaQ",
@@ -137,6 +137,7 @@ return {
 				soundstart = "lasfirerc",
 				soundtrigger = 1,
 				targetborder = 0.2,
+				targetmoveerror = 0,
 				thickness = 2.4,
 				tolerance = 4500,
 				turret = true,
@@ -144,7 +145,7 @@ return {
 				weaponvelocity = 920,
 				damage = {
 					default = 116,
-					vtol = 22,
+					vtol = 58,
 				},
 			},
 		},
@@ -155,7 +156,6 @@ return {
 				comment = "seems to have 40 deg burst limit arc limit w the burstcontrolwhenoutofarc = 2, fastautoretargeting, compounding",
 				def = "MECH_RAPIDLASER",
 				fastautoretargeting = true,
-				fastquerypointupdate = true,
 				onlytargetcategory = "NOTSUB",
 			},
 		},

@@ -27,7 +27,7 @@ return {
 		objectname = "Units/CORFSHIP.s3o",
 		radardistance = 750,
 		radaremitheight = 52,
-		script = "Units/corfship.cob",
+		script = "Units/CORFSHIP.cob",
 		seismicsignature = 0,
 		selfdestructas = "pyroselfd",
 		sightdistance = 500,

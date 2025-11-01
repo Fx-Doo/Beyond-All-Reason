@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Gadget Profiler",
@@ -34,8 +32,8 @@ local prefixColor = {
 	game = '\255\166\166\255',
 	cmd = '\255\166\255\255',
 	unit = '\255\255\166\255',
-	map = '\255\255\255\080',
-	dbg = '\255\120\120\120',
+	map = '\255\122\122\122',
+	dbg = '\255\088\088\088',
 }
 local prefixedGnames = {}
 local function ConstructPrefixedName (ghInfo)
@@ -56,6 +54,7 @@ local callinStatsSYNCED = {}
 
 local highres = false
 local tick = 0.2
+local averageTime = 2.0
 local retainSortTime = 10
 
 local spGetTimer = Spring.GetTimer
@@ -156,8 +155,6 @@ else
 	end
 end
 
-
-local gname2name = {}
 Hook = function(gadget, callinName)
 	local gadgetName = gadget.ghInfo.name
 	local realFunc = gadget[callinName]
@@ -169,7 +166,6 @@ Hook = function(gadget, callinName)
 	gadget['_old' .. callinName] = realFunc
 
 	local gname = prefixedGnames[gadgetName] or ConstructPrefixedName(gadget.ghInfo)
-	gname2name[gname] = gadgetName
 
 	local hook_func = function(...)
 		if inHook then
@@ -308,6 +304,7 @@ else
 	-- Unsynced Setup
 	--------------------------------------------------------------------------------
 
+	local startedProfiler = false
 	local running = false
 
 	local timersSynced = {}
@@ -340,6 +337,7 @@ else
 			running = true
 
 			tick = (words and words[1] and tonumber(words[1])) or tick
+			averageTime = (words and words[2] and tonumber(words[2])) or averageTime
 
 			if highres and true then -- this tests the timers for correctness
 				local starttime = Spring.GetTimer()
@@ -492,9 +490,6 @@ else
 
 		local sorted = {}
 
-		local averageTime = Spring.GetConfigFloat("profiler_averagetime", 2)
-		local sortByLoad = Spring.GetConfigInt("profiler_sort_by_load", 1) == 1
-
 		for gname, callins in pairs(stats) do
 			local t = 0 -- would call it time, but protected
 			local cmax_t = 0
@@ -536,18 +531,15 @@ else
 			local frames = math.min(1 / tick, Spring.GetFPS()) * retainSortTime
 			avgTLoad[gname] = ((avgTLoad[gname]*(frames-1)) + tLoad) / frames
 			local tColourString, sColourString = GetRedColourStrings(tTime, sLoad, gname, redStr, deltaTime)
-			if not sortByLoad or avgTLoad[gname] >= 0.05 or sLoad >= 5 then -- only show heavy ones
-				sorted[n] = { name = gname2name[gname] or gname, plainname = gname, fullname = gname .. ' \255\200\200\200(' .. cmaxname_t .. ',' .. cmaxname_space .. ')', tLoad = tLoad, sLoad = sLoad, tTime = tTime, tColourString = tColourString, sColourString = sColourString, avgTLoad = avgTLoad[gname] }
+			if avgTLoad[gname] >= 0.05 or sLoad >= 5 then -- only show heavy ones
+				sorted[n] = { plainname = gname, fullname = gname .. ' \255\200\200\200(' .. cmaxname_t .. ',' .. cmaxname_space .. ')', tLoad = tLoad, sLoad = sLoad, tTime = tTime, tColourString = tColourString, sColourString = sColourString, avgTLoad = avgTLoad[gname] }
 				n = n + 1
 			end
 			allOverTime = allOverTime + tLoad
 			allOverSpace = allOverSpace + sLoad
 		end
-		if sortByLoad then
-			table.sort(sorted, SortFunc)
-		else
-			table.sort(sorted, function(a, b) return a.name < b.name end)
-		end
+
+		table.sort(sorted, SortFunc)
 
 		sorted.allOverTime = allOverTime
 		sorted.allOverSpace = allOverSpace
@@ -646,7 +638,9 @@ else
 
 		for i = 1, #list do
 			local v = list[i]
+			local name = v.plainname
 			local gname = v.fullname
+			local tTime = v.tTime
 			local tLoad = v.tLoad
 			local sLoad = v.sLoad
 			local tColour = v.tColourString
@@ -721,7 +715,7 @@ else
 		Line(0, title_colour, "Callins in brackets are heaviest per gadget for (time,allocs)")
 
 		Line(1, title_colour, "Tick time: " .. tick .. "s")
-		Line(0, title_colour, "Smoothing time: " .. Spring.GetConfigFloat("profiler_averagetime", 2) .. "s")
+		Line(0, title_colour, "Smoothing time: " .. averageTime .. "s")
 
 		gl.EndText()
 	end

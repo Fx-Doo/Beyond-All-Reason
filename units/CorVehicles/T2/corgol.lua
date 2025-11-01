@@ -1,13 +1,13 @@
 return {
 	corgol = {
 		buildpic = "CORGOL.DDS",
-		buildtime = 30000,
+		buildtime = 26100,
 		canmove = true,
 		collisionvolumeoffsets = "0 -10 -1",
 		collisionvolumescales = "50 50 50",
 		collisionvolumetype = "BOX",
 		corpse = "DEAD",
-		energycost = 28000,
+		energycost = 22000,
 		explodeas = "hugeexplosiongeneric",
 		footprintx = 4,
 		footprintz = 4,
@@ -121,7 +121,6 @@ return {
 			cor_gol = {
 				areaofeffect = 292,
 				avoidfeature = false,
-				cegtag = "Heavy-Plasma",
 				craterareaofeffect = 292,
 				craterboost = 0,
 				cratermult = 0,

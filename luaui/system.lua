@@ -42,7 +42,6 @@ if (System == nil) then
 		Engine = Engine,
 		Platform = Platform,
 		Game = Game,
-		GameCMD = Game.CustomCommands.GameCMD,
 		gl = gl,
 		GL = GL,
 		CMD = CMD,

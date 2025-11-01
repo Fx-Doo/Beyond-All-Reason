@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
   return {
     name      = "Snow",
@@ -77,6 +75,10 @@ table.insert(particleTypes, {
 local widgetDisabledSnow = false
 
 local shader
+local shaderTimeLoc
+local shaderCamPosLoc
+local shaderScaleLoc
+local shaderSpeedLoc
 
 local startTimer = Spring.GetTimer()
 local diffTime = 0
@@ -114,7 +116,6 @@ local glDeleteList         = gl.DeleteList
 local glTexture            = gl.Texture
 local glGetShaderLog       = gl.GetShaderLog
 local glCreateShader       = gl.CreateShader
-local LuaShader            = gl.LuaShader
 local glDeleteShader       = gl.DeleteShader
 local glUseShader          = gl.UseShader
 local glUniform            = gl.Uniform
@@ -192,7 +193,7 @@ local function init()
 		return
 	end
 
-	shader = LuaShader({
+	shader = glCreateShader({
 		vertex = [[
 	  		#version 150 compatibility
 			uniform float time;
@@ -232,20 +233,26 @@ local function init()
 				gl_Position = gl_ProjectionMatrix * eyePos;
 			}
 		]],
-		uniformFloat = {
+		uniform = {
 			time   = diffTime,
 			scale  = 0,
 			speed  = {0,0,0},
 			camPos = {0,0,0},
 		},
-	}, "Snow Shader")
+	})
 
-	if not shader:Initialize() then
+	if (shader == nil) then
 		Spring.Echo("[Snow widget:Initialize] particle shader compilation failed")
 		Spring.Echo(glGetShaderLog())
 		widgetHandler:RemoveWidget()
 		return
 	end
+
+	shaderTimeLoc			= glGetUniformLocation(shader, 'time')
+	shaderCamPosLoc			= glGetUniformLocation(shader, 'camPos')
+
+	shaderScaleLoc			= glGetUniformLocation(shader, 'scale')
+	shaderSpeedLoc			= glGetUniformLocation(shader, 'speed')
 
 	if particleLists[1] == nil then
 		CreateParticleLists()
@@ -264,21 +271,6 @@ local function getWindSpeed()
 		windDirZ = maxWindSpeed
 	end
 end
-
-local function snowCmd(_, _, params)
-	if (params[1] and params[1] == '1') or (not params[1] and (snowMaps[currentMapname] == nil or snowMaps[currentMapname] == false)) then
-		snowMaps[currentMapname] = true
-		enabled = true
-		Spring.Echo("Snow widget: snow enabled for this map. (Snow wont show when average fps is below "..minFps..".)")
-		init()
-	else
-		snowMaps[currentMapname] = false
-		enabled = false
-		Spring.Echo("Snow widget: snow disabled for this map.")
-		removeSnow()
-	end
-end
-
 
 function widget:Initialize()
 	widget:ViewResize()
@@ -342,8 +334,6 @@ function widget:Initialize()
 
 	getWindSpeed()
 	init()
-
-	widgetHandler:AddAction("snow", snowCmd, nil, 't')
 end
 
 --------------------------------------------------------------------------------
@@ -390,8 +380,6 @@ end
 
 function widget:Shutdown()
 	enabled = false
-	widgetHandler:RemoveAction("snow")
-	if shader then shader:Finalize() end 
 end
 
 local pausedTime = 0
@@ -407,12 +395,13 @@ function widget:DrawWorld()
 	lastFrametime = Spring.GetTimer()
 	if os.clock() - startOsClock > 0.5 then		-- delay to prevent no textures being shown
 		if shader ~= nil and particleLists[#particleTypes] ~= nil and particleLists[#particleTypes][particleStep] ~= nil then
-			shader:Activate()
+			glUseShader(shader)
 			camX,camY,camZ = Spring.GetCameraPosition()
 			diffTime = Spring.DiffTimers(lastFrametime, startTimer) - pausedTime
-			shader:SetUniform("time", diffTime)
-			shader:SetUniform("camPos", camX, camY, camZ)
-			
+
+			glUniform(shaderTimeLoc,diffTime * 1)
+			glUniform(shaderCamPosLoc, camX, camY, camZ)
+
 			glDepthTest(true)
 			glBlending(GL.SRC_ALPHA, GL.ONE)
 
@@ -431,8 +420,8 @@ function widget:DrawWorld()
 
 			glTexture(snowTexture)
 			for particleType, pt in pairs(particleTypes) do
-				shader:SetUniform("scale", pt.scale * particleScale)
-				shader:SetUniform("speed", pt.gravity, offsetX, offsetZ)
+				glUniform(shaderScaleLoc, pt.scale*particleScale)
+				glUniform(shaderSpeedLoc, pt.gravity, offsetX, offsetZ)
 				glCallList(particleLists[particleType][particleStep])
 			end
 			glTexture(false)
@@ -441,7 +430,7 @@ function widget:DrawWorld()
 			gl.PointSize(1.0)
 			gl.PointSprite(false, false)
 			glResetState()
-			shader:Deactivate()
+			glUseShader(0)
 		end
 	end
 end
@@ -483,6 +472,22 @@ function widget:SetConfigData(data)
 			particleStep = data.particleStep
 			if particleStep < 1 then particleStep = 1 end
 			if particleStep > particleSteps then particleStep = particleSteps end
+		end
+	end
+end
+
+function widget:TextCommand(command)
+    if string.find(command, "snow", nil, true) == 1  and  string.len(command) == 4 then
+		if snowMaps[currentMapname] == nil or snowMaps[currentMapname] == false then
+			snowMaps[currentMapname] = true
+			enabled = true
+			Spring.Echo("Snow widget: snow enabled for this map. (Snow wont show when average fps is below "..minFps..".)")
+			init()
+		else
+			snowMaps[currentMapname] = false
+			enabled = false
+			Spring.Echo("Snow widget: snow disabled for this map.")
+			removeSnow()
 		end
 	end
 end

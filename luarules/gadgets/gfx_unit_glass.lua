@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name      = "Unit glass pieces",
@@ -88,7 +86,7 @@ else -- Unsynced
 -- Includes
 -----------------------------------------------------------------
 
-local LuaShader = gl.LuaShader
+local LuaShader = VFS.Include("LuaRules/Gadgets/Include/LuaShader.lua")
 
 -----------------------------------------------------------------
 -- Acceleration
@@ -101,7 +99,9 @@ local glGetSun = gl.GetSun
 
 local glDepthTest = gl.DepthTest
 local glCulling = gl.Culling
+local glBlending = gl.Blending
 
+local glPushPopMatrix = gl.PushPopMatrix
 local glPushMatrix = gl.PushMatrix
 local glPopMatrix = gl.PopMatrix
 local glUnitMultMatrix = gl.UnitMultMatrix
@@ -280,6 +280,7 @@ local teamColors = {}
 local glassUnits = {}
 
 local pieceList
+local allUnits
 
 local sunChanged = true
 local glassShader

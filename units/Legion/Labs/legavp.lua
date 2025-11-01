@@ -67,11 +67,10 @@ return {
 			"cormabm",
 			"legavjam",
 			"legavrad",
-			"legafcv"
 		},
 		customparams = {
 			usebuildinggrounddecal = false,
-			buildinggrounddecaltype = "decals/legavp_aoplane.dds",
+			buildinggrounddecaltype = "decals/coravp_aoplane.dds",
 			buildinggrounddecalsizey = 12,
 			buildinggrounddecalsizex = 12,
 			buildinggrounddecaldecayspeed = 0.01,

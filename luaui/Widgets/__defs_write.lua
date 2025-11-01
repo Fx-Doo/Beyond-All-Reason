@@ -10,8 +10,6 @@ if customparamDefsDetected then
 
     local excludeScavengers = true
 
-    local widget = widget ---@type Widget
-
     function widget:GetInfo()
         return {
             name      = "Write customparam.__def to files",

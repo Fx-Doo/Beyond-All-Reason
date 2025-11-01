@@ -4,8 +4,6 @@ if not scavengersAIEnabled then
 	return
 end
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name    = "Scavenger Info",
@@ -21,6 +19,7 @@ end
 local show = true	-- gets disabled when it has been loaded before
 
 local vsx,vsy = Spring.GetViewGeometry()
+local fontfile2 = "fonts/" .. Spring.GetConfigString("bar_font2", "Exo2-SemiBold.otf")
 
 local textFile = VFS.LoadFile("gamedata/scavengers/infotext.txt")
 
@@ -53,7 +52,7 @@ local maxLines = 20
 
 local showOnceMore = false		-- used because of GUI shader delay
 
-local font, font2, loadedFontSize, titleRect, backgroundGuishader, textList, dlistcreated
+local font, font2, loadedFontSize, titleRect, backgroundGuishader, textList, dlistcreated, bgpadding
 
 local RectRound, UiElement, UiScroller, elementCorner
 
@@ -68,7 +67,8 @@ function widget:ViewResize()
 	screenY = math.floor((vsy * centerPosY) + (screenHeight / 2))
 
 	font, loadedFontSize = WG['fonts'].getFont()
-	font2 = WG['fonts'].getFont(2)
+	font2 = WG['fonts'].getFont(fontfile2)
+	bgpadding = WG.FlowUI.elementPadding
 	elementCorner = WG.FlowUI.elementCorner
 
 	RectRound = WG.FlowUI.Draw.RectRound

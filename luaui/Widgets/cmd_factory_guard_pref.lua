@@ -1,6 +1,4 @@
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name      = "Factory Guard Default On",
@@ -13,7 +11,7 @@ function widget:GetInfo()
 	}
 end
 
-local CMD_FACTORY_GUARD = GameCMD.FACTORY_GUARD
+VFS.Include("luarules/configs/customcmds.h.lua")
 
 local isFactory = {}
 for unitDefID, unitDef in pairs(UnitDefs) do

@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 	name	= "Spy move/reclaim defaults",
@@ -12,19 +10,10 @@ function widget:GetInfo()
 	}
 end
 
-local spies  = {}
-
-local spyNames = {
-	'armspy',
-	'corspy',
-	'legaspy',
+local spies  = {
+	[UnitDefNames.armspy.id] = true,
+	[UnitDefNames.corspy.id] = true,
 }
-
-for _, spyName in ipairs(spyNames) do
-	if UnitDefNames[spyName] then
-		spies[UnitDefNames[spyName].id] = true
-	end
-end
 
 local GetSelectedUnitsSorted = Spring.GetSelectedUnitsSorted
 local GetUnitStates = Spring.GetUnitStates
@@ -50,10 +39,6 @@ function widget:PlayerChanged(playerID)
 end
 
 function widget:Initialize()
-    if #spies == 0 then
-	    widgetHandler:RemoveWidget()
-	    return
-    end
     if Spring.IsReplay() or Spring.GetGameFrame() > 0 then
         maybeRemoveSelf()
     end

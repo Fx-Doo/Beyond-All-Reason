@@ -31,7 +31,6 @@ string armasy  ("armasy");
 string armap   ("armap");
 string armaap  ("armaap");
 string armshltx("armshltx");
-
 string corlab  ("corlab");
 string coralab ("coralab");
 string corvp   ("corvp");
@@ -41,14 +40,6 @@ string corasy  ("corasy");
 string corap   ("corap");
 string coraap  ("coraap");
 string corgant ("corgant");
-
-string leglab  ("leglab");
-string legalab ("legalab");
-string legvp   ("legvp");
-string legavp  ("legavp");
-string legap   ("legap");
-string legaap  ("legaap");
-string leggant ("leggant");
 
 int switchInterval = MakeSwitchInterval();
 
@@ -76,12 +67,9 @@ void AiUnitAdded(CCircuitUnit@ unit, Unit::UseAs usage)
 		// if (ai.teamId != ai.GetLeadTeamId()) then this change affects only target selection,
 		// while threatmap still counts "ignored" here units.
 // 		AiLog("ignore newly created armpw, corak, armflea, armfav, corfav");
-		array<string> spam = {"armpw", "corak", "armflea", "armfav", "corfav", "leggob", "legscout"};
-		for (uint i = 0; i < spam.length(); ++i) {
-			CCircuitDef@ cdef = ai.GetCircuitDef(spam[i]);
-			if (cdef !is null)
-				cdef.SetIgnore(true);
-		}
+		array<string> spam = {"armpw", "corak", "armflea", "armfav", "corfav"};
+		for (uint i = 0; i < spam.length(); ++i)
+			ai.GetCircuitDef(spam[i]).SetIgnore(true);
 	}
 
 	const array<Opener::SO>@ opener = Opener::GetOpener(facDef);
@@ -138,11 +126,6 @@ bool AiIsSwitchAllowed(CCircuitDef@ facDef)
 		|| (aiEconomyMgr.metal.current > facDef.costM);
 	aiFactoryMgr.isAssistRequired = Economy::isSwitchAssist = !isOK;
 	return isOK;
-}
-
-CCircuitDef@ AiGetFactoryToBuild(const AIFloat3& in pos, bool isStart, bool isReset)
-{
-	return aiFactoryMgr.DefaultGetFactoryToBuild(pos, isStart, isReset);
 }
 
 /* --- Utils --- */

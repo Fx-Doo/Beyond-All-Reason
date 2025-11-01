@@ -1,16 +1,19 @@
 local teams = Spring.GetTeamList()
 mapsizeX = Game.mapSizeX
 mapsizeZ = Game.mapSizeZ
-local scavengerAITeamID = Spring.Utilities.GetScavTeamID()
-local scavengerAllyTeamID = Spring.Utilities.GetScavAllyTeamID()
-
-if Spring.Utilities.Gametype.IsScavengers() then
-	scavengersAIEnabled = true
-	ScavengerStartboxXMin, ScavengerStartboxZMin, ScavengerStartboxXMax, ScavengerStartboxZMax = Spring.GetAllyTeamStartBox(scavengerAllyTeamID)
-	if ScavengerStartboxXMin == 0 and ScavengerStartboxZMin == 0 and ScavengerStartboxXMax == mapsizeX and ScavengerStartboxZMax == mapsizeZ then
-		ScavengerStartboxExists = false
-	else
-		ScavengerStartboxExists = true
+for i = 1,#teams do
+	local luaAI = Spring.GetTeamLuaAI(teams[i])
+	if luaAI and luaAI ~= "" and string.sub(luaAI, 1, 12) == 'ScavengersAI' then
+		scavengersAIEnabled = true
+		scavengerAITeamID = i - 1
+		_,_,_,_,_,scavengerAllyTeamID = Spring.GetTeamInfo(scavengerAITeamID)
+		ScavengerStartboxXMin, ScavengerStartboxZMin, ScavengerStartboxXMax, ScavengerStartboxZMax = Spring.GetAllyTeamStartBox(scavengerAllyTeamID)
+		if ScavengerStartboxXMin == 0 and ScavengerStartboxZMin == 0 and ScavengerStartboxXMax == mapsizeX and ScavengerStartboxZMax == mapsizeZ then
+			ScavengerStartboxExists = false
+		else
+			ScavengerStartboxExists = true
+		end
+		break
 	end
 end
 
@@ -21,8 +24,6 @@ else
 	lootboxSpawnEnabled = false
 end
 
-
-local gadget = gadget ---@type Gadget
 
 function gadget:GetInfo()
     return {
@@ -151,7 +152,7 @@ end
 function gadget:GameFrame(n)
 
     if n%30 == 0 and n > 2 then
-		if SpawnChance < 1 or math.random(0,SpawnChance) == 0 then
+		if math.random(0,SpawnChance) == 0 then
 			LootboxesToSpawn = LootboxesToSpawn+0.1
 			if LootboxesToSpawn < 0 then
 				LootboxesToSpawn = 0
@@ -161,9 +162,7 @@ function gadget:GameFrame(n)
         if aliveLootboxesCount > 0 then
 			for i = 1,#aliveLootboxes do --for lootboxID,_ in pairs(aliveLootboxes) do
 				local lootboxID = aliveLootboxes[i]
-				if lootboxID then
-					nearbyCaptureLibrary.NearbyCapture(lootboxID, aliveLootboxCaptureDifficulty[lootboxID], 1024)
-				end
+				nearbyCaptureLibrary.NearbyCapture(lootboxID, aliveLootboxCaptureDifficulty[lootboxID], 1024)
 			end
         end
         if LootboxesToSpawn >= 1 and lootboxSpawnEnabled then

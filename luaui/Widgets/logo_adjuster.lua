@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
   return {
     name      = "Logo adjuster",
@@ -83,6 +81,7 @@ function widget:Update(dt)
 	sec = sec + dt
 	if sec > 1.25 then
 		sec = 0
+		local now = os.clock()
 		local gameFrame = Spring.GetGameFrame()
 		if gameFrame > 0 then
 

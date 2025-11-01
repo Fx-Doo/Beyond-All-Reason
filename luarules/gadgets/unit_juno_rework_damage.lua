@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = 'Juno Rework Damage',
@@ -190,10 +188,8 @@ local todenyUnitsNames = {
 	local junoWeaponsNames = {
 		["armjuno_juno_pulse"] = true,
 		["corjuno_juno_pulse"] = true,
-		["legjuno_juno_pulse"] = true,
 		["armjuno_scav_juno_pulse"] = true,
 		["corjuno_scav_juno_pulse"] = true,
-		["legjuno_scav_juno_pulse"] = true,
 	}
 	-- convert unitname -> unitDefID
 	local junoWeapons = {}
@@ -259,9 +255,6 @@ local todenyUnitsNames = {
 		end
 		if WeaponDefNames.corjuno_juno_pulse then
 			Script.SetWatchExplosion(WeaponDefNames.corjuno_juno_pulse.id, true)
-		end
-		if WeaponDefNames.legjuno_juno_pulse then
-			Script.SetWatchExplosion(WeaponDefNames.legjuno_juno_pulse.id, true)
 		end
 	end
 

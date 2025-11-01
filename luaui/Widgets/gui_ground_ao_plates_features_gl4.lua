@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Ground AO Plates Features GL4",
@@ -13,7 +11,7 @@ function widget:GetInfo()
 end
 
 --------------- Configurables -------------------
-local decalAlpha = 0.66
+local decalAlpha = 0.33
 
 --------------- Atlas textures ----------------
 
@@ -81,12 +79,7 @@ end
 ---- GL4 Backend Stuff----
 local groundPlateVBO = nil
 local groundPlateShader = nil
-
-local luaShaderDir = "LuaUI/Include/"
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-local popElementInstance  = InstanceVBOTable.popElementInstance
+local luaShaderDir = "LuaUI/Widgets/Include/"
 
 local glTexture = gl.Texture
 local glCulling = gl.Culling
@@ -124,13 +117,13 @@ local function AddPrimitiveAtUnit(featureID, featureDefID, noUpload)
 end
 
 local function ProcessAllFeatures()
-	InstanceVBOTable.clearInstanceTable(groundPlateVBO)
+	clearInstanceTable(groundPlateVBO)
 	local features = Spring.GetAllFeatures()
 	--Spring.Echo("Refreshing Ground Plates", #features)
 	for _, featureID in ipairs(features) do
 		AddPrimitiveAtUnit(featureID, nil, true)
 	end
-	InstanceVBOTable.uploadAllElements(groundPlateVBO)
+	uploadAllElements(groundPlateVBO)
 end
 local firstRun = true
 function widget:DrawWorldPreUnit()
@@ -240,7 +233,7 @@ function widget:Initialize()
 	-- MATCH CUS position as seed to sin, then pass it through geoshader into fragshader
 	--shaderConfig.POST_VERTEX = "v_parameters.w = max(-0.2, sin(timeInfo.x * 2.0/30.0 + (v_centerpos.x + v_centerpos.z) * 0.1)) + 0.2; // match CUS glow rate"
 	shaderConfig.ZPULL = 512.0 -- send 16 elmos forward in depth buffer"
-	shaderConfig.POST_SHADING = "fragColor.rgba = vec4(texcolor.rgb, pow(texcolor.a,0.85) * g_uv.z);"
+	shaderConfig.POST_SHADING = "fragColor.rgba = vec4(texcolor.rgb, pow(texcolor.a,0.5) * g_uv.z);"
 	shaderConfig.MAXVERTICES = 4
 	shaderConfig.USE_CIRCLES = nil
 	shaderConfig.USE_CORNERRECT = nil
@@ -306,4 +299,4 @@ function widget:GameFrame()
 	end
 end
 
-
+	

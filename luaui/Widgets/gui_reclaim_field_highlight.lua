@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name      = "Reclaim Field Highlight",
@@ -55,7 +53,6 @@ local abs = math.abs
 local floor = math.floor
 local min = math.min
 local max = math.max
-local clamp = math.clamp
 local sqrt = math.sqrt
 local mathHuge = math.huge
 
@@ -439,7 +436,7 @@ do
 		featureConvexHulls[clusterID] = convexHull
 
 		cluster.area = hullArea
-		local areaSize = clamp((hullArea - 2 * areaTextMin) / areaTextRange, 0, 1)
+		local areaSize = max(0, min(1, (hullArea - 2 * areaTextMin) / areaTextRange))
 		cluster.font = fontSizeMin + (fontSizeMax - fontSizeMin) * areaSize
 	end
 end
@@ -576,13 +573,13 @@ local function UpdateFeatureReclaim()
 		end
 	end
 
-	if removed then
-		clusterizingNeeded = true
-	elseif next(dirty) then
-		redrawingNeeded = true
+	if #dirty>0 and not removed then
 		for ii in pairs(dirty) do
 			featureClusters[ii].text = string.formatSI(featureClusters[ii].metal)
 		end
+		redrawingNeeded = true
+	elseif removed then
+		clusterizingNeeded = true
 	end
 end
 
@@ -653,7 +650,7 @@ end
 -- Drawing
 
 local camUpVector
-local cameraScale = 1
+local cameraScale
 
 local function DrawHullVertices(hull)
 	for j = 1, #hull do

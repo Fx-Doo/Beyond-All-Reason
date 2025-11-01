@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Team Com Ends",
@@ -126,8 +124,7 @@ end
 
 function gadget:Initialize()
 	-- disable gadget when deathmode is "killall" or "none", or scoremode isnt regular
-	local deathmode = Spring.GetModOptions().deathmode
-	if deathmode ~= 'com' and deathmode ~= 'own_com' and deathmode ~= 'territorial_domination' and deathmode ~= 'builders' and not Spring.GetModOptions().temp_enable_territorial_domination then
+	if Spring.GetModOptions().deathmode ~= 'com' and Spring.GetModOptions().deathmode ~= 'own_com' and Spring.GetModOptions().deathmode ~= 'builders' then
 		gadgetHandler:RemoveGadget(self)
 	end
 

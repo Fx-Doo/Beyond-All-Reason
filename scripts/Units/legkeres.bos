@@ -121,7 +121,8 @@ AimSecondary(heading, pitch)
 	signal SIG_AIM_2;
 	set-signal-mask SIG_AIM_2;
 	turn lgun to x-axis <0.000000> - pitch speed <50.000000>;
-	
+	wait-for-turn turret around y-axis;
+	wait-for-turn lgun around x-axis;
 	start-script RestoreAfterDelay();
 	return (1);
 }
@@ -155,7 +156,8 @@ AimTertiary(heading, pitch)
 	signal SIG_AIM_3;
 	set-signal-mask SIG_AIM_3;
 	turn rgun to x-axis <0.000000> - pitch speed <50.000000>;
-	
+	wait-for-turn turret around y-axis;
+	wait-for-turn rgun around x-axis;
 	start-script RestoreAfterDelay();
 	return (1);
 }

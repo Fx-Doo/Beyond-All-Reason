@@ -25,7 +25,7 @@ return {
 		movestate = 0,
 		nochasecategory = "VTOL",
 		objectname = "Units/CORTREM.s3o",
-		script = "Units/cortrem.cob",
+		script = "Units/cortrem_clean.cob",
 		seismicsignature = 0,
 		selfdestructas = "hugeExplosionGenericSelfd",
 		sightdistance = 351,
@@ -112,7 +112,7 @@ return {
 		weapondefs = {
 			tremor_spread_fire = {
 				accuracy = 0,
-				areaofeffect = 210,
+				areaofeffect = 200,
 				avoidfeature = false,
 				cegtag = "arty-medium",
 				craterboost = 0,
@@ -134,12 +134,13 @@ return {
 				weapontype = "Cannon",
 				weaponvelocity = 420,
 				customparams = {
-					max_range_reduction = "0.30",
+					max_range_reduction = "0.28",
 					speceffect = "sector_fire",
-					spread_angle = "22",
+					spread_angle = "20",
+					when = "always",
 				},
 				damage = {
-					default = 200,
+					default = 150,
 					subs = 75,
 					vtol = 19,
 				},

@@ -130,9 +130,6 @@ return {
 				weapontimer = 14,
 				weapontype = "Cannon",
 				weaponvelocity = 660,
-				customparams = {
-					noattackrangearc = 1,
-				},
 				damage = {
 					default = 210,
 					shields = 105,

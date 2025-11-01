@@ -11,8 +11,6 @@ if not Spring.Utilities.Gametype.IsFFA() or not gadgetHandler:IsSyncedCode() the
   return
 end
 
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
   return {
     name = 'FFA start setup',

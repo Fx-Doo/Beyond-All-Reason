@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name 	= "Manual launch command",
@@ -10,11 +8,11 @@ function gadget:GetInfo()
 	}
 end
 
+VFS.Include('luarules/configs/customcmds.h.lua')
+
 if not gadgetHandler:IsSyncedCode() then
 	return
 end
-
-local CMD_MANUAL_LAUNCH = GameCMD.MANUAL_LAUNCH
 
 local manualLaunchUnits = {}
 for unitDefId, unitDef in pairs(UnitDefs) do

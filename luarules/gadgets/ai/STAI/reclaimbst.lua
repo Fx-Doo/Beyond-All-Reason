@@ -10,16 +10,17 @@ end
 
 function ReclaimBST:Act()
 	local timearea = 10000
-	if self.unit:Internal():CurrentCommand() ~= CMD.RECLAIM then
-		if #Spring.GetFeaturesInCylinder(self.position.x,self.position.z,10000) > 0 then
-			self.ai.tool:GiveOrder(self.unit:Internal():ID(),CMD.RECLAIM,{self.position.x,self.position.y,self.position.z,timearea},0,'1-1')	
-		end
-		
-	end
+	self.act = self.unit:Internal():AreaReclaim(self.position,timearea)
+	self.unit:ElectBehaviour()
 end
 
 function ReclaimBST:Update()
+-- 	 self.uFrame = self.uFrame or 0
 	local f = self.game:Frame()
+-- 	if f - self.uFrame < self.ai.behUp['reclaimbst']  then
+-- 		return
+-- 	end
+-- 	self.uFrame = f
 	if self.ai.schedulerhst.behaviourTeam ~= self.ai.id or self.ai.schedulerhst.behaviourUpdate ~= 'ReclaimBST' then return end
 	self.position.x,self.position.y,self.position.z = self.unit:Internal():GetRawPos()
 	self:Act()

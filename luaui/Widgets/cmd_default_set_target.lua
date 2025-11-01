@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name	= "Set target default",
@@ -14,7 +12,7 @@ end
 
 local rebindKeys = false
 
-local CMD_UNIT_SET_TARGET = GameCMD.UNIT_SET_TARGET
+local CMD_UNIT_SET_TARGET = 34923
 
 local IsUnitAllied = Spring.IsUnitAllied
 local GetSelectedUnitsCounts = Spring.GetSelectedUnitsCounts

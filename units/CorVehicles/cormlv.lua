@@ -32,7 +32,7 @@ return {
 		nochasecategory = "VTOL",
 		objectname = "Units/CORMLV.s3o",
 		radardistancejam = 64,
-		script = "Units/cormlv.cob",
+		script = "Units/cormlv_clean.cob",
 		seismicsignature = 0,
 		selfdestructas = "smallExplosionGenericSelfd",
 		sightdistance = 450,

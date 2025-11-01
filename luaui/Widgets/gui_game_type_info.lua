@@ -12,8 +12,6 @@
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "GameTypeInfo",
@@ -45,7 +43,7 @@ function widget:ViewResize()
 	vsx, vsy = Spring.GetViewGeometry()
 	widgetScale = (0.80 + (vsx * vsy / 6000000))
 
-	font = WG['fonts'].getFont(1, 1.5)
+	font = WG['fonts'].getFont(nil, 1.5, 0.25, 1.25)
 
 	if messages[1] then
 		messages[1].x = widgetScale * 60
@@ -88,8 +86,6 @@ function widget:LanguageChanged()
 		key = 'killAllUnits'
 	elseif deathmode == "builders" then
 		key = 'killAllBuilders'
-	elseif deathmode == "territorial_domination" or Spring.GetModOptions().temp_enable_territorial_domination then
-		key = 'territorialDomination'
 	else
 		key = 'killAllCommanders'
 	end

@@ -152,6 +152,7 @@ return {
 			super_missile = {
 				areaofeffect = 64,
 				avoidfeature = false,
+				burnblow = true,
 				castshadow = true,
 				cegtag = "missiletrailsmall-simple",
 				craterareaofeffect = 0,
@@ -162,7 +163,7 @@ return {
 				firestarter = 5,
 				flighttime = 2.5,
 				impulsefactor = 0.123,
-				model = "cormissile3fast.s3o",
+				model = "cormissile2.s3o",
 				name = "KarganethMissiles",
 				noselfdamage = true,
 				range = 600,
@@ -188,9 +189,8 @@ return {
 				weapontype = "MissileLauncher",
 				weaponvelocity = 600,
 				customparams = {
-					overrange_distance = 690,
-					projectile_destruction_method = "descend",
 					speceffect = "retarget",
+					when = "always",
 				},
 				damage = {
 					default = 180,
@@ -202,7 +202,6 @@ return {
 				badtargetcategory = "GROUNDSCOUT VTOL",
 				def = "SUPER_MISSILE",
 				fastautoretargeting = true,
-				fastquerypointupdate = true,
 				onlytargetcategory = "SURFACE",
 			},
 			[2] = {

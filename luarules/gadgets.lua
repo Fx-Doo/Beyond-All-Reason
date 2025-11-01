@@ -19,7 +19,7 @@
 
 local VFSMODE = VFS.ZIP_ONLY -- FIXME: ZIP_FIRST ?
 if Spring.IsDevLuaEnabled() then
-	VFSMODE = VFS.RAW_FIRST
+	VFSMODE = VFS.RAW_ONLY
 end
 
 VFS.Include('init.lua', nil, VFSMODE)
@@ -158,8 +158,6 @@ local callInLists = {
 	"StockpileChanged",
 
 	"ActiveCommandChanged",
-	"CameraRotationChanged",
-	"CameraPositionChanged",
 	"CommandNotify",
 
 	-- Feature CallIns
@@ -1343,7 +1341,6 @@ end
 
 local CMD_ANY = CMD.ANY
 local CMD_NIL = CMD.NIL
-local CMD_BUILD = CMD.BUILD
 local allowCommandList = {[CMD_ANY] = {}}
 
 function gadgetHandler:ReorderAllowCommands(gadget, f)
@@ -1482,13 +1479,7 @@ end
 function gadgetHandler:AllowCommand(unitID, unitDefID, unitTeam,
 									cmdID, cmdParams, cmdOptions, cmdTag, playerID, fromSynced, fromLua)
 	local cmdKey = cmdID or CMD_NIL
-	if not allowCommandList[cmdKey] then
-		if type(cmdKey) == "number" and cmdKey < 0 then
-			cmdKey = CMD_BUILD
-		else
-			cmdKey = CMD_ANY
-		end
-	end
+	if not allowCommandList[cmdKey] then cmdKey = CMD_ANY end
 
 	tracy.ZoneBeginN("G:AllowCommand")
 	for _, g in ipairs(allowCommandList[cmdKey]) do
@@ -1806,9 +1797,9 @@ function gadgetHandler:UnitIdle(unitID, unitDefID, unitTeam)
 	return
 end
 
-function gadgetHandler:UnitCmdDone(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdOpts, cmdTag)
+function gadgetHandler:UnitCmdDone(unitID, unitDefID, unitTeam, cmdID, cmdTag, cmdParams, cmdOpts)
 	for _, g in ipairs(self.UnitCmdDoneList) do
-		g:UnitCmdDone(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdOpts, cmdTag)
+		g:UnitCmdDone(unitID, unitDefID, unitTeam, cmdID, cmdTag, cmdParams, cmdOpts)
 	end
 	return
 end
@@ -2164,18 +2155,6 @@ end
 function gadgetHandler:ActiveCommandChanged(id, cmdType)
 	for _, g in ipairs(self.ActiveCommandChangedList) do
 		g:ActiveCommandChanged(id, cmdType)
-	end
-end
-
-function gadgetHandler:CameraRotationChanged(rotx, roty, rotz)
-	for _, g in r_ipairs(self.CameraRotationChangedList) do
-		g:CameraRotationChanged(rotx, roty, rotz)
-	end
-end
-
-function gadgetHandler:CameraPositionChanged(posx, posy, posz)
-	for _, g in r_ipairs(self.CameraPositionChangedList) do
-		g:CameraPositionChanged(posx, posy, posz)
 	end
 end
 

@@ -22,7 +22,7 @@ return {
 		movementclass = "BOT3",
 		nochasecategory = "VTOL",
 		objectname = "Units/CORPYRO.s3o",
-		script = "Units/corpyro.cob",
+		script = "Units/CORPYRO.cob",
 		seismicsignature = 0,
 		selfdestructas = "pyroselfd",
 		selfdestructcountdown = 1,

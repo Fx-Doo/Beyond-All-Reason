@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Area Attack",
@@ -12,9 +10,7 @@ function gadget:GetInfo()
 	}
 end
 
--- Custom counterpart to the engine's `CMD.AREA_ATTACK`, used by air units.
--- FIXME: See https://github.com/beyond-all-reason/RecoilEngine/issues/1032
-local CMD_AREA_ATTACK_GROUND = GameCMD.AREA_ATTACK_GROUND
+local CMD_AREAATTACK = 39954
 
 if gadgetHandler:IsSyncedCode() then
 
@@ -38,7 +34,7 @@ if gadgetHandler:IsSyncedCode() then
 	local aadesc = {
 		name = "Area Attack",
 		action = "areaattack",
-		id = CMD_AREA_ATTACK_GROUND,
+		id = CMD_AREAATTACK,
 		type = CMDTYPE.ICON_AREA,
 		tooltip = "attack an area randomly",
 		cursor = "cursorattack",
@@ -60,7 +56,7 @@ if gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:AllowCommand(unitID, unitDefID, teamID, cmdID, cmdParams, cmdOptions, cmdTag, playerID, fromSynced, fromLua)
-		-- accepts: CMD_AREA_ATTACK_GROUND
+		-- accepts: CMD_AREAATTACK
 		if canAreaAttack[unitDefID] then
 			return true
 		else
@@ -69,7 +65,7 @@ if gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:CommandFallback(u,ud,team,cmd,param,opt)
-		if cmd == CMD_AREA_ATTACK_GROUND then
+		if cmd == CMD_AREAATTACK then
 			local x,_,z = Spring.GetUnitPosition(u)
 			local dist = math_sqrt((x-param[1])*(x-param[1]) + (z-param[3])*(z-param[3]))
 			if dist <= range[ud] - param[4] then
@@ -90,14 +86,14 @@ if gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:Initialize()
-		gadgetHandler:RegisterCMDID(CMD_AREA_ATTACK_GROUND)
-		gadgetHandler:RegisterAllowCommand(CMD_AREA_ATTACK_GROUND)
+		gadgetHandler:RegisterCMDID(CMD_AREAATTACK)
+		gadgetHandler:RegisterAllowCommand(CMD_AREAATTACK)
 	end
 
 else	-- UNSYNCED
 
 	function gadget:Initialize()
-		Spring.SetCustomCommandDrawData(CMD_AREA_ATTACK_GROUND, CMDTYPE.ICON_UNIT_OR_AREA, {1,0,0,.8},true)
+		Spring.SetCustomCommandDrawData(CMD_AREAATTACK, CMDTYPE.ICON_UNIT_OR_AREA, {1,0,0,.8},true)
 	end
 
 end

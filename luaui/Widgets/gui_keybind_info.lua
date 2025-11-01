@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "Keybind/Mouse Info",
@@ -48,6 +46,7 @@ local function getActionHotkey(action)
 end
 
 local vsx, vsy = Spring.GetViewGeometry()
+local fontfile2 = "fonts/" .. Spring.GetConfigString("bar_font2", "Exo2-SemiBold.otf")
 
 local screenHeightOrg = 550
 local screenWidthOrg = 1050
@@ -188,7 +187,7 @@ local function drawWindow(activetab)
 end
 
 local function refreshText()
-	actionHotkeys = VFS.Include("luaui/Include/action_hotkeys.lua")
+	actionHotkeys = VFS.Include("luaui/Widgets/Include/action_hotkeys.lua")
 	currentLayout = Spring.GetConfigString("KeyboardLayout", "qwerty")
 
 	keybindsText = {
@@ -305,8 +304,7 @@ function widget:ViewResize()
 	screenY = math.floor((vsy * centerPosY) + (screenHeight / 2))
 
 	font = WG['fonts'].getFont()
-	font2 = WG['fonts'].getFont(2)
-
+	font2 = WG['fonts'].getFont(fontfile2)
 	elementCorner = WG.FlowUI.elementCorner
 
 	RectRound = WG.FlowUI.Draw.RectRound
@@ -438,10 +436,7 @@ function widget:Shutdown()
 		keybinds = nil
 	end
 	if WG['guishader'] then
-		WG['guishader'].RemoveDlist('keybindinfo')
-	end
-	if backgroundGuishader ~= nil then
-		glDeleteList(backgroundGuishader)
+		WG['guishader'].DeleteDlist('keybindinfo')
 	end
 end
 

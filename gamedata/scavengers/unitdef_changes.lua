@@ -1148,7 +1148,7 @@ customDefs.legkam = {
 -- 	},
 -- }
 
--- -- Custom ARMADA ambusher - NO cloak since looks weird/ugly atm
+-- -- Custom ARM ambusher - NO cloak since looks weird/ugly atm
 -- customDefs.armamb = {
 -- 	-- cancloak = false,
 -- 	-- stealth = true,

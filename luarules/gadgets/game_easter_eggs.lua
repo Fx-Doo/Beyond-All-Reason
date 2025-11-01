@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
     return {
         name      = "Easter Eggs Spawner",
@@ -24,8 +22,8 @@ local colors = {"pink","white","red", "blue", "darkgreen", "purple", "green", "y
 
 function spawnRandomEggField(x,y,z, spread)
 
-    local featureValueMetal = 4
-    local featureValueEnergy = 40
+    local featureValueMetal = 5
+    local featureValueEnergy = 50
     local size
     local color
 

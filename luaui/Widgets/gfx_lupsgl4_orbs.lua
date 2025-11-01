@@ -1,6 +1,4 @@
 --------------------------------------------------------------------------------
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "LUPS Orb GL4",
@@ -13,10 +11,25 @@ function widget:GetInfo()
 	}
 end
 
+local spGetUnitPieceInfo = Spring.GetUnitPieceInfo
+local spGetGameFrame = Spring.GetGameFrame
+local spGetUnitPieceMap = Spring.GetUnitPieceMap
+local spGetUnitIsActive = Spring.GetUnitIsActive
+local spGetUnitMoveTypeData = Spring.GetUnitMoveTypeData
+local spGetUnitVelocity = Spring.GetUnitVelocity
 local spGetUnitTeam = Spring.GetUnitTeam
+local glBlending = gl.Blending
+local glTexture = gl.Texture
 
+local GL_GREATER = GL.GREATER
+local GL_ONE_MINUS_SRC_ALPHA = GL.ONE_MINUS_SRC_ALPHA
+local GL_SRC_ALPHA = GL.SRC_ALPHA
+local GL_ONE = GL.ONE
 
+local glAlphaTest = gl.AlphaTest
+local glDepthTest = gl.DepthTest
 
+local spValidUnitID = Spring.ValidUnitID
 
 --------------------------------------------------------------------------------
 -- Beherith's notes
@@ -49,26 +62,10 @@ local corafusShieldSphere = table.merge(defaults, {
 	--colormap2 = { {0.2, 0.2, 1, 0.7},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.7} },
 })
 
-local corafust3ShieldSphere = table.merge(defaults, {
-	pos = { 0, 120, 0 },
-	size = 64,
-	light = 8,
-	--colormap1 = { {0.9, 0.9, 1, 0.75},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 0.75} },
-	--colormap2 = { {0.2, 0.2, 1, 0.7},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.7} },
-})
-
 local armafusShieldSphere = table.merge(defaults, {
 	pos = { 0, 60, 0 },
 	size = 28,
 	light = 4.25,
-	--colormap1 = { {0.9, 0.9, 1, 0.75},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 0.75} },
-	--colormap2 = { {0.2, 0.2, 1, 0.7},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.7} },
-})
-
-local armafust3ShieldSphere = table.merge(defaults, {
-	pos = { 0, 120, 0 },
-	size = 56,
-	light = 8.5,
 	--colormap1 = { {0.9, 0.9, 1, 0.75},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 0.75} },
 	--colormap2 = { {0.2, 0.2, 1, 0.7},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.7} },
 })
@@ -80,15 +77,6 @@ local legafusShieldSphere = table.merge(defaults, {
 	--colormap1 = { {0.9, 0.9, 1, 0.75},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 0.75} },
 	--colormap2 = { {0.2, 0.2, 1, 0.7},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.7} },
 })
-
-local legafust3ShieldSphere = table.merge(defaults, {
-	pos = { 0, 120, 0 },
-	size = 72,
-	light = 8.5,
-	--colormap1 = { {0.9, 0.9, 1, 0.75},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 1.0},{0.9, 0.9, 1, 0.75} },
-	--colormap2 = { {0.2, 0.2, 1, 0.7},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.75},{0.2, 0.2, 1, 0.7} },
-})
-
 local corfusShieldSphere = table.merge(defaults, {
 	pos = { 0, 51, 0 },
 	size = 23,
@@ -129,13 +117,6 @@ local armjunoShieldSphere = table.merge(defaults, {
 	colormap2 = { { 0.8, 0.2, 0.2, 0.4 }, { 0.8, 0.2, 0.2, 0.45 }, { 0.9, 0.2, 0.2, 0.45 }, { 0.9, 0.1, 0.2, 0.4 } },
 })
 
-local legjunoShieldSphere = table.merge(defaults, {
-	pos = { 0, 69, 0 },
-	size = 9,
-	colormap1 = { { 0.9, 0.9, 1, 0.75 }, { 0.9, 0.9, 1, 1.0 }, { 0.9, 0.9, 1, 1.0 }, { 0.9, 0.9, 1, 0.75 } },
-	colormap2 = { { 0.8, 0.2, 0.2, 0.4 }, { 0.8, 0.2, 0.2, 0.45 }, { 0.9, 0.2, 0.2, 0.45 }, { 0.9, 0.1, 0.2, 0.4 } },
-})
-
 local corjunoShieldSphere = table.merge(defaults, {
 	pos = { 0, 72, 0 },
 	size = 13,
@@ -150,7 +131,6 @@ local armgateShieldSphere = table.merge(defaults, {
 	colormap2 = { { 0.2, 0.6, 0.2, 0.4 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.4 } },
 	isShield = true, 
 })
-
 local armgatet3ShieldSphere = table.merge(defaults, {
 	pos = { 0, 42, -6 },
 	size = 20,
@@ -158,29 +138,10 @@ local armgatet3ShieldSphere = table.merge(defaults, {
 	colormap2 = { { 0.2, 0.6, 0.2, 0.4 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.4 } },
 	isShield = true, 
 })
-local leggatet3ShieldSphere = table.merge(defaults, {
-	pos = { 0, 45, 0 },
-	size = 18,
-	colormap1 = { { 0.9, 0.9, 1, 0.75 }, { 0.9, 0.9, 1, 1.0 }, { 0.9, 0.9, 1, 1.0 }, { 0.9, 0.9, 1, 0.75 } },
-	colormap2 = { { 0.2, 0.6, 0.2, 0.4 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.4 } },
-	isShield = true, 
-})
-
-local legdeflectorShieldSphere = table.merge(defaults, {
-	pos = { 0, 21, 0 },
-	size = 12,
-	colormap1 = { { 0.9, 0.9, 1, 0.75 }, { 0.9, 0.9, 1, 1.0 }, { 0.9, 0.9, 1, 1.0 }, { 0.9, 0.9, 1, 0.75 } },
-	colormap2 = { { 0.2, 0.6, 0.2, 0.4 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.45 }, { 0.2, 0.6, 0.2, 0.4 } },
-	isShield = true,
-})
 
 local UnitEffects = {
 	["armjuno"] = {
 		{ class = 'ShieldSphere', options = armjunoShieldSphere },
-		{ class = 'ShieldJitter', options = { life = math.huge, pos = { 0, 72, 0 }, size = 14, precision = 22, repeatEffect = true } },
-	},
-	["legjuno"] = {
-		{ class = 'ShieldSphere', options = legjunoShieldSphere },
 		{ class = 'ShieldJitter', options = { life = math.huge, pos = { 0, 72, 0 }, size = 14, precision = 22, repeatEffect = true } },
 	},
 	["corjuno"] = {
@@ -208,18 +169,6 @@ local UnitEffects = {
 	["legafus"] = {
 		{ class = 'ShieldSphere', options = legafusShieldSphere },
 		{ class = 'ShieldJitter', options = { layer = -16, life = math.huge, pos = { 0, 60, 0 }, size = 38.5, precision = 22, repeatEffect = true } },
-	},
-	["armafust3"] = {
-		{ class = 'ShieldSphere', options = armafust3ShieldSphere },
-		{ class = 'ShieldJitter', options = { layer = -16, life = math.huge, pos = { 0, 120, 0 }, size = 57, precision = 22, repeatEffect = true } },
-	},
-	["corafust3"] = {
-		{ class = 'ShieldSphere', options = corafust3ShieldSphere },
-		{ class = 'ShieldJitter', options = { layer = -16, life = math.huge, pos = { 0, 120, 0 }, size = 65, precision = 22, repeatEffect = true } },
-	},
-	["legafust3"] = {
-		{ class = 'ShieldSphere', options = legafust3ShieldSphere },
-		{ class = 'ShieldJitter', options = { layer = -16, life = math.huge, pos = { 0, 120, 0 }, size = 77, precision = 22, repeatEffect = true } },
 	},
 	["resourcecheat"] = {
 		{ class = 'ShieldSphere', options = armafusShieldSphere },
@@ -253,20 +202,10 @@ local UnitEffects = {
 		{ class = 'ShieldSphere', options = armgatet3ShieldSphere },
 		--{class='ShieldJitter', options={delay=0,life=math.huge, pos={0,23.5,-5}, size=555, precision=0, strength=0.001, repeatEffect=true}},
 	},
-	["leggatet3"] = {
-		{ class = 'ShieldJitter', options = { delay = 0, life = math.huge, pos = { 0, 45, 0 }, size = 20, precision = 22, repeatEffect = true } },
-		{ class = 'ShieldSphere', options = leggatet3ShieldSphere },
-		--{class='ShieldJitter', options={delay=0,life=math.huge, pos={0,23.5,-5}, size=555, precision=0, strength=0.001, repeatEffect=true}},
-	},
 	["armfgate"] = {
 		{ class = 'ShieldJitter', options = { delay = 0, life = math.huge, pos = { 0, 25, 0 }, size = 15, precision = 22, repeatEffect = true } },
 		{ class = 'ShieldSphere', options = table.merge(armgateShieldSphere, { pos = { 0, 25, 0 } }) },
 		--{class='ShieldJitter', options={delay=0,life=math.huge, pos={0,25,0}, size=555, precision=0, strength= 0.001, repeatEffect=true}},
-	},
-	["legdeflector"] = {
-		{ class = 'ShieldJitter', options = { delay = 0, life = math.huge, pos = { 0, 20, -5 }, size = 15, precision = 22, repeatEffect = true } },
-		{ class = 'ShieldSphere', options = legdeflectorShieldSphere },
-		--{class='ShieldJitter', options={delay=0,life=math.huge, pos={0,23.5,-5}, size=555, precision=0, strength=0.001, repeatEffect=true}},
 	},
 	["lootboxbronze"] = {
 		{ class = 'ShieldSphere', options = table.merge(corfusShieldSphere,  {pos = { 0, 34, 0 }, size = 10} ) },
@@ -346,15 +285,13 @@ UnitEffects = nil
 -- Variables
 --------------------------------------------------------------------------------
 
+local sphereVBO = nil
 local orbVBO = nil
 local orbShader = nil
 
-local LuaShader = gl.LuaShader
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local popElementInstance  = InstanceVBOTable.popElementInstance
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-local drawInstanceVBO     = InstanceVBOTable.drawInstanceVBO
+local luaShaderDir = "LuaUI/Widgets/Include/"
+local LuaShader = VFS.Include(luaShaderDir.."LuaShader.lua")
+VFS.Include(luaShaderDir.."instancevbotable.lua")
 
 local vsSrc =
 [[
@@ -588,11 +525,11 @@ out vec4 fragColor;
 
 	float Fbm12(vec2 P) {
 		const int octaves = 2;
-		const float lacunarity = 1.8;
-		const float gain = 0.80;
+		const float lacunarity = 1.5;
+		const float gain = 0.49;
 
 		float sum = 0.0;
-		float amp = 0.8;
+		float amp = 1.0;
 		vec2 pp = P;
 
 		int i;
@@ -618,7 +555,7 @@ out vec4 fragColor;
 		 v += noise13(p * 0.9) * 0.99;
 		 v += noise13(p * 3.99) * 0.49;
 		 v += noise13(p * 8.01) * 0.249;
-		 v += noise13(p * 25.05) * 0.124;
+		 v += noise13(p * 15.05) * 0.124;
 		 return v;
 	}
 
@@ -644,48 +581,26 @@ out vec4 fragColor;
 
 		return color * t;
 	}
+	
+	
+	vec3 LightningOrb2(vec2 vUv, vec3 color) {
+		// looks quite similar to previous, but twice as fast
+		float violence = (1.0 - modelPos_vs.w);
+		vUv.x = fract(vUv.x * 2.0); // double it
+		vec2 uv = NORM2SNORM(vUv);
+		const float strength = 0.03 + 0.1 * violence;
+		const float dx = 0.225;
+		float t = 0.0;
+		for (int k = -4; k < 3; ++k) {
+			vec2 thisUV = uv;
+			thisUV.x -= dx * float(k);
+			thisUV.y += 3 * float(k);
+			vec2 fbmUV = vec2(thisUV.x * 2 + time, thisUV.y + 0.3*time);
+			t += abs(strength / ((thisUV.x + (2.0 * Fbm12( fbmUV ) -0.95))));
+		}
 
-float mirroredRepeat(float x, float repeats) {
-    x *= repeats;
-    float i = floor(x);
-    float f = fract(x);
-    // If i is odd, mirror the fractional part
-    if (mod(i, 2.0) == 1.0) {
-        f = 1.0 - f;
-    }
-    return f;
-}
-
-vec3 LightningOrb2(vec2 vUv, vec3 color) {
-
-    // Example: NO fract(), but still repeating:
-    // vUv.x *= 3.0;
-
-    // Or: mirror repeat for 2 tiles
-    vUv.x = mirroredRepeat(vUv.x, 2.0);
-
-    // From here on, continue as you did before:
-    vec2 uv = NORM2SNORM(vUv);
-
-    float violence = (1 - modelPos_vs.w);
-    const float strength = 0.08 + 0.4 * violence;
-    const float dx = 0.225;
-
-    float t = 0.1;
-    for (int k = -4; k < 3; ++k) {
-        vec2 thisUV = uv;
-        thisUV.x -= dx * float(k);
-        thisUV.y += 2.0 * float(k);
-        vec2 fbmUV = vec2(thisUV.x * 1.0 + time, thisUV.y + 0.3 * time);
-
-        // Your fract()-free or tiled/noise logic remains the same here:
-        t += abs(strength / (thisUV.x + (3.0 * Fbm12(fbmUV) - 1.9)));
-    }
-
-    return color * t;
-}
-
-
+		return color * t;
+	}
 
 	vec3 MagicOrb(vec3 noiseVec, vec3 color) {
 		float t = 0.0;
@@ -721,7 +636,7 @@ vec3 LightningOrb2(vec2 vUv, vec3 color) {
 
 	vec3 RotAroundY(vec3 p)
 	{
-		float ra = -time * 0.5;
+		float ra = -time * 2.1;
 		mat4 tr = mat4(cos(ra), 0.0, sin(ra), 0.0,
 					   0.0, 1.0, 0.0, 0.0,
 					   -sin(ra), 0.0, cos(ra), 0.0,
@@ -741,9 +656,8 @@ void main(void)
 		noiseVec = RotAroundY(noiseVec);
 		vec2 vUv = (RadialCoords(noiseVec));
 		vec3 col = LightningOrb2(vUv, fragColor.rgb);
-		fragColor.rgba = vec4(col,1.0) * 1.2; return;
-		//fragColor.rgb = max(fragColor.rgb, col * col);
-		//fragColor.rgb = max(fragColor.rgb, col * 2);
+		//fragColor.rgba = vec4(col,1.0); return;
+		fragColor.rgb = max(fragColor.rgb, col * col);
 	}
 	else if (technique_vs == 2) { // MagicOrb
 		vec3 noiseVec = modelPos_vs.xyz;
@@ -793,7 +707,7 @@ local function initGL4()
   )
   shaderCompiled = orbShader:Initialize()
   if not shaderCompiled then goodbye("Failed to compile orbShader GL4 ") end
-  local sphereVBO, numVerts, sphereIndexVBO, numIndices = InstanceVBOTable.makeSphereVBO(24,16,1)
+  local sphereVBO, numVerts, sphereIndexVBO, numIndices = makeSphereVBO(24,16,1)
   --Spring.Echo("SphereVBO has", numVerts, "vertices and ", numIndices,"indices")
   local orbVBOLayout = {
 		  {id = 3, name = 'posrad', size = 4}, -- widthlength
@@ -802,10 +716,10 @@ local function initGL4()
 		  {id = 6, name = 'color2', size = 4}, --- color
 		  {id = 7, name = 'instData', type = GL.UNSIGNED_INT, size= 4},
 		}
-  orbVBO = InstanceVBOTable.makeInstanceVBOTable(orbVBOLayout,256, "orbVBO", 7)
+  orbVBO = makeInstanceVBOTable(orbVBOLayout,256, "orbVBO", 7)
   orbVBO.numVertices = numIndices
   orbVBO.vertexVBO = sphereVBO
-  orbVBO.VAO = InstanceVBOTable.makeVAOandAttach(orbVBO.vertexVBO, orbVBO.instanceVBO)
+  orbVBO.VAO = makeVAOandAttach(orbVBO.vertexVBO, orbVBO.instanceVBO)
   orbVBO.primitiveType = GL.TRIANGLES
   orbVBO.indexVBO = sphereIndexVBO  
   orbVBO.VAO:AttachIndexBuffer(orbVBO.indexVBO)
@@ -832,13 +746,16 @@ end
 -- Note that we rely on VisibleUnitRemoved triggering right before VisibleUnitAdded on UnitFinished 
 local shieldFinishFrames = {} -- unitID to gameframe
 
-function widget:DrawWorldPreParticles(drawAboveWater, drawBelowWater, drawReflection, drawRefraction) 
+
+local lastDrawFrame = -1
+function widget:DrawWorldPreParticles() 
 	if next(shieldFinishFrames) then shieldFinishFrames = {} end
 	-- NOTE: This is called TWICE per draw frame, once before water and once after, even if no water is present. 
 	-- If water is present on the map, then it gets called again between the two for the refraction pass
 	-- Solution is to draw it only on the first call, and draw reflections from widget:DrawWorldReflection
-	
-	if drawAboveWater and not drawReflection and not drawRefraction then
+	local thisDrawFrame = Spring.GetDrawFrame()
+	if lastDrawFrame ~= thisDrawFrame then 
+		lastDrawFrame = thisDrawFrame
 		DrawOrbs(false) 
 	end
 end
@@ -891,12 +808,12 @@ end
 
 function widget:VisibleUnitsChanged(extVisibleUnits, extNumVisibleUnits)
 	if orbVBO.usedElements > 0 then 
-		InstanceVBOTable.clearInstanceTable(orbVBO) 
+		clearInstanceTable(orbVBO) 
 	end
 	for unitID, unitDefID in pairs(extVisibleUnits) do 
 		widget:VisibleUnitAdded(unitID, unitDefID, nil, true)
 	end
-	InstanceVBOTable.uploadAllElements(orbVBO)
+	uploadAllElements(orbVBO)
 end
 
 function widget:VisibleUnitRemoved(unitID)

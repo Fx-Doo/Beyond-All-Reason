@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name      = "Waypoint Dragger",
@@ -15,7 +13,7 @@ end
 local spGetActiveCommand    = Spring.GetActiveCommand
 local spGetGameSeconds      = Spring.GetGameSeconds
 local spGetSelectedUnits    = Spring.GetSelectedUnits
-local spGetUnitCommands     = Spring.GetUnitCommands
+local spGetCommandQueue     = Spring.GetCommandQueue
 local spGetMouseState       = Spring.GetMouseState
 local spGetModKeyState      = Spring.GetModKeyState
 local spGiveOrderToUnit     = Spring.GiveOrderToUnit
@@ -102,7 +100,7 @@ local function GetWayPointsNearCursor(wpTbl, mx, my)
 
 	for i = 1, #selUnitsTbl do
 		local unitID = selUnitsTbl[i]
-		local commands = spGetUnitCommands(unitID,20)
+		local commands = spGetCommandQueue(unitID,20)
 		if commands then
 			for cmdNum = 1, #commands do
 				local curCmd      = commands[cmdNum    ]
@@ -196,7 +194,7 @@ local function UpdateWayPoints(wpTbl)
 		local cmdUnitID = wpData[7]
 		local cmdValid  = false
 
-		local unitCmds = spGetUnitCommands(cmdUnitID,20)
+		local unitCmds = spGetCommandQueue(cmdUnitID,20)
 
 		-- check if the command has not been completed
 		-- since the MousePress() event occurred (tags

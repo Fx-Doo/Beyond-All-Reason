@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name    = 'Penetrator Weapons',
@@ -66,13 +64,10 @@ local slowingPerType = { -- Whether the projectile loses velocity, as well.
 --------------------------------------------------------------------------------
 -- Locals ----------------------------------------------------------------------
 
-local abs  = math.abs
-local max  = math.max
 local min  = math.min
 local sqrt = math.sqrt
 
 local spGetFeatureHealth       = Spring.GetFeatureHealth
-local spGetGroundHeight        = Spring.GetGroundHeight
 local spGetProjectileDirection = Spring.GetProjectileDirection
 local spGetProjectilePosition  = Spring.GetProjectilePosition
 local spGetProjectileVelocity  = Spring.GetProjectileVelocity
@@ -80,7 +75,6 @@ local spGetUnitHealth          = Spring.GetUnitHealth
 local spGetUnitIsDead          = Spring.GetUnitIsDead
 local spGetUnitPosition        = Spring.GetUnitPosition
 local spGetUnitRadius          = Spring.GetUnitRadius
-local spGetWaterLevel          = Spring.GetWaterLevel
 local spSetProjectileVelocity  = Spring.SetProjectileVelocity
 
 local spAddUnitDamage          = Spring.AddUnitDamage
@@ -96,7 +90,6 @@ local armorShields = Game.armorTypes.shields
 -- Find all weapons with an over-penetration behavior.
 
 local weaponParams = {}
-local waterWeapons = {}
 local unitArmorType = {}
 
 -- Track projectiles and their remaining damage and sequence their collisions.
@@ -128,7 +121,7 @@ local function loadPenetratorWeaponDefs()
 				damages  = toSafeDamageArray(weaponDef.damages),
 				falloff  = tobool(custom.overpenetrate_falloff == nil and falloffPerType[weaponDef.type] or custom.overpenetrate_falloff),
 				slowing  = tobool(custom.overpenetrate_slowing == nil and slowingPerType[weaponDef.type] or custom.overpenetrate_slowing),
-				penalty  = max(0, tonumber(custom.overpenetrate_penalty or penaltyDefault)),
+				penalty  = math.max(0, tonumber(custom.overpenetrate_penalty or penaltyDefault)),
 				weaponID = weaponDefID,
 				impulse  = weaponDef.damages.impulseFactor,
 			}
@@ -143,10 +136,6 @@ local function loadPenetratorWeaponDefs()
 			end
 
 			weaponParams[weaponDefID] = params
-
-			if weaponDef.waterWeapon then
-				waterWeapons[weaponDefID] = true
-			end
 		end
 	end
 	return (table.count(weaponParams) > 0)
@@ -214,7 +203,7 @@ local function addPenetratorCollision(targetID, isUnit, armorType, damage, proje
 	collisions[#collisions+1] = {
 		targetID  = targetID,
 		isUnit    = isUnit,
-		health    = max(health, 1),
+		health    = health,
 		healthMax = healthMax,
 		armorType = armorType,
 		damage    = damage,
@@ -258,7 +247,7 @@ local function addShieldDamage(shieldUnitID, shieldWeaponIndex, damageToShields,
 	local state, health = Spring.GetUnitShieldState(shieldUnitID)
 	local SHIELD_STATE_ENABLED = 1 -- nb: not boolean
 	if state == SHIELD_STATE_ENABLED and health > 0 then
-		local healthLeft = max(0, health - damageToShields)
+		local healthLeft = math.max(0, health - damageToShields)
 		if shieldWeaponIndex then
 			Spring.SetUnitShieldState(shieldUnitID, shieldWeaponIndex, healthLeft)
 		else
@@ -375,14 +364,8 @@ function gadget:GameFrame(gameFrame)
 							penetrator.dirZ * impulse
 						)
 					else
-						-- Features do not have an impulse limiter (like unit_collision_damage_behavior),
-						-- so apply damage only with no impulse. They also must be destroyed manually:
-						local health = collision.health - damage
-						if health > 1 then
-							Spring.SetFeatureHealth(targetID, health)
-						else
-							Spring.DestroyFeature(targetID)
-						end
+						-- Features are not velocity-monitored so do not receive impulse.
+						Spring.SetFeatureHealth(targetID, collision.health - damage)
 					end
 				end
 			end
@@ -409,28 +392,6 @@ function gadget:ProjectileCreated(projectileID, ownerID, weaponDefID)
 	local params = weaponParams[weaponDefID]
 	if params then
 		addPenetratorProjectile(projectileID, ownerID, params)
-	end
-end
-
-function gadget:Explosion(weaponDefID, px, py, pz, attackerID, projectileID)
-	if projectileID and projectiles[projectileID] then
-		-- Only process collisions with terrain or water.
-		local elevation = spGetGroundHeight(px, pz)
-
-		if not waterWeapons[weaponDefID] then
-			elevation = max(elevation, spGetWaterLevel(px, pz))
-		end
-
-		if abs(elevation - py) < 0.5 then
-			local penetrator = projectiles[projectileID]
-			projectileHits[projectileID] = penetrator
-			local collisions = penetrator.collisions
-			collisions[#collisions+1] = {
-				hitX = px,
-				hitY = py,
-				hitZ = pz,
-			}
-		end
 	end
 end
 

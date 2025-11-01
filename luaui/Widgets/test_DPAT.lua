@@ -1,5 +1,3 @@
-local widget = widget ---@type Widget
-
 function widget:GetInfo()
 	return {
 		name = "TEST DrawPrimitiveAtUnit GL4",
@@ -16,15 +14,9 @@ end
 local texture = "luaui/images/backgroundtile.png"
 
 ---- GL4 Backend Stuff----
-
-local InstanceVBOTable = gl.InstanceVBOTable
-
-local popElementInstance  = InstanceVBOTable.popElementInstance
-local pushElementInstance = InstanceVBOTable.pushElementInstance
-
 local selectionVBO = nil
 local selectShader = nil
-local luaShaderDir = "LuaUI/Include/"
+local luaShaderDir = "LuaUI/Widgets/Include/"
 
 -- Localize for speedups:
 local glStencilFunc         = gl.StencilFunc
@@ -35,7 +27,9 @@ local glDepthTest           = gl.DepthTest
 local glTexture             = gl.Texture
 local glClear               = gl.Clear
 local GL_ALWAYS             = GL.ALWAYS
+local GL_EQUAL              = GL.EQUAL
 local GL_NOTEQUAL           = GL.NOTEQUAL
+local GL_LINE_LOOP          = GL.LINE_LOOP
 local GL_KEEP               = 0x1E00 --GL.KEEP
 local GL_STENCIL_BUFFER_BIT = GL.STENCIL_BUFFER_BIT
 local GL_REPLACE            = GL.REPLACE

@@ -1,5 +1,3 @@
-local gadget = gadget ---@type Gadget
-
 function gadget:GetInfo()
 	return {
 		name = "Raptor Scum GL4",
@@ -19,12 +17,33 @@ end
 	-- fix stencil testing
 
 
+
 if gadgetHandler:IsSyncedCode() then
-	local pveTeamID = Spring.Utilities.GetScavTeamID() or Spring.Utilities.GetRaptorTeamID()
+	local scavengerAITeamID = 999
+	local raptorsAITeamID = 999
+
+	local teams = Spring.GetTeamList()
+	for i = 1, #teams do
+		local luaAI = Spring.GetTeamLuaAI(teams[i])
+		if luaAI and luaAI ~= "" and string.sub(luaAI, 1, 12) == 'ScavengersAI' then
+			scavengerAITeamID = i - 1
+			break
+		end
+	end
+	for i = 1, #teams do
+		local luaAI = Spring.GetTeamLuaAI(teams[i])
+		if luaAI and luaAI ~= "" and string.sub(luaAI, 1, 12) == 'RaptorsAI' then
+			raptorsAITeamID = i - 1
+			break
+		end
+	end
 
 	local scumSpawnerIDs = {}
 
+
 	local scums = {} -- {posx = 123, posz = 123, radius = 123, spawnframe = 0, growthrate = 1.0} -- in elmos per sec
+	local scumArray = {} -- this will be the array of actual scums
+	local scumIndex = 0
 	local numscums = 0
 	local scumBins = {} -- a table keyed with (posx / 1024) + 1024 + (posz/1024), values are tables of scumindexes that can overlap that bin
 	local scumRemoveQueue = {} -- maps gameframes to list of scums that will be removed
@@ -34,7 +53,6 @@ if gadgetHandler:IsSyncedCode() then
 	local floor = math.floor
 	local max = math.max
 	local min = math.min
-	local clamp = math.clamp
 	local spGetGroundHeight = Spring.GetGroundHeight
 	local spGetGameFrame = Spring.GetGameFrame
 	local mapSizeX = Game.mapSizeX
@@ -45,9 +63,9 @@ if gadgetHandler:IsSyncedCode() then
 	local function GetScumCurrentRadius(scum, gf)
 		gf = gf or spGetGameFrame()
 		if scum.growthrate > 0 then
-			return clamp((gf - scum.spawnframe) * scum.growthrate, 0, scum.radius)
+			return max(0, min(scum.radius, (gf - scum.spawnframe) * scum.growthrate))
 		else
-			return clamp(scum.radius - (gf - scum.spawnframe) *(-1.0 * scum.growthrate), 0, scum.radius)
+			return min(scum.radius, max(0,scum.radius - (gf - scum.spawnframe) *(-1.0 * scum.growthrate)) )
 		end
 	end
 
@@ -64,48 +82,39 @@ if gadgetHandler:IsSyncedCode() then
 
 	function gadget:Initialize()
 		local scumGenerators = {
-			raptor_hive = {radius = 800, growthrate = 0.8},
-			raptor_turret_basic_t3_v1 = {radius = 600, growthrate = 0.4},
-			raptor_turret_basic_t2_v1 = {radius = 400, growthrate = 0.2},
-			raptor_turret_basic_t4_v1 = {radius = 800, growthrate = 0.8},
-			raptor_turret_antiair_t3_v1 = {radius = 600, growthrate = 0.4},
-			raptor_turret_antiair_t2_v1 = {radius = 400, growthrate = 0.2},
-			raptor_turret_antiair_t4_v1 = {radius = 800, growthrate = 0.8},
-			raptor_turret_acid_t3_v1 = {radius = 600, growthrate = 0.4},
-			raptor_turret_acid_t2_v1 = {radius = 400, growthrate = 0.2},
-			raptor_turret_acid_t4_v1 = {radius = 800, growthrate = 0.8},
-			raptor_turret_emp_t3_v1 = {radius = 600, growthrate = 0.4},
-			raptor_turret_emp_t2_v1 = {radius = 400, growthrate = 0.2},
-			raptor_turret_emp_t4_v1 = {radius = 800, growthrate = 0.8},
-			raptor_turret_antinuke_t3_v1 = {radius = 600, growthrate = 0.4},
-			raptor_turret_antinuke_t2_v1 = {radius = 400, growthrate = 0.2},
-			raptor_turret_meteor_t4_v1 = {radius = 800, growthrate = 0.8},
+				raptor_hive = {radius = 800, growthrate = 0.8},
+				raptor_turret_basic_t3_v1 = {radius = 600, growthrate = 0.4},
+				raptor_turret_basic_t2_v1 = {radius = 400, growthrate = 0.2},
+				raptor_turret_basic_t4_v1 = {radius = 800, growthrate = 0.8},
+				raptor_turret_antiair_t3_v1 = {radius = 600, growthrate = 0.4},
+				raptor_turret_antiair_t2_v1 = {radius = 400, growthrate = 0.2},
+				raptor_turret_antiair_t4_v1 = {radius = 800, growthrate = 0.8},
+				raptor_turret_acid_t3_v1 = {radius = 600, growthrate = 0.4},
+				raptor_turret_acid_t2_v1 = {radius = 400, growthrate = 0.2},
+				raptor_turret_acid_t4_v1 = {radius = 800, growthrate = 0.8},
+				raptor_turret_emp_t3_v1 = {radius = 600, growthrate = 0.4},
+				raptor_turret_emp_t2_v1 = {radius = 400, growthrate = 0.2},
+				raptor_turret_emp_t4_v1 = {radius = 800, growthrate = 0.8},
+				raptor_turret_antinuke_t3_v1 = {radius = 600, growthrate = 0.4},
+				raptor_turret_antinuke_t2_v1 = {radius = 400, growthrate = 0.2},
+				raptor_turret_meteor_t4_v1 = {radius = 800, growthrate = 0.8},
 
-			scavbeacon_t1_scav = {radius = 740, growthrate = 0.74},
-			scavbeacon_t2_scav = {radius = 880, growthrate = 0.88},
-			scavbeacon_t3_scav = {radius = 1000, growthrate = 1},
-			scavbeacon_t4_scav = {radius = 1360, growthrate = 1.36},
-		}
+				scavbeacon_t1_scav = {radius = 740, growthrate = 0.74},
+				scavbeacon_t2_scav = {radius = 880, growthrate = 0.88},
+				scavbeacon_t3_scav = {radius = 1000, growthrate = 1},
+				scavbeacon_t4_scav = {radius = 1360, growthrate = 1.36},
+			}
 		for unitDefName, scumParams in pairs(scumGenerators) do
 			if UnitDefNames[unitDefName] then
 				scumSpawnerIDs[UnitDefNames[unitDefName].id] = scumParams
 			end
 		end
-		local scumSpawnerExclusions = {
-			lootdroppod_gold_scav = true,
-			lootdroppod_printer_scav = true,
-			meteor_scav = true,
-			mission_command_tower_scav = true,
-			nuketest_scav = true,
-			nuketestcor_scav = true,
-			nuketestorg_scav = true,
-			scavempspawner_scav = true,
-			scavengerdroppod_scav = true,
-			scavengerdroppodfriendly_scav = true,
-			scavtacnukespawner_scav = true
-		}
+
+		local scumSpawnerExclusions = {lootdroppod_gold_scav = true, lootdroppod_printer_scav = true, meteor_scav = true, mission_command_tower_scav = true,
+		nuketest_scav = true, nuketestcor_scav = true, nuketestorg_scav = true, scavempspawner_scav = true, scavengerdroppod_scav = true, scavengerdroppodfriendly_scav = true,
+		scavtacnukespawner_scav = true}
 		for unitDefID, unitDef in pairs(UnitDefs) do
-			if unitDef.customParams.isscavenger and not scumSpawnerExclusions[unitDef.name] and not unitDef.canMove and not string.find(unitDef.name, "lootbox") and not scumSpawnerIDs[unitDefID] and not unitDef.customParams.objectify and not unitDef.canCloak then
+			if unitDef.customParams.isscavenger and (not unitDef.canMove) and (not string.find(unitDef.name, "lootbox")) and not scumSpawnerIDs[unitDefID] and (not unitDef.customParams.objectify) and (not unitDef.canCloak) and not scumSpawnerExclusions[unitDef.name]then
 				scumSpawnerIDs[unitDefID] = {radius = 600, growthrate = 1.2}
 			end
 		end
@@ -118,7 +127,7 @@ if gadgetHandler:IsSyncedCode() then
 	end
 
 
-	-- This checks wether the unit is under any scum
+		-- This checks wether the unit is under any scum
 	local function IsPosInScum(unitx,unity, unitz)
 		-- out of bounds check, no scum outside of map bounds
 		if unitx < 0 or unitz < 0 or unitx > mapSizeX or unitz > mapSizeZ then return nil end
@@ -172,8 +181,11 @@ if gadgetHandler:IsSyncedCode() then
 		local attempts = 0
 		repeat
 			attempts = attempts + 1
+			local randAngle = math.random() * math.pi
+
 			local r = radius * math.sqrt(math.random())
 			local theta = math.random() * 2 * math.pi
+
 			local x = scum.posx + r * math.cos(theta)
 			local z = scum.posz + r * math.sin(theta)
 			if x > 128 and x < Game.mapSizeX - 128 and z > 128 and z < Game.mapSizeZ - 128 and r > 32 then
@@ -245,7 +257,9 @@ if gadgetHandler:IsSyncedCode() then
 				scum.spawnframe = gf - ((scum.radius - currentradius)/ (-1 * growthrate) )
 				deathtime = math.floor( gf + (currentradius/(-1 * growthrate)))
 			end
+
 			scum.growthrate = growthrate
+
 
 			if debugmode then Spring.Echo("Updated scum", scumID, "it was", currentradius,"/", scum.radius, "sized, growing at", growthrate) end
 		end
@@ -263,7 +277,7 @@ if gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:UnitCreated(unitID, unitDefID, unitTeam)
-		if scumSpawnerIDs[unitDefID] and (debugmode or (unitTeam == pveTeamID)) then
+		if scumSpawnerIDs[unitDefID] and (debugmode or (unitTeam == scavengerAITeamID or unitTeam == raptorsAITeamID)) then
 			local px, py, pz = Spring.GetUnitPosition(unitID)
 			local gf = Spring.GetGameFrame()
 
@@ -299,12 +313,10 @@ if gadgetHandler:IsSyncedCode() then
 			scumRemoveQueue[n] = nil
 		end
 	end
+elseif not Spring.Utilities.Gametype.IsScavengers() then
 
 
-
-elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
-
-
+	local texcolorheight = "LuaUI/images/raptor_scum/alien_guts_colorheight.dds"
 
 	local textureresolution = "low" -- low or high
 	local textures = {
@@ -326,6 +338,7 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 
 	local scumVBO = nil
 	local scumShader = nil
+	local luaShaderDir = "LuaUI/gadgets/Include/"
 	local debugmode = false
 	local headless = false
 	local drawScum = true
@@ -333,9 +346,12 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 
 	local glTexture = gl.Texture
 	local glCulling = gl.Culling
+	local glDepthTest = gl.DepthTest
+	local GL_BACK = GL.BACK
 	local GL_LEQUAL = GL.LEQUAL
 	local glStencilFunc         = gl.StencilFunc
 	local glStencilOp           = gl.StencilOp
+	local glStencilTest         = gl.StencilTest
 	local glStencilMask         = gl.StencilMask
 	local glDepthTest           = gl.DepthTest
 	local glClear               = gl.Clear
@@ -344,6 +360,7 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 	local GL_KEEP               = 0x1E00 --GL.KEEP
 	local GL_STENCIL_BUFFER_BIT = GL.STENCIL_BUFFER_BIT
 	local GL_REPLACE            = GL.REPLACE
+	local GL_POINTS				= GL.POINTS
 
 	local shaderConfig = {
 		SPECULAREXPONENT = 64.0,  -- the specular exponent of the lava plane
@@ -360,13 +377,9 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 
 	---- GL4 Backend Stuff----
 
-	local LuaShader = gl.LuaShader
-	local InstanceVBOTable = gl.InstanceVBOTable
-
-	local uploadAllElements   = InstanceVBOTable.uploadAllElements
-	local popElementInstance  = InstanceVBOTable.popElementInstance
-	local pushElementInstance = InstanceVBOTable.pushElementInstance
-
+	local luaShaderDir = "LuaUI/widgets/Include/"
+	local LuaShader = VFS.Include(luaShaderDir.."LuaShader.lua")
+	VFS.Include(luaShaderDir.."instancevbotable.lua")
 
 	local vsSrc =  [[
 	#version 420
@@ -555,7 +568,9 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 		fogFactor = clamp(fogFactor, 0.0, 1.0);
 		fragColor.rgb = mix( fogColor.rgb, fragColor.rgb,fogFactor);
 
+
 		fragColor.rgb *= nightFactor.rgb;
+
 	}
 	]]
 
@@ -599,7 +614,7 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 			return
 		end
 
-		scumVBO = InstanceVBOTable.makeInstanceVBOTable(
+		scumVBO = makeInstanceVBOTable(
 			{
 				{id = 1, name = 'worldposradius', size = 4}, -- xpos, ypos, zpos, radius
 				{id = 2, name = 'lifeparams', size = 4}, -- lifestart, lifeend, growthrate, unused
@@ -612,19 +627,20 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 			return
 		end
 
-		local planeVBO, numVertices = InstanceVBOTable.makePlaneVBO(1,1,resolution,resolution)
-		local planeIndexVBO, numIndices =  InstanceVBOTable.makePlaneIndexVBO(resolution,resolution, true)
+		local planeVBO, numVertices = makePlaneVBO(1,1,resolution,resolution)
+		local planeIndexVBO, numIndices =  makePlaneIndexVBO(resolution,resolution, true)
 
 		scumVBO.vertexVBO = planeVBO
 		scumVBO.indexVBO = planeIndexVBO
 
-		scumVBO.VAO = InstanceVBOTable.makeVAOandAttach(
+		scumVBO.VAO = makeVAOandAttach(
 			scumVBO.vertexVBO,
 			scumVBO.instanceVBO,
 			scumVBO.indexVBO)
 
 	end
 
+	local scumIndex = 0
 	local scumRemoveQueue = {} -- maps gameframes to list of scums that will be removed
 	local scums = {} -- table of {posx = 123, posz = 123, radius = 123, spawnframe = 0, growthrate = -1.0} -- in elmos per sec
 	local numscums = 0
@@ -632,8 +648,10 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 
 	local sqrt = math.sqrt
 	local floor = math.floor
-	local clamp = math.clamp
+	local max = math.max
+	local min = math.min
 	local spGetGroundHeight = Spring.GetGroundHeight
+	local spGetGameFrame = Spring.GetGameFrame
 	local mapSizeX = Game.mapSizeX
 	local mapSizeZ = Game.mapSizeZ
 	local boundary = 32 -- how many elmos closer to the center of the scum than the actual edge of the scum the unit must be to be considered on the scum
@@ -652,9 +670,9 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 	local function GetScumCurrentRadius(scum, gf)
 		gf = gf or gameFrame
 		if scum.growthrate > 0 then
-			return clamp((gf - scum.spawnframe) * scum.growthrate, 0, scum.radius)
+			return max(0, min(scum.radius, (gf - scum.spawnframe) * scum.growthrate))
 		else
-			return clamp(scum.radius - (gf - scum.spawnframe) *(-1.0 * scum.growthrate), 0, scum.radius)
+			return min(scum.radius, max(0,scum.radius - (gf - scum.spawnframe) *(-1.0 * scum.growthrate)) )
 		end
 	end
 
@@ -749,6 +767,7 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 				scum.spawnframe = gf - ((scum.radius - currentradius)/ (-1 * growthrate) )
 				deathtime = math.floor( gf + (currentradius/(-1 * growthrate)))
 			end
+
 			scum.growthrate = growthrate
 
 			if debugmode then Spring.Echo("Updated scum", scumID, "it was", currentradius,"/", scum.radius, "sized, growing at", growthrate) end
@@ -780,6 +799,7 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 	local function UpdateScumOverlaps()
 		local overlapped = {} -- keys are scumID, value is that its either overlapped or not.
 		local scumRadii = {} -- keys are scumID, value is current radius
+
 
 		for scumID, scum in pairs(scums) do
 			overlapped[scumID] = false
@@ -831,6 +851,9 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 		if debugmode then
 			local mx, my, mb = Spring.GetMouseState()
 			local _, coords = Spring.TraceScreenRay(mx, my, true)
+			local posx  = Game.mapSizeX * math.random() * 1
+			local posz  = Game.mapSizeZ * math.random() * 1
+			local posy  = Spring.GetGroundHeight(posx, posz)
 			if coords and (IsPosInScum(coords[1], coords[2],coords[3])) then
 				Spring.Echo("Inscum", numscums, IsPosInScum(coords[1], coords[2],coords[3]))
 			end
@@ -842,8 +865,9 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 				UpdateScumOverlaps()
 			end
 
+			local disticon = 27 * Spring.GetConfigInt("UnitIconDist", 200) -- iconLength = unitIconDist * unitIconDist * 750.0f;
 			--Spring.Echo(scumVBO.usedElements)
-			--glCulling(GL.BACK)
+			--glCulling(GL_BACK)
 			glCulling(false)
 			glDepthTest(GL_LEQUAL)
 			--glDepthTest(false)
@@ -914,9 +938,18 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 		local posz  = Game.mapSizeZ * math.random() * 0.8
 		local posy  = Spring.GetGroundHeight(posx, posz)
 		local radius = math.random() * 256 + 128
+		local lifetime = math.random() * 1025
+		local deathtime = lifetime * 2
 		local growthrate = math.random() * 0.5 -- in elmos per frame
 		local scumID = math.random()
-		AddOrUpdateScum(posx, posy, posz, radius, growthrate, scumID)
+		AddOrUpdateScum(
+				posx,
+				posy,
+				posz,
+				radius,
+				growthrate,
+				scumID
+				)
 	end
 
 	local scumModulo = 1
@@ -948,6 +981,7 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 		if debugmode then
 			-- randomly add a new scum instance
 			if n % 2 == 0 then
+
 				if numscums < 300 then
 					AddRandomScum()
 				else
@@ -963,6 +997,7 @@ elseif not Spring.Utilities.Gametype.IsScavengers() then	-- UNSYNCED
 	end
 
 	local function HandleScumCreated(cmd, posx, posz, radius, growthrate, gf, scumID)
+
 		--Spring.Echo("Scum Created Unsynced", cmd, posx, posz, radius, growthrate, gf, scumID)
 		AddOrUpdateScum(posx, nil, posz, radius, growthrate, scumID)
 	end
