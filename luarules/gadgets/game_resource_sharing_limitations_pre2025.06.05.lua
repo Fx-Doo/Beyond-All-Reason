@@ -112,11 +112,11 @@ if (sharing_tax > 0 or disable_overflow) then -- only enable this part if we nee
 		local totalAvailableAllyTeamStorages = {metal = 0, energy = 0}
 		local availableTeamStorage = {}
 
-		for _, teamID in pairs(allyteamTeamList[allyTeam]) do
+		for _, teamID in pairs(allyteamTeamList[allyTeam]) do -- 1st iteration's goal is to assess the available storage
 			availableTeamStorage[teamID] = {}
-			for resType, excess in pairs(preTaxValue) do
+			for resType, excess in pairs(preTaxValue) do -- this only runs if excess ~= nil so we're not processing null excess
 				local availableStorage = GetAvailableStorage(teamID, resType)
-				if teamOverflowedLastFrame[teamID][resType] > 0 and availableStorage > 0 then
+				if teamOverflowedLastFrame[teamID][resType] > 0 and availableStorage > 0 then -- this can happen because we do not process excess in real time, we have to do it because otherwise we might tax the same "resource" twice
 					local shareBack = math.min(teamOverflowedLastFrame[teamID][resType], availableStorage)
 					SpAddTeamResource(teamID, resType, shareBack)
 					availableStorage = availableStorage - shareBack
@@ -129,7 +129,7 @@ if (sharing_tax > 0 or disable_overflow) then -- only enable this part if we nee
 			end
 		end
 
-		if preTaxValue.metal == 0 then preTaxValue.metal = nil end
+		if preTaxValue.metal == 0 then preTaxValue.metal = nil end -- if our shareBack process left 0 excess, we again filter out nil excesses to avoid needless processing
 		if preTaxValue.energy == 0 then preTaxValue.energy = nil end
 
 		for resType, excess in pairs(preTaxValue) do
@@ -139,25 +139,16 @@ if (sharing_tax > 0 or disable_overflow) then -- only enable this part if we nee
 					preTaxValue[resType] = nil
 					teamOverflowedLastFrame[teamID][resType] = 0
 				end
-			end
-			allyTeamOverflowedLastFrame[allyTeam][resType] = 0
-		end
-
-		for resType, excess in pairs(preTaxValue) do
-			local postTaxValue = excess * (1 - sharing_tax)
-			local percent = math.min(1, postTaxValue / totalAvailableAllyTeamStorages[resType])
-			local SharedAmount = 0
-			for _, teamID in pairs(allyteamTeamList[allyTeam]) do
-				local aftTaxAmount = percent * availableTeamStorage[teamID][resType]
-				local preTaxAmount = aftTaxAmount / (1 - sharing_tax)
-				SpAddTeamResource(teamID, resType, aftTaxAmount)
-				SharedAmount = SharedAmount + preTaxAmount
-			end
-			local percentShared = SharedAmount / excess
-			for _, teamID in pairs(allyteamTeamList[allyTeam]) do
-				local resSent = percentShared * teamOverflowedLastFrame[teamID][resType]
-				local resExcessed = (1 - percentShared) * teamOverflowedLastFrame[teamID][resType]
-				teamOverflowedLastFrame[teamID][resType] = 0
+			else	
+				local postTaxValue = excess * (1 - sharing_tax)
+				local percent = math.min(1, postTaxValue / totalAvailableAllyTeamStorages[resType])
+				local SharedAmount = 0
+				for _, teamID in pairs(allyteamTeamList[allyTeam]) do
+					local aftTaxAmount = percent * availableTeamStorage[teamID][resType]
+					local preTaxAmount = aftTaxAmount / (1 - sharing_tax)
+					SpAddTeamResource(teamID, resType, aftTaxAmount)
+					teamOverflowedLastFrame[teamID][resType] = 0
+				end
 			end
 			allyTeamOverflowedLastFrame[allyTeam][resType] = 0
 		end
