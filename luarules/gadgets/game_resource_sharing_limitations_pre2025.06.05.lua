@@ -129,15 +129,13 @@ if (sharing_tax > 0 or disable_overflow) then -- only enable this part if we nee
 			end
 		end
 
-		if preTaxValue.metal == 0 then preTaxValue.metal = nil end -- if our shareBack process left 0 excess, we again filter out nil excesses to avoid needless processing
+		if preTaxValue.metal == 0 then preTaxValue.metal = nil end -- if our shareBack process left 0 excess, we again filter out null excesses to avoid needless processing
 		if preTaxValue.energy == 0 then preTaxValue.energy = nil end
 
-		for resType, excess in pairs(preTaxValue) do
+		for resType, excess in pairs(preTaxValue) do -- 2nd iteration: either available storage is null and we just reset counters, or is non null and we add resources then reset counters
 			if totalAvailableAllyTeamStorages[resType] <= 0 then
 				for _, teamID in pairs(allyteamTeamList[allyTeam]) do
-					local resExcessed = teamOverflowedLastFrame[teamID][resType]
-					preTaxValue[resType] = nil
-					teamOverflowedLastFrame[teamID][resType] = 0
+					teamOverflowedLastFrame[teamID][resType] = 0 -- just reset counter
 				end
 			else	
 				local postTaxValue = excess * (1 - sharing_tax)
