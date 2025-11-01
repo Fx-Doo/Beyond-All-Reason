@@ -2162,7 +2162,8 @@ function gadgetHandler:SunChanged()
 	return
 end
 
-function gadgetHandler:Update(deltaTime)
+function gadgetHandler:Update()
+	local deltaTime = Spring.GetLastUpdateSeconds()
 	tracy.ZoneBeginN("G:Update")
 	for _, g in ipairs(self.UpdateList) do
 		tracy.ZoneBeginN("G:Update:" .. g.ghInfo.name)
