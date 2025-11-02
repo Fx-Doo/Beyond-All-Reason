@@ -300,6 +300,63 @@ local fdefcost = {}
 -- bool allowed
 -- table result == table of the resourcing deltas between engine and wanted behaviour, used in the resolve function to add/remove resources
 -- table stats == table of the stats deltas between engine and wanted behaviour, used in the resolve function to add/remove stats (but could be moved to a GameFramePost() thread instead
+local hasDebt = {}
+
+function gadget:AllowStockpileBuildStep(unitID, unitTeam, weaponDefID, energyCost, metalCost, step)
+	local paidDebt = true
+	if hasDebt[teamID] then
+		paidDebt = TryToPayDebts(teamID)
+	end
+	return paidDebt
+end
+
+local function UseTeamResource(teamID, resType, amount)
+	local hadEnough = true
+	local curr = Spring.GetTeamResources(teamID, resType)
+	if curr >= amount then
+		Spring.UseTeamResource(teamID, resType, amount)
+		return true
+	else
+		return false
+	end
+end
+
+local function UseResource(teamID, resType, amount)
+	local hadEnough = UseTeamResource(teamID, resType, amount) -- Debts happen when we ie reclaiming an allied wreck or unit and both manual sharing and unit sharing are disabled or when unit sharing is disabled and res sharing is taxed
+	-- We have to remove what the engine produces from builderID => We use Spring.UseTeamResource
+	-- But at this point, the income haven't yet arrived
+	-- Because we can't hook at the right time with either gameFrame() or gameFramePost() and process that debt before anything else could use the received amount
+	-- we set up a lock on any resource consumption that would happen until the debt is paid
+	-- this includes positive buildsteps for features, units, weapon stockpiling
+	-- this should also include weapons firing with a cost but we have no hook there.
+	-- generally, since the resources are credited right after the reclaim step, and those resources are supposedly sufficient to paid the debt, we shouldn't hit a case where anything would actually be delayed (false return on paidDebt = false)
+	-- because of the debt itself, but rather because of insuffiscient resources after the debt was paid
+	if hadEnough then
+		return
+	end
+	local debt = hasDebt[teamID] or {}
+	debt[resType] = (debt[resType] or 0) + amount
+	hasDebt[teamID] = debt
+end
+	
+local function TryToPayDebts(teamID)
+	if hasDebt[teamID] then
+		for _,resType in pairs ({"energy", "metal"}) do
+			local debtValue = hasDebt[teamID][resType] or 0
+			Spring.Echo(teamID, debtValue)
+			local hadEnough = UseTeamResource(teamID, resType, debtValue)
+			if hadEnough then
+				hasDebt[teamID][resType] = nil
+			end
+		end
+		if hasDebt[teamID].metal == nil and hasDebt[teamID].energy == nil then
+			hasDebt[teamID] = nil
+			return true
+		end
+	end
+	return false
+end
+		
 
 function NewDecideOutcome(builderTeam, objectTeam, step, currentProgress, totalECost, totalMCost, justBool)
 
@@ -554,9 +611,9 @@ local function ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
 	for teamID, subTable in pairs (result) do
 		for resType, value in pairs(subTable) do
 			if value > 0 then
-				Spring.AddResourceRaw(teamID, resType, value)
+				Spring.AddTeamResource(teamID, resType, value)
 			else
-				Spring.UseResourceRaw(teamID, resType, math.abs(value))
+				UseResource(teamID, resType, math.abs(value))
 			end
 		end
 	end
@@ -586,6 +643,10 @@ function gadget:AllowFeatureBuildStep(builderID, builderTeam, featureID, feature
 		local objectTeam = Spring.GetFeatureTeam(featureID)
 		local _,_,_,_, reclaimLeft = Spring.GetFeatureResources(featureID)
 		local _, _, resurrectProgress = Spring.GetFeatureHealth(featureID)
+		local paidDebt = true
+		if hasDebt[builderTeam] then
+			paidDebt = TryToPayDebts(builderTeam)
+		end
 	if step > 0 then -- repair or rez step
 		if reclaimLeft < 1 then -- repairing a feature
 			local totalECost = FeatureDefs[featureDefID].energy
@@ -595,7 +656,7 @@ function gadget:AllowFeatureBuildStep(builderID, builderTeam, featureID, feature
 				return false
 			end
 			local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
-			return allowed and resolved -- return true only once resolved
+			return allowed and resolved and paidDebt -- return true only once resolved
 		else -- rez step
 			local wreckDefName, facing = Spring.GetFeatureResurrect (featureID)
 			local wreckDefID = UnitDefNames[wreckDefName].id
@@ -606,7 +667,7 @@ function gadget:AllowFeatureBuildStep(builderID, builderTeam, featureID, feature
 				return false
 			end
 			local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
-			return allowed and resolved
+			return allowed and resolved and paidDebt
 		end
     else -- reclaim step
 		local totalECost = FeatureDefs[featureDefID].energy
@@ -623,6 +684,10 @@ end
 function gadget:AllowUnitBuildStep(builderID, builderTeam, unitID, unitDefID, step)
 	local hp,maxhp,_,_,currentBuild = Spring.GetUnitHealth(unitID)
 	local objectTeam = Spring.GetUnitTeam(unitID)
+	local paidDebt = true
+	if hasDebt[builderTeam] then
+		paidDebt = TryToPayDebts(builderTeam)
+	end
 	if step > 0 then
 		if currentBuild < 1 then -- build step
 			local totalECost = UnitDefs[unitDefID].energyCost
@@ -632,7 +697,7 @@ function gadget:AllowUnitBuildStep(builderID, builderTeam, unitID, unitDefID, st
 				return false
 			end
 			local resolved = ResolveDelta(builderID, builderTeam, objectTeam, result, stats)
-			return allowed and resolved
+			return allowed and resolved and paidDebt
 		else -- repair step
 			return true
 		end

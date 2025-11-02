@@ -186,10 +186,13 @@ local callInLists = {
 	-- LuaRules CallIns (note: the *PreDamaged calls belong here too)
 	"CommandFallback",
 	"AllowCommand",
+	"AllowCommandAutoTargetFeature",
+	"AllowCommandAutoTargetUnit",
 	"AllowStartPosition",
 	"AllowUnitCreation",
 	"AllowUnitTransfer",
 	"AllowUnitBuildStep",
+	"AllowStockpileBuildStep",
 	"AllowUnitCaptureStep",
 	"AllowUnitTransport",
 	"AllowUnitTransportLoad",
@@ -1587,6 +1590,20 @@ function gadgetHandler:AllowUnitBuildStep(builderID, builderTeam,
 	tracy.ZoneBeginN("G:AllowUnitBuildStep")
 	for _, g in ipairs(self.AllowUnitBuildStepList) do
 		if not g:AllowUnitBuildStep(builderID, builderTeam, unitID, unitDefID, part) then
+			tracy.ZoneEnd()
+			return false
+		end
+	end
+	tracy.ZoneEnd()
+	return true
+end
+
+function gadgetHandler:AllowStockpileBuildStep(builderID, builderTeam,
+										  weaponDefID, energyCost, metalCost, part)
+
+	tracy.ZoneBeginN("G:AllowStockpileBuildStep")
+	for _, g in ipairs(self.AllowStockpileBuildStepList) do
+		if not g:AllowStockpileBuildStep(builderID, builderTeam, weaponDefID, energyCost, metalCost, part) then
 			tracy.ZoneEnd()
 			return false
 		end
