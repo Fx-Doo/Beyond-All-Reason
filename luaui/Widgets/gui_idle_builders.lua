@@ -304,6 +304,14 @@ local function updateList(force)
 					idleList[unitDefID] = { unitID }
 				end
 			end
+		elseif 	Spring.GetUnitRulesParam(unitID, "idlestate") == 1 then
+			if spValidUnitID(unitID) and not spGetUnitIsDead(unitID) and not spGetUnitIsBeingBuilt(unitID) then
+				if idleList[unitDefID] then
+					idleList[unitDefID][#idleList[unitDefID] + 1] = unitID
+				else
+					idleList[unitDefID] = { unitID }
+				end
+			end
 		end
 	end
 
