@@ -181,6 +181,8 @@ local CMD_OPT_RIGHT = CMD.OPT_RIGHT
 local keyShift = 304
 local selectedUnits = spGetSelectedUnits()
 local selectedUnitsCount = spGetSelectedUnitsCount()
+local executingUnits = {}
+local executingUnitsCount = 0
 
 --------------------------------------------------------------------------------
 -- Helper Functions
@@ -260,15 +262,19 @@ local function CanUnitExecute(uID, cmdID)
 end
 
 
-local function GetExecutingUnits(cmdID)
-    local units = {}
+local function RefreshExecutingUnits(cmdID)
+	if cmdID == nil then
+		cmdID = CMD_MOVE
+	end
+    executingUnits = {}
     for i = 1, selectedUnitsCount do
         local uID = selectedUnits[i]
         if CanUnitExecute(uID, cmdID) then
-            units[#units + 1] = uID
+            executingUnits[#executingUnits + 1] = uID
         end
     end
-    return units
+	executingUnitsCount = #executingUnits
+	return true
 end
 
 
@@ -394,6 +400,9 @@ end
 function widget:SelectionChanged(sel)
     selectedUnits = sel
     selectedUnitsCount = spGetSelectedUnitsCount()
+	if usingCmd ~= nil then
+		RefreshExecutingUnits(usingCmd)
+	end
 end
 
 
@@ -456,7 +465,7 @@ function widget:MousePress(mx, my, mButton)
     end
 
     -- Is this command eligible for a custom formation ?
-    if not (formationCmds[usingCmd] and (not multiUnitOnlyCmds[usingCmd] or #GetExecutingUnits(usingCmd) > 1)) then
+    if not (formationCmds[usingCmd] and (not multiUnitOnlyCmds[usingCmd] or #executingUnits > 1)) then
         return false
     end
 
@@ -470,7 +479,7 @@ function widget:MousePress(mx, my, mButton)
 	local alt, ctrl, meta, shift = spGetModKeyState()
 
     -- Is this line a path candidate (We don't do a path off an overriden command)
-	pathCandidate = (not overriddenCmd) and selectedUnitsCount==1 and (not shift or repeatForSingleUnit)
+	pathCandidate = (not overriddenCmd) and executingUnitsCount==1 and (not shift or repeatForSingleUnit)
 
     -- Initialize path positions tracking
     pathPositions = {}
@@ -480,6 +489,10 @@ end
 
 
 function widget:MouseMove(mx, my, dx, dy, mButton)
+	if lastUsingCmd ~= usingCmd then
+		lastUsingCmd = usingCmd
+		RefreshExecutingUnits(usingCmd)
+	end
     -- It is possible for MouseMove to fire after MouseRelease
     if #fNodes == 0 then
         return false
@@ -576,7 +589,7 @@ function widget:MouseRelease(mx, my, mButton)
         end
     end
 
-	if selectedUnitsCount == 1 and not shift then
+	if executingUnitsCount == 1 and not shift then
 		spSetActiveCommand(0) -- Deselect command
 	end
 
@@ -635,7 +648,7 @@ function widget:MouseRelease(mx, my, mButton)
         end
         local adjustedMinFormationLength = max(dragDelta, minFormationLength)
 
-        if fDists[#fNodes] < adjustedMinFormationLength or (usingCmd == CMD.UNLOAD_UNIT and fDists[#fNodes] < 64*(selectedUnitsCount - 1)) then
+        if fDists[#fNodes] < adjustedMinFormationLength or (usingCmd == CMD.UNLOAD_UNIT and fDists[#fNodes] < 64*(executingUnitsCount - 1)) then
             -- We should check if any units are able to execute it,
             -- but the order is small enough network-wise that the tiny bug potential isn't worth it.
 
@@ -663,7 +676,7 @@ function widget:MouseRelease(mx, my, mButton)
         else
             -- Order is a formation; line was drawn
             -- Are any units able to execute it?
-            local mUnits = GetExecutingUnits(usingCmd)
+            local mUnits = executingUnits
 
             if #mUnits > 0 then
 
@@ -764,7 +777,7 @@ end
 
 local function DrawFilledCircleOutFading(pos, size, cornerCount)
     SetColor(usingCmd, 1)
-	local lengthPerUnit = lineLength / (selectedUnitsCount-1)
+	local lengthPerUnit = lineLength / (executingUnitsCount-1)
 	if (lengthPerUnit < 64) and (usingCmd == CMD.UNLOAD_UNIT) then
 		glColor(1.0,0.3,0.0,1.0)
 	end
@@ -778,10 +791,10 @@ local function DrawFormationDots(vertFunction, zoomY)
 	gl.PushAttrib(GL.ALL_ATTRIB_BITS)
     gl.DepthTest(false)
     local currentLength = 0
-    local lengthPerUnit = lineLength / (selectedUnitsCount - 1)
+    local lengthPerUnit = lineLength / (executingUnitsCount - 1)
     local lengthUnitNext = lengthPerUnit
     local dotSize = sqrt(zoomY*0.24)
-    if (#fNodes > 1) and (selectedUnitsCount > 1) then
+    if (#fNodes > 1) and (executingUnitsCount > 1) then
         SetColor(usingCmd, 0.6)
 		if (lengthPerUnit < 64) and (usingCmd == CMD.UNLOAD_UNIT) then
 			glColor(1.0,0.3,0.0,0.6)
@@ -897,6 +910,7 @@ end
 
 
 function widget:Update(deltaTime)
+
     dimmAlpha = dimmAlpha - lineFadeRate * deltaTime
     if dimmAlpha <= 0 then
         dimmNodes = {}
@@ -1429,7 +1443,7 @@ function widget:Initialize()
 		-- Add first node
 		if AddFNode(worldPos) then
 			local alt, ctrl, meta, shift = spGetModKeyState()
-			pathCandidate = selectedUnitsCount == 1 and (not shift or repeatForSingleUnit)
+			pathCandidate = executingUnitsCount == 1 and (not shift or repeatForSingleUnit)
 			return true
 		end
 		return false
@@ -1517,7 +1531,7 @@ function widget:Initialize()
 			local dragDelta = selectionThreshold -- Approximate for external callers
 			local adjustedMinFormationLength = max(dragDelta, minFormationLength)
 
-			if fDists[#fNodes] < adjustedMinFormationLength or (usingCmd == CMD.UNLOAD_UNIT and fDists[#fNodes] < 64*(selectedUnitsCount - 1)) then
+			if fDists[#fNodes] < adjustedMinFormationLength or (usingCmd == CMD.UNLOAD_UNIT and fDists[#fNodes] < 64*(executingUnitsCount - 1)) then
 				-- Single-click style order
 				if usingCmd == CMD_MOVE and #fNodes > 0 then
 					GiveNotifyingOrder(usingCmd, {fNodes[1][1], fNodes[1][2], fNodes[1][3]}, cmdOpts)
@@ -1525,7 +1539,7 @@ function widget:Initialize()
 				end
 			else
 				-- Formation order
-				local mUnits = GetExecutingUnits(usingCmd)
+				local mUnits = executingUnits
 				if #mUnits > 0 then
 					local interpNodes = GetInterpNodes(mUnits)
 					local orders
