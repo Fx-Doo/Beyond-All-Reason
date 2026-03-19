@@ -405,6 +405,16 @@ function widget:SelectionChanged(sel)
 	end
 end
 
+function widget:ActiveCommandChanged()
+    local _, activeCmdID = spGetActiveCommand()
+	if activeCmdID == CMD_UNLOADUNITS then
+		activeCmdID = CMD_UNLOADUNIT
+	end
+    if activeCmdID and formationCmds[activeCmdID] then
+        usingCmd = activeCmdID
+		RefreshExecutingUnits(usingCmd)
+	end
+end
 
 --------------------------------------------------------------------------------
 -- Mouse/keyboard Callins
