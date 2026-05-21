@@ -56,6 +56,8 @@ local recloakFrame = {}
 local currentFrame = 0
 
 local canCloak = {}
+local perfectCloakDefs = {}
+local perfectCloakUnits = {}
 for udid, ud in pairs(UnitDefs) do
 	if ud.canCloak then
 		canCloak[udid] = {
@@ -63,6 +65,29 @@ for udid, ud in pairs(UnitDefs) do
 			ud.cloakCostMoving,
 			ud.cloakCost,
 		}
+	end
+	if ud.customParams and ud.customParams.perfectcloak then 
+		-- units with this tag get a "perfect cloak"
+		-- it means they also become sonar and radar stealth for 
+		-- as long as they're cloaked; the effect is removed by decloaking
+		-- this is currently a no-op, but enables both the use of sonarstealth submerged units;
+		-- and the possibility of having more "stealth when cloaked" units 
+		-- without the downside of allowing them to remain undetected without spending X resources on cloaking.
+		perfectCloakDefs[udid] = true
+	end
+end
+
+function doStealth(unitID)
+	if perfectCloakUnits[unitID] then
+		Spring.SetUnitSonarStealth(unitID, true)
+		Spring.SetUnitStealth(unitID, true)
+	end
+end
+
+function undoStealth(unitID)
+	if perfectCloakUnits[unitID] then
+		Spring.SetUnitSonarStealth(unitID, false)
+		Spring.SetUnitStealth(unitID, false)
 	end
 end
 
@@ -72,6 +97,7 @@ function PokeDecloakUnit(unitID, duration)
 	else
 		spSetUnitRulesParam(unitID, 'cannotcloak', 1, alliedTrueTable)
 		spSetUnitCloak(unitID, 0)
+		undoStealth(unitID)
 		recloakUnit[unitID] = duration or DEFAULT_DECLOAK_TIME
 	end
 
@@ -112,6 +138,7 @@ function gadget:GameFrame(n)
 					spSetUnitRulesParam(unitID, 'cannotcloak', 0, alliedTrueTable)
 					if wantCloakState == 1 or areaCloaked == 1 then
 						spSetUnitCloak(unitID, 1)
+						doStealth(unitID)
 					end
 					recloakUnit[unitID] = nil
 				end
@@ -126,11 +153,13 @@ end
 -- Only called with enemyID if an enemy is within decloak radius.
 function gadget:AllowUnitCloak(unitID, enemyID)
 	if enemyID then
+		undoStealth(unitID)
 		return false
 	end
 
 	if recloakFrame[unitID] then
 		if recloakFrame[unitID] > currentFrame then
+			undoStealth(unitID)
 			return false
 		end
 		recloakFrame[unitID] = nil
@@ -138,11 +167,13 @@ function gadget:AllowUnitCloak(unitID, enemyID)
 
 	local stunnedOrInbuild = spGetUnitIsStunned(unitID)
 	if stunnedOrInbuild then
+		undoStealth(unitID)
 		return false
 	end
 
 	local unitDefID = unitID and spGetUnitDefID(unitID)
 	if not canCloak[unitDefID] then
+		undoStealth(unitID)
 		return false
 	end
 
@@ -153,15 +184,17 @@ function gadget:AllowUnitCloak(unitID, enemyID)
 		local cost = moving and canCloak[unitDefID][2] or canCloak[unitDefID][3]
 
 		if not spUseUnitResource(unitID, "e", cost/2) then -- SlowUpdate happens twice a second.
+			undoStealth(unitID)
 			return false
 		end
 	end
-
+	doStealth(unitID)
 	return true
 end
 
 function gadget:AllowUnitDecloak(unitID, objectID, weaponID)
 	recloakFrame[unitID] = currentFrame + DEFAULT_DECLOAK_TIME
+	undoStealth(unitID)
 end
 
 local function SetWantedCloaked(unitID, state)
@@ -180,12 +213,14 @@ local function SetWantedCloaked(unitID, state)
 		local areaCloaked = spGetUnitRulesParam(unitID, 'areacloaked')
 		if cannotCloak ~= 1 and areaCloaked ~= 1 then
 			spSetUnitCloak(unitID, 1)
+			doStealth(unitID)
 		end
 		spSetUnitRulesParam(unitID, 'wantcloak', 1, alliedTrueTable)
 	elseif state == 0 and wantCloakState == 1 then
 		local areaCloaked = spGetUnitRulesParam(unitID, 'areacloaked')
 		if areaCloaked ~= 1 then
 			spSetUnitCloak(unitID, 0)
+			undoStealth(unitID)
 		end
 		spSetUnitRulesParam(unitID, 'wantcloak', 0, alliedTrueTable)
 	end
@@ -213,6 +248,9 @@ function gadget:AllowCommand(unitID, unitDefID, teamID, cmdID, cmdParams, cmdOpt
 end
 
 function gadget:UnitCreated(unitID, unitDefID)
+	if perfectCloakDefs[unitDefID] then
+		perfectCloakUnits[unitID] = true
+	end
 	if canCloak[unitDefID] then
 		local cloakDescID = spFindUnitCmdDesc(unitID, CMD_CLOAK)
 		if cloakDescID then
@@ -225,6 +263,12 @@ function gadget:UnitCreated(unitID, unitDefID)
 			return
 		end
 	end
+end
+
+function gadget:UnitDestroyed(unitID, unitDefID, teamID)
+	recloakUnit[unitID] = nil
+	recloakFrame[unitID] = nil
+	perfectCloakUnits[unitID] = nil
 end
 
 function gadget:Initialize()
