@@ -142,6 +142,55 @@ local commanderList = {
 }
 
 local categories = {}
+local dronesClass = {
+	corcs = true,
+	coracs = true,
+	armcs = true,
+	armacs = true,
+	corbw = true,
+	armsaber = true,
+	armseap = true,
+	corseap = true,
+	armsehak = true,
+	armblade = true,
+	--armdfly = true,
+	--corseah = true,
+	corcrwh = true,
+	corcsa = true,
+	armcsa = true,
+}
+local gunshipsClass = {
+	armkam = true,
+	armbrawl = true,
+	corape = true,
+	corcut = true,
+}
+local bombersClass = {
+	corshad = true,
+	corhurc = true,
+	cortitan = true,
+	armpnix = true,
+	armliche = true,
+	armthund = true,
+	armlance = true,
+	armsb = true,
+	corsb = true,
+}
+local strikersClass = {
+	armstil = true, -- special case, i plan on using striker missiles instead of bombs; this unit has too much speed ot be considered a bomber
+	armfig = true,
+	armsfig = true,
+	armpeep = true,
+	armhawk = true,
+	armawac = true,
+	corveng = true,
+	corvamp = true,
+	corawac = true,
+	corfink = true,
+	corsfig = true,
+	corhunt = true,
+}
+
 
 -- Manual categories: OBJECT T4AIR LIGHTAIRSCOUT GROUNDSCOUT RAPTOR
 -- Deprecated caregories: BOT TANK PHIB NOTLAND SPACE
@@ -198,6 +247,65 @@ local function unitDef_Post(name, uDef)
 
 	----------------------------------------------------------------------------------------------------------
 
+	if strikersClass[name] == true then
+		uDef.customparams.mobility = 1
+		uDef.hoverattack = false
+		uDef.cruisealtitude = 100
+		uDef.customparams.autoairdefs = true
+	elseif bombersClass[name] == true then
+		uDef.customparams.mobility = 0.4
+		uDef.hoverattack = false
+		uDef.cruisealtitude = 120
+		uDef.customparams.autoairdefs = true
+	elseif gunshipsClass[name] == true then
+		uDef.customparams.mobility = 0.8
+		uDef.hoverattack = false
+		uDef.cruisealtitude = 160
+		uDef.customparams.autoairdefs = true
+	elseif dronesClass[name] == true then
+		uDef.hoverattack = true
+		uDef.cruisealtitude = 60
+		uDef.customparams.autoairdefs = true
+	end
+
+
+	local spd = uDef.speed
+
+	if spd and uDef.canfly and not uDef.hoverattack and uDef.customparams and uDef.customparams.autoairdefs then 
+		local mobility = uDef.customparams.mobility or 1
+		local mobilityFactor =  (mobility) ^(0.65) -- stable across 0.4 to 1.0 range, untested beyond
+		local speedFactor =  ((spd / 300) ^(0.1)) -- stable across 100 - 400spd range, untested beyond
+		uDef.turnradius = 130 / mobility -- mobility of 1 ~= 120 turnRadius regardless of speed, we'll slightly overestimate it to avoid units going in circles
+		uDef.maxacc = spd/1000
+		uDef.wingdrag = 0.07
+		uDef.wingangle = 0.08
+		uDef.maxdec = spd/1500
+		uDef.speedtofront = spd / 20000
+		uDef.fronttospeed = spd / 20000
+		uDef.maxaileron = 289 / 20000
+		uDef.maxelevator = 289 / 20000
+		uDef.maxrudder = mobilityFactor * speedFactor * 289 / 20000
+		uDef.maxbank = mobilityFactor *  289 / 450
+		uDef.maxpitch = mobilityFactor * 289 / 450
+		uDef.maxroll = mobilityFactor * 289 / 450
+		uDef.mygravity = 0
+	end
+
+	if gunshipsClass[name] then
+		if uDef.weapons and uDef.weapondefs then
+			for wName, weaponDef in pairs(uDef.weapondefs) do
+				for armorType, damage in pairs(weaponDef.damage) do
+					weaponDef.damage[armorType] = damage * 10
+				end
+				weaponDef.areaofeffect = (weaponDef.areaofeffect or 8) * 3
+				weaponDef.turret = true
+				weaponDef.reloadtime = weaponDef.reloadtime * 7
+				weaponDef.burst = (weaponDef.burst or 1) * 3
+				weaponDef.burstrate = weaponDef.burstrate or 0.1
+				weaponDef.range = weaponDef.range * 1.9
+			end
+		end
+	end
 
 
 	if uDef.sounds then
