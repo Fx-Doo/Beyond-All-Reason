@@ -1,4 +1,6 @@
 local armorDefs = {
+	passengers = {
+	},
 	commanders = {
 		"armcom",
 		"armcomlvl2",

@@ -1072,6 +1072,14 @@ local function weaponDef_Post(name, wDef)
 			damage.indestructable = 0
 		end
 
+		if damage and damage.vtol then
+			if wDef.areaofeffect == nil then
+				wDef.areaofeffect = wDef.areaofeffect or 0
+			end
+			local ratio = (wDef.areaofeffect < 15 and 0.05 or wDef.areaofeffect < 100  and 0.1 or wDef.areaofeffect < 200 and 0.85 or 1.0)
+			damage.passengers = damage.vtol * ratio
+		end
+
 		if wDef.weapontype == "BeamLaser" then
 			if wDef.beamttl == nil then
 				wDef.beamttl = 3
