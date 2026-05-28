@@ -12,6 +12,9 @@ function widget:GetInfo()
 	}
 end
 
+if not WG.TransportAPI then return false end
+
+local TransportAPI = WG.TransportAPI
 
 -- Localized functions for performance
 local mathSin = math.sin
@@ -58,7 +61,8 @@ local cantBeTransported = {}
 local unitMass = {}
 local unitXSize = {}
 
-local circleList, chobbyInterface
+local circleList = {}
+local chobbyInterface
 
 for defID, def in pairs(UnitDefs) do
 	if def.transportSize and def.transportSize > 0 then
@@ -70,14 +74,14 @@ for defID, def in pairs(UnitDefs) do
 	cantBeTransported[defID] = def.cantBeTransported
 end
 
-local function DrawCircleLine()
+local function DrawCircleLine(nPieces)
 	gl.BeginEnd(GL.QUADS, function()
 		local detailPartWidth, a1, a2, a3, a4
 		local width = circleSpaceUsage
 		local detail = circlePieceDetail
 
-		local radStep = (2.0 * math.pi) / circlePieces
-		for i = 1, circlePieces do
+		local radStep = (2.0 * math.pi) / nPieces
+		for i = 1, nPieces do
 			for d = 1, detail do
 				detailPartWidth = ((width / detail) * d)
 				a1 = ((i + detailPartWidth - (width / detail)) * radStep)
@@ -102,11 +106,13 @@ local selectedUnitsCount = 0
 function widget:Initialize()
 	selectedUnits = spGetSelectedUnits()
 	selectedUnitsCount = spGetSelectedUnitsCount()
-	circleList = gl.CreateList(DrawCircleLine)
+	circleList = {}
 end
 
 function widget:Shutdown()
-	gl.DeleteList(circleList)
+	for k,v in pairs(circleList) do
+		gl.DeleteList(v)
+	end
 end
 
 function widget:SelectionChanged(sel)
@@ -123,8 +129,8 @@ function widget:GameFrame(n)
 	if selectedUnitsCount < 1  or selectedUnitsCount > 20 then
 		return
 	end
-
-	if select(2, Spring.GetActiveCommand()) ~= CMD_LOAD_UNITS then
+	local activeCommand, activeCmdDescID = Spring.GetActiveCommand()
+	if (activeCmdDescID ~= CMD_LOAD_UNITS) and (select(2,Spring.GetDefaultCommand()) ~= CMD_LOAD_UNITS) then
 		if next(unitsToDraw) then
 			unitsToDraw = {}
 		end
@@ -132,20 +138,16 @@ function widget:GameFrame(n)
 	end
 
 	activeTransportDefs = {}
+	local selectedTransports = {}
 	for i = 1, #selectedUnits do
 		local transID = selectedUnits[i]
 		local transDefID = spGetUnitDefID(transID)
-
 		if validTrans[transDefID] then
-			local transportedUnits = Spring.GetUnitIsTransporting(transID)
-			local transCapacity = transDefs[transDefID][2]
-			if not transportedUnits or #transportedUnits < transCapacity then
-				activeTransportDefs[transDefID] = true
-			end
+			selectedTransports[#selectedTransports + 1] = transID
 		end
 	end
 
-	if not next(activeTransportDefs) then
+	if not next(selectedTransports) then
 		if next(unitsToDraw) then
 			unitsToDraw = {}
 		end
@@ -154,7 +156,17 @@ function widget:GameFrame(n)
 
 	unitsToDraw = {}
 
-	local visibleUnits = Spring.GetVisibleUnits()
+	local visibleUnits = {}
+	if activeCmdDescID == CMD_LOAD_UNITS then
+		visibleUnits = Spring.GetVisibleUnits()
+	else
+		local mx, my = Spring.GetMouseState()
+		local type, data = Spring.TraceScreenRay(mx, my)
+		if type == "unit" then
+			visibleUnits = {data}
+		end
+	end
+
 	if not visibleUnits or not next(visibleUnits) then
 		return
 	end
@@ -162,24 +174,44 @@ function widget:GameFrame(n)
 	for _, unitID in ipairs(visibleUnits) do
 		local passengerDefID = spGetUnitDefID(unitID)
 		if not cantBeTransported[passengerDefID] and not Spring.IsUnitIcon(unitID) then
-			local passengerFootprintX = unitXSize[passengerDefID] / springFootprintScale
-			local canBePickedUp = false
-			for transDefID, _ in pairs(activeTransportDefs) do
-				local transDef = transDefs[transDefID]
-				local transMassLimit = transDef[1]
-				local transportSizeLimit = transDef[3]
-
-				if unitMass[passengerDefID] <= transMassLimit and passengerFootprintX <= transportSizeLimit then
-					canBePickedUp = true
-					break
+			local passengerSize = TransportAPI.GetPassengerSize(unitID)
+			local bestState = 0 -- 0 no slot for unit, 1 - slot but cant fit, 2 - can fit
+			for idx, transportID in pairs(selectedTransports) do
+				local transporterDefID = spGetUnitDefID(transportID)
+				if bestState < 1 then
+					local slotString = "transporterHasSlotOfSize" .. passengerSize
+					if Spring.GetUnitRulesParam(transportID, slotString) == true then
+						bestState = 1	
+					end
 				end
+				if bestState < 2 then
+					local canFit = TransportAPI.CanPassengerFitInTransporter(transportID, unitID, transporterDefID, passengerSize, 0)
+					if canFit then
+						bestState = 2
+						break
+					end
+				end
+			end
+			local isOverSized = UnitDefs[passengerDefID].customParams.oversized == "1"
+			local color = {0,0,0,0}
+			if bestState == 0 then
+				canBePickedUp = false
+			elseif bestState == 1 then
+				canBePickedUp = true
+				color = { 1, 0.5, 0, 0.8} -- orange
+			elseif bestState == 2 and isOverSized then
+				canBePickedUp = true
+				color = { 1, 1, 0, 0.8} -- yellow
+			else
+				canBePickedUp = true
+				color = { 0, 1, 0, 0.8} -- green
 			end
 
 			if canBePickedUp then
 				local x, y, z = Spring.GetUnitBasePosition(unitID)
 				if x then
 					-- we have to scale up passengerFootprintX otherwise indicator would be under the unit instead of around it
-					unitsToDraw[unitID] = { pos = { x, y, z }, size = (passengerFootprintX * indicatorSizeMultiplier) }
+					unitsToDraw[unitID] = { pos = { x, y, z }, size = passengerSize, color = color}
 				end
 			end
 		end
@@ -246,10 +278,14 @@ function widget:DrawWorldPreUnit()
 		end
 		if alpha > 0.04 then
 			local size = opts.size
-			gl.Color(0, 0.8, 0, alpha * 0.55)
-			gl.DrawListAtUnit(unitID, circleList, false, size, 1.0, size, currentRotationAngle, 0, 1, 0)
-			gl.Color(0, 0.8, 0, alpha)
-			gl.DrawListAtUnit(unitID, circleList, false, size * 1.18, 1.0, size * 1.18, -currentRotationAngle, 0, 1, 0)
+			if not circleList[size] then
+				circleList[size] = gl.CreateList(function() DrawCircleLine(size) end)
+			end
+			local color = opts.color
+			local thisSize = math.sqrt(2*size)/2 * springFootprintScale * indicatorSizeMultiplier
+			gl.Color(color[1], color[2], color[3], alpha * color[4])
+			gl.DrawListAtUnit(unitID, circleList[size], false, thisSize, 1.0, thisSize, currentRotationAngle, 0, 1, 0)
+			--gl.DrawListAtUnit(unitID, circleList[size], false, thisSize * 1.18, 1.0, thisSize * 1.18, -currentRotationAngle * 8/size, 0, 1, 0)
 		end
 	end
 

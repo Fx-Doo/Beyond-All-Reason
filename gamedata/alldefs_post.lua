@@ -166,6 +166,8 @@ categories["MINE"] = function(uDef) return uDef.weapondefs.minerange end
 categories["COMMANDER"] = function(uDef) return commanderList[uDef.movementclass] end
 categories["EMPABLE"] = function(uDef) return categories.SURFACE(uDef) and uDef.customparams.paralyzemultiplier ~= 0 end
 
+-- Dood suggested tractorbeam setup:
+local toOversize = VFS.Include("dood_suggested_setup/oversizeTable.lua")
 -------------------------
 -- MODULE FUNCTIONS
 -------------------------
@@ -178,6 +180,32 @@ local function unitDef_Post(name, uDef)
 	local weapondefs = uDef.weapondefs
 	local weapons = uDef.weapons
 
+	if toOversize[name] then
+		local passengerSize = toOversize[name].passengersize
+		if passengerSize == 1 then
+			uDef.customparams.oversized = "0"
+			uDef.customparams.nseats = 1
+		elseif passengerSize == 1.5 then
+			uDef.customparams.oversized = "1"
+			uDef.customparams.nseats = 1
+		elseif passengerSize == 2 then
+			uDef.customparams.oversized = "0"
+			uDef.customparams.nseats = 2
+		elseif passengerSize == 3 then
+			uDef.customparams.oversized = "1"
+			uDef.customparams.nseats = 2
+		elseif passengerSize == 4 then
+			uDef.customparams.oversized = "0"
+			uDef.customparams.nseats = 4
+		elseif passengerSize == 5 then
+			uDef.customparams.oversized = "1"
+			uDef.customparams.nseats = 4
+		else
+			uDef.customparams.oversized = "0"
+			uDef.customparams.nseats = 16
+		end
+	end
+	
 	if not uDef.icontype then
 		uDef.icontype = name
 	end
@@ -215,6 +243,8 @@ local function unitDef_Post(name, uDef)
 			else
 				uDef.script = "units/generic_air_transport_lus.lua"
 			end
+			uDef.customparams.transporterSpeedModMode = 3
+			uDef.customparams.transporterSpeedModStrength = 0.5
 		end
 	end
 
