@@ -41,6 +41,7 @@ local spGetUnitLosState = Spring.GetUnitLosState
 local spGetUnitTransporter = Spring.GetUnitTransporter
 local spGetUnitDefID = Spring.GetUnitDefID
 local spGetUnitIsBeingBuilt = Spring.GetUnitIsBeingBuilt
+local spGetUnitIsDead = Spring.GetUnitIsDead
 local spGetUnitsInCylinder = Spring.GetUnitsInCylinder
 local spSetUnitMoveGoal = Spring.SetUnitMoveGoal
 local spGiveOrderToUnit = Spring.GiveOrderToUnit
@@ -207,16 +208,8 @@ local function BuggerOff(x, y, z, padDefID, transporterID) -- prolly needs to fi
 	end
 end
 
-function EnablePassenger(passengerID)
-	local passengerDefID = spGetUnitDefID(passengerID)
-	local defs = UnitDefs[passengerDefID]
-	if defs.buildSpeed > 0 then
-		local buildRange = defs.buildDistance
-		Spring.SetUnitBuildParams(passengerID, "buildRange", buildRange)
-	end
-	if defs.weapons and #defs.weapons > 0 then
-		Spring.SetUnitUseWeapons(passengerID, false, true)
-	end
+local function EnablePassenger(passengerID)
+	TransportAPI.EnablePassenger(passengerID)
 end
 
 -------------------------
@@ -258,6 +251,9 @@ local function CanBeTransportedStatic(passengerID, passengerDefID, transporterID
 	if not spValidUnitID(passengerID) then
 		return false
 	end
+	if spGetUnitIsDead(passengerID) then
+		return false	
+	end
 	if passengerID == transporterID then
 		return false	
 	end
@@ -278,6 +274,9 @@ local function CanBeTransportedDynamic(passengerID, passengerDefID, passengerPos
 	if not spValidUnitID(passengerID) then
 		return false
 	end
+	if spGetUnitIsDead(passengerID) then
+		return false	
+	end
 	if spGetUnitTransporter(passengerID) ~= nil then
 		return false	
 	end
@@ -287,8 +286,11 @@ local function CanBeTransportedDynamic(passengerID, passengerDefID, passengerPos
 	if isUnderwater(passengerID, passengerPosY) then
 		return false
 	end
-	if spGetUnitRulesParam(passengerID, "inTransportAnim") == 1 then
-		return false	
+	if spGetUnitRulesParam(passengerID, "inUnloadAnim") == 1 then
+		return false
+	end
+	if (spGetUnitRulesParam(passengerID, "inLoadAnim") or 0) > 0 then
+		return false
 	end
 	local allied = spAreTeamsAllied(passengerTeamID, transporterTeamID)
 	if allied then
@@ -314,6 +316,9 @@ end
 local function CanBeAutoClaimed(passengerID, transporterAllyTeam) -- things that should only deny queueing if within area cmds
 	if not spValidUnitID(passengerID) then
 		return false
+	end
+	if spGetUnitIsDead(passengerID) then
+		return false	
 	end
 	return not claimedBy[transporterAllyTeam][passengerID]
 end
@@ -379,7 +384,14 @@ end
 --- @param transporterID number
 --- @param transporterTeamID number  -- transporter teamID
 --- @return boolean
-local function CanMoveToTransporter(passengerID, passengerTeamID, transporterID, transporterTeamID) -- things that should allow moving towards transporter to facilitate loading
+local function CanMoveToTransporter(passengerID, passengerTeamID, transporterID, transporterTeamID, posY) -- things that should allow moving towards transporter to facilitate loading
+	if posY < 0 then
+		local passengerDefID = spGetUnitDefID(passengerID)
+		local isHover = UnitDefs[passengerDefID].modCategories["hover"] == true
+		if not isHover then -- ground units should not move to an underwater position
+			return false
+		end
+	end
 	if passengerTeamID == transporterTeamID then
 		return true -- if it's the same team, we can move it towards the transport to facilitate loading
 	end
@@ -568,7 +580,7 @@ local function ExecuteLoadUnits(transporterID, transporterDefID, transporterTeam
 		elseif CanBeTransportedNow(passengerID, passengerTeamID, passengerPosX, passengerPosY, passengerPosZ, transporterID, transporterAllyTeam, transporterPosX, transporterPosY, transporterPosZ) then
 			customTransportLoad[transporterDefID](transporterID, 'PerformLoad', passengerID)
 			removalFlag = true
-		elseif dist2D(transporterPosX, transporterPosZ, cx, cz) < radius and CanMoveToTransporter(passengerID, passengerTeamID, transporterID, transporterTeamID) then
+		elseif dist2D(transporterPosX, transporterPosZ, cx, cz) < radius and CanMoveToTransporter(passengerID, passengerTeamID, transporterID, transporterTeamID, spGetGroundHeight(transporterPosX, transporterPosZ)) then
 			moveToTransporterFlag = true
 		end
 		if moveToTransporterFlag then
@@ -686,7 +698,7 @@ local function ExecuteSuccessiveLoadUnits(transporterID, transporterDefID, trans
 		elseif CanBeTransportedNow(passengerID, passengerTeamID, passengerPosX, passengerPosY, passengerPosZ, transporterID, transporterAllyTeam, transporterPosX, transporterPosY, transporterPosZ) then
 			customTransportLoad[transporterDefID](transporterID, 'PerformLoad', passengerID)
 			removalFlag = true
-		elseif dist2D(transporterPosX, transporterPosZ, passengerPosX, passengerPosZ) < 512  and CanMoveToTransporter(passengerID, passengerTeamID, transporterID, transporterTeamID) then
+		elseif dist2D(transporterPosX, transporterPosZ, passengerPosX, passengerPosZ) < 512  and CanMoveToTransporter(passengerID, passengerTeamID, transporterID, transporterTeamID, spGetGroundHeight(transporterPosX, transporterPosZ)) then
 			moveToTransporterFlag = true
 		end
 		if moveToTransporterFlag then -- do not order skipped passengers
@@ -722,17 +734,22 @@ function gadget:Initialize()
 	if #AllUnits > 0 then
 		for i = 1, #AllUnits do -- save/load compat
 			local unitID = AllUnits[i]
-			if spGetUnitRulesParam(unitID, "inTransportAnim") == 1 then
-				spEcho("Repairing unit " .. unitID .. " stuck in transport anim on gadget initialization")
-				-- this unit was in the middle of an unload anim, we need to "repair" it by releasing MoveCtrl and clip it to ground level (not fall, otherwise fall damages !!)
+			if spGetUnitRulesParam(unitID, "inUnloadAnim") == 1 then
+				spEcho("Repairing unit " .. unitID .. " stuck in unload anim on gadget initialization")
+				-- unit was mid-unload: release MoveCtrl, re-enable abilities, snap to ground
 				spMoveCtrlDisable(unitID, false)
-				spSetUnitRulesParam(unitID, "inTransportAnim", 0)
+				spSetUnitRulesParam(unitID, "inUnloadAnim", 0)
 				EnablePassenger(unitID)
-				-- repair customized radius from model defs
 				local unitDefID = spGetUnitDefID(unitID)
-				local radius = UnitDefs[unitDefID].radius
-				local height = UnitDefs[unitDefID].height
-				spSetUnitRadiusAndHeight(unitID, radius, height)
+				spSetUnitRadiusAndHeight(unitID, UnitDefs[unitDefID].radius, UnitDefs[unitDefID].height)
+				local unitPosX, unitPosY, unitPosZ = spGetUnitPosition(unitID)
+				spSetUnitPosition(unitID, unitPosX, spGetGroundHeight(unitPosX, unitPosZ), unitPosZ)
+			end
+			if (spGetUnitRulesParam(unitID, "inLoadAnim") or 0) > 0 then
+				spEcho("Repairing unit " .. unitID .. " stuck in load anim on gadget initialization")
+				-- unit was mid-load (not yet attached): release MoveCtrl and snap to ground
+				spMoveCtrlDisable(unitID, false)
+				spSetUnitRulesParam(unitID, "inLoadAnim", 0)
 				local unitPosX, unitPosY, unitPosZ = spGetUnitPosition(unitID)
 				spSetUnitPosition(unitID, unitPosX, spGetGroundHeight(unitPosX, unitPosZ), unitPosZ)
 			end
@@ -877,6 +894,15 @@ function gadget:CommandFallback(transporterID, transporterDefID, transporterTeam
 			local co = coroutine.create(function()
 					while true do
 						coroutine.yield() -- ticked by GameFrame every frame
+						local posX, posY, posZ = spGetUnitPosition(transporterID)
+						local passengerPosX, passengerPosY, passengerPosZ = spGetUnitPosition(cmdParams[1])
+						local disttoArea = dist2D(posX, posZ, passengerPosX, passengerPosZ)
+						while (disttoArea > 1024) or (Spring.GetGameFrame()%15 ~= transporterID%15) do
+							coroutine.yield() -- wait until we're close enough or every 15 frames to not do expensive checks every frame when far from the area
+							posX, posY, posZ = spGetUnitPosition(transporterID)
+							passengerPosX, passengerPosY, passengerPosZ = spGetUnitPosition(cmdParams[1])
+							disttoArea = dist2D(posX, posZ, passengerPosX, passengerPosZ)
+						end
 						local Q = spGetUnitCommands(transporterID, 1)
 						local cmd = Q and Q[1]
 						if not (cmd and cmd.id == CMD_LOAD_UNIT) then
@@ -912,6 +938,13 @@ function gadget:CommandFallback(transporterID, transporterDefID, transporterTeam
 				while true do
 					coroutine.yield() -- ticked by GameFrame every frame
 					coroutine.lastKnownParams = { cx, cy, cz, radius }
+					local posX, posY, posZ = spGetUnitPosition(transporterID)
+					local disttoArea = dist2D(posX, posZ, cx, cz)
+					while (disttoArea > 2*radius) or (Spring.GetGameFrame()%15 ~= transporterID%15) do
+						coroutine.yield() -- wait until we're close enough or every 15 frames to not do expensive checks every frame when far from the area
+						posX, posY, posZ = spGetUnitPosition(transporterID)
+						disttoArea = dist2D(posX, posZ, cx, cz)
+					end
 					-- update the coroutine's last known params 
 					-- so we can detect mid-coroutine changes, instead of exiting + recreating
 					local Q = spGetUnitCommands(transporterID, 1)
@@ -948,6 +981,10 @@ end
 
 -- still recquired for defaultCommand to work
 function gadget:AllowUnitTransport(transporterID, transporterDefID, transporterTeamID, passengerID, passengerDefID, passengerTeamID)
+	-- allow the attach that our own Load animation initiates
+	if spGetUnitRulesParam(passengerID, "inLoadAnim") == transporterID then
+		return true
+	end
 	--use our helper CanTransport
 	--I separated both to avoid FindUnitToTransport calling gadget:AllowUnitTransportLoad with an additional arg
 	local transporterAllyTeam = spGetUnitAllyTeam(transporterID)
@@ -961,19 +998,20 @@ function gadget:AllowUnitTransportUnload(transporterID, transporterDefID, transp
 	if not isAirTransport[transporterDefID] then return true end	
 	-- distance gate for individual unload commands
 	local transporterPosX, transporterPosY, transporterPosZ = spGetUnitPosition(transporterID)
-	local blocked = Spring.TestBuildOrder(TransportAPI.GetUnloadPadType(transporterID), goalX, goalY, goalZ, 0)
+	local unloadPadType = TransportAPI.GetUnloadPadType(transporterID)
+	local blocked = Spring.TestBuildOrder(unloadPadType, goalX, goalY, goalZ, 0)
 	if blocked == 0 then
 		--spEcho("unload position blocked for transporter " .. transporterID .. ", finding closest valid position")
-		goalX, goalY, goalZ = Spring.ClosestBuildPos(transporterTeamID, TransportAPI.GetUnloadPadType(transporterID), goalX, goalY, goalZ, 512, 0, 0)
+		goalX, goalY, goalZ = Spring.ClosestBuildPos(transporterTeamID, unloadPadType, goalX, goalY, goalZ, 512, 0, 0)
 		if not goalX then
 			spEcho("Error: no valid unload position found near target point for transporter " .. transporterID .. ", aborting unload")
 			return false
 		end
 	end
 	-- retest because we might still have mobile units in the way
-	blocked = Spring.TestBuildOrder(TransportAPI.GetUnloadPadType(transporterID), goalX, goalY, goalZ, 0)
+	blocked = Spring.TestBuildOrder(unloadPadType, goalX, goalY, goalZ, 0)
 	if blocked == 1 then
-		BuggerOff(goalX, goalY, goalZ,TransportAPI.GetUnloadPadType(transporterID), transporterID)
+		BuggerOff(goalX, goalY, goalZ, unloadPadType, transporterID)
 		--spEcho("need bugger off logic")
 	elseif blocked == 3 then
 		--spEcho("reclaimable feature in the way, should we unload ?")
@@ -984,11 +1022,15 @@ function gadget:AllowUnitTransportUnload(transporterID, transporterDefID, transp
 	end	
 	-- handle custom transports
 	if customTransportUnload[transporterDefID] then
-		if spGetUnitRulesParam(transporterID, "canUnload") == 0 then return false end
-		local targets = TransportAPI.GetUnloadTargets(transporterID, passengerID)
-		for _, passengerID in ipairs(targets) do
-			customTransportUnload[transporterDefID](transporterID, 'PerformUnload', passengerID, goalX, goalY, goalZ)
+		if spGetUnitRulesParam(transporterID, "canUnload") == 0 then 
+			spSetUnitMoveGoal(transporterID, goalX, goalY, goalZ) -- just override the engine given movegoal so it does not slowly descend.
+			return false
 		end
+		local targets = TransportAPI.GetUnloadTargets(transporterID, passengerID, goalX, goalY, goalZ)
+		for i = 1, #targets do
+			customTransportUnload[transporterDefID](transporterID, 'PerformUnload', targets[i], goalX, goalY, goalZ)
+		end
+		spSetUnitMoveGoal(transporterID, goalX, goalY, goalZ) -- just override the engine given movegoal so it does not slowly descend.
 		spUnitFinishCommand(transporterID) -- consume the command so the transporter proceeds to the next
 		return false
 	end
@@ -1027,7 +1069,11 @@ function gadget:AllowCommand(unitID, unitDefID, unitTeam, cmdID, cmdParams, cmdO
 	end
 	if cmdID == CMD.UNLOAD_UNIT then
 		local posX, posY, posZ = cmdParams[1], cmdParams[2], cmdParams[3]
-		local newPosX, newPosY, newPosZ = Spring.ClosestBuildPos(unitTeam, TransportAPI.GetUnloadPadType(unitID), posX, posY, posZ, 512, 0, 0)
+		-- cmdParams[4] is the specific passengerID for single-unload cmds; nil for area-style unloads
+		if not spValidUnitID(cmdParams[4]) then
+			cmdParams[4] = nil -- force nil in case some odd looking cmd was given
+		end
+		local newPosX, newPosY, newPosZ = Spring.ClosestBuildPos(unitTeam, TransportAPI.GetUnloadPadType(unitID, cmdParams[4]), posX, posY, posZ, 512, 0, 0)
 		if newPosX ~= posX or newPosY ~= posY or newPosZ ~= posZ then
 			cmdParams[1], cmdParams[2], cmdParams[3] = newPosX, newPosY, newPosZ
 			if fromInsert then

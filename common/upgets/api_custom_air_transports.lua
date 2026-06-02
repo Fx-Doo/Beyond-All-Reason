@@ -31,6 +31,19 @@ local spGetUnitRotation = Spring.GetUnitRotation
 local cachedCos, cachedSin = {}, {}
 local unloadPad = {}
 local spGetUnitRulesParam = Spring.GetUnitRulesParam
+
+-- Maps transporterSeats (1-16) to unloadpad footprint size.
+-- Derived from universalPadGenerator.py: pad = (max(beam_footprint_w, beam_footprint_h) + 32) / 16
+local seatsToPadSize = {
+	[1]  = 4,
+	[2]  = 6,  [3]  = 6,  [4]  = 6,
+	[5]  = 8,  [6]  = 8,  [7]  = 8,
+	[8]  = 10, [9]  = 10, [10] = 10, [11] = 10, [12] = 10,
+	[13] = 12,
+	[14] = 10,
+	[15] = 12,
+	[16] = 10,
+}
 local spValidUnitID = Spring.ValidUnitID
 
 local function cachedCosSin(angle)
@@ -41,69 +54,25 @@ local function cachedCosSin(angle)
 	return cachedCos[angle], cachedSin[angle]
 end
 
-local function rotationMatrixX(rx)
-    local c, s = cachedCosSin(rx)
-    return { {1,0,0}, {0,c,-s}, {0,s,c} }
-end
-
-local function rotationMatrixY(ry)
-    local c, s = cachedCosSin(ry)
-    return { {c,0,s}, {0,1,0}, {-s,0,c} }
-end
-
-local function rotationMatrixZ(rz)
-    local c, s = cachedCosSin(rz)
-    return { {c,-s,0}, {s,c,0}, {0,0,1} }
-end
-
-local function multiplyMatrices(a, b)
-    local r = {}
-    for i = 1, 3 do
-        r[i] = {}
-        for j = 1, 3 do
-            r[i][j] = 0
-            for k = 1, 3 do r[i][j] = r[i][j] + a[i][k] * b[k][j] end
-        end
-    end
-    return r
-end
-
-local function applyRotation(m, vx, vy, vz)
-    return m[1][1]*vx + m[1][2]*vy + m[1][3]*vz,
-           m[2][1]*vx + m[2][2]*vy + m[2][3]*vz,
-           m[3][1]*vx + m[3][2]*vy + m[3][3]*vz
-end
-
-local function transposeMatrix(m)
-    return {
-        { m[1][1], m[2][1], m[3][1] },
-        { m[1][2], m[2][2], m[3][2] },
-        { m[1][3], m[2][3], m[3][3] },
-    }
-end
-
 local function shortAngle(a)
     a = a % (2 * math.pi)
     if a > math.pi then a = a - 2 * math.pi end
     return a
 end
 
--- converts a world-space position and rotation into the transporter's unit-local space
-TransportAPI.WorldToUnitSpace = function(unitID, wantedWorldSpacePosX, wantedWorldSpacePosY, wantedWorldSpacePosZ, wantedWorldSpaceRotX, wantedWorldSpaceRotY, wantedWorldSpaceRotZ, currentUnitPosX, currentUnitPosY, currentUnitPosZ, currentUnitRotX, currentUnitRotY, currentUnitRotZ)
-    if not currentUnitPosX then
-        currentUnitPosX, currentUnitPosY, currentUnitPosZ    = spGetUnitPosition(unitID)
-        currentUnitRotX, currentUnitRotY, currentUnitRotZ = spGetUnitRotation(unitID)
-    end
-    local deltaX, deltaY, deltaZ = wantedWorldSpacePosX - currentUnitPosX, wantedWorldSpacePosY - currentUnitPosY, wantedWorldSpacePosZ - currentUnitPosZ
-    local unitRot = multiplyMatrices(
-        rotationMatrixY(-currentUnitRotY),
-        multiplyMatrices(rotationMatrixX(-currentUnitRotX), rotationMatrixZ(-currentUnitRotZ))
-    )
-    local wantedUnitSpacePosX, wantedUnitSpacePosY, wantedUnitSpacePosZ = applyRotation(transposeMatrix(unitRot), deltaX, deltaY, deltaZ)
-    return wantedUnitSpacePosX, wantedUnitSpacePosY, wantedUnitSpacePosZ,
-           shortAngle(wantedWorldSpaceRotX - currentUnitRotX),
-           shortAngle(currentUnitRotY - wantedWorldSpaceRotY), -- inverted in unit space
-           shortAngle(wantedWorldSpaceRotZ - currentUnitRotZ)
+-- Returns true if any passenger in the list is hover or amphib (canbeuw), false otherwise.
+function TransportAPI.HasAmphibCargo(passengers)
+	if not passengers or #passengers == 0 then return false end
+	for _, passengerID in ipairs(passengers) do
+		local udefID = Spring.GetUnitDefID(passengerID)
+		if udefID then
+			local def = UnitDefs[udefID]
+			if def.modCategories["canbeuw"] == true or def.modCategories["hover"] == true then
+				return true
+			end
+		end
+	end
+	return false
 end
 
 TransportAPI.precomputedProgress = {}
@@ -126,7 +95,7 @@ end
 
 -- Inspects the transporter's command queue to detect area-unload orders.
 -- Returns all currently loaded passengers for area-unload, or {passengerID} for single-unload.
-function TransportAPI.GetUnloadTargets(transporterID, passengerID)
+function TransportAPI.GetUnloadTargets(transporterID, passengerID, goalX, goalY, goalZ)
 	local Q = Spring.GetUnitCommands(transporterID, 2) -- we only need the first two
 	local isAreaUnload = Q and Q[1] and (
 		Q[1].id == CMD.UNLOAD_UNITS or
@@ -139,8 +108,29 @@ function TransportAPI.GetUnloadTargets(transporterID, passengerID)
 		)
 	)
 	if isAreaUnload then
-		return Spring.GetUnitIsTransporting(transporterID)
+		-- multi passengers, filter per unit
+		local units = Spring.GetUnitIsTransporting(transporterID)
+		local writeIndex = 1
+		local passengerIDs = {}
+		local gy = Spring.GetGroundHeight(goalX, goalZ)
+		for idx = 1, #units do
+			local uID = units[idx]
+			if TransportAPI.HasAmphibCargo({uID}) then
+				-- hover and amphib units are dropped at water surface (y=0); they float or sink naturally
+				passengerIDs[writeIndex] = uID
+				writeIndex = writeIndex + 1
+			else
+				-- land unit: skip if the ground is below water and the unit would be submerged
+				local uHeight = Spring.GetUnitHeight(uID)
+				if uHeight + gy > 0 then
+					passengerIDs[writeIndex] = uID
+					writeIndex = writeIndex + 1
+				end
+			end
+		end
+		return passengerIDs
 	end
+	-- only one passenger, no filter needed
 	return { passengerID }
 end
 
@@ -172,53 +162,58 @@ function TransportAPI.GetPassengerSize(unitID) -- minimal perf improvement: cach
 	return cachedUnitSizes[udefID]
 end
 
-function TransportAPI.GetUnloadPadType(transporterID)
-	local transporterDefID = Spring.GetUnitDefID(transporterID)
-	if unloadPad[transporterDefID] then
-		return unloadPad[transporterDefID]
-	end
+-- passengerID is optional: when provided, pad type is based solely on that unit (for single-unload cmds).
+-- When nil, all currently loaded passengers are checked (for area unloads).
+function TransportAPI.GetUnloadPadType(transporterID, passengerID)
 	local transporterSeats = Spring.GetUnitRulesParam(transporterID, "transporterSeats")
 	if not transporterSeats then
 		Spring.Echo("Error, GetUnloadPadType expects a valid transporter ID as 1st arg, transporterID "..transporterID.." does not point to a valid transporter ID")
 		return nil
 	end
-	if transporterSeats < 4 then
-		unloadPad[transporterDefID] = UnitDefNames["unloadpad2x2"].id
-	elseif transporterSeats < 8 then
-		unloadPad[transporterDefID] = UnitDefNames["unloadpad4x4"].id
-	elseif transporterSeats < 16 then
-		unloadPad[transporterDefID] = UnitDefNames["unloadpad8x8"].id
+	local passengers = passengerID and {passengerID} or Spring.GetUnitIsTransporting(transporterID)
+	local suffix = TransportAPI.HasAmphibCargo(passengers) and "_amphib" or ""
+	Spring.Echo(suffix)
+	local padSize = seatsToPadSize[transporterSeats] or 10
+	local padString = "unloadsize"..tostring(padSize)..suffix
+	if UnitDefNames[padString] then
+		return UnitDefNames[padString].id
 	end
-	return unloadPad[transporterDefID]
+	-- suffix variant not defined: fall back to land pad of the same size
+	return UnitDefNames["unloadsize"..tostring(padSize)].id
 end
 
 function TransportAPI.GetBiggestUnloadPadType(units)
+	if not units or #units == 0 then return nil end
+	-- find the largest seat count across all transporters in the selection
 	local transporterSeats = 0
-	local bestDefID = Spring.GetUnitDefID(units[1])
 	for i = 1, #units do
-	local unit = units[i]
-		local thisSeats = Spring.GetUnitRulesParam(unit, "transporterSeats") or 0
+		local thisSeats = Spring.GetUnitRulesParam(units[i], "transporterSeats") or 0
 		if thisSeats > transporterSeats then
-			bestDefID = Spring.GetUnitDefID(unit)
 			transporterSeats = thisSeats
 		end
 	end
-	local transporterDefID = bestDefID
-	if unloadPad[transporterDefID] then
-		return unloadPad[transporterDefID]
-	end
-	if not transporterSeats then
-		Spring.Echo("Error, GetUnloadPadType expects a valid transporter ID as 1st arg, transporterID "..transporterID.." does not point to a valid transporter ID")
+	if transporterSeats == 0 then
+		Spring.Echo("Error, GetBiggestUnloadPadType: no valid transporters in units table")
 		return nil
 	end
-	if transporterSeats < 4 then
-		unloadPad[transporterDefID] = UnitDefNames["unloadpad2x2"].id
-	elseif transporterSeats < 8 then
-		unloadPad[transporterDefID] = UnitDefNames["unloadpad4x4"].id
-	elseif transporterSeats < 16 then
-		unloadPad[transporterDefID] = UnitDefNames["unloadpad8x8"].id
+	-- aggregate all passengers across every transporter in the selection
+	local allPassengers = {}
+	for i = 1, #units do
+		local passengers = Spring.GetUnitIsTransporting(units[i])
+		if passengers then
+			for _, passengerID in ipairs(passengers) do
+				allPassengers[#allPassengers + 1] = passengerID
+			end
+		end
 	end
-	return unloadPad[transporterDefID]
+	local suffix = TransportAPI.HasAmphibCargo(allPassengers) and "_amphib" or ""
+	local padSize = seatsToPadSize[transporterSeats] or 10
+	local padString = "unloadsize"..tostring(padSize)..suffix
+	if UnitDefNames[padString] then
+		return UnitDefNames[padString].id
+	end
+	-- suffix variant not defined: fall back to land pad of the same size
+	return UnitDefNames["unloadsize"..tostring(padSize)].id
 end
 
 
@@ -263,6 +258,26 @@ end
 function TransportAPI.IsPassengerCommander(passengerID)
 	local isCommander = UnitDefs[Spring.GetUnitDefID(passengerID)].customParams.iscommander
 	return isCommander
+end
+
+function TransportAPI.EnablePassenger(passengerID)
+	local defs = UnitDefs[Spring.GetUnitDefID(passengerID)]
+	if defs.buildSpeed > 0 then
+		Spring.SetUnitBuildParams(passengerID, "buildRange", defs.buildDistance)
+	end
+	if defs.weapons and #defs.weapons > 0 then
+		Spring.SetUnitUseWeapons(passengerID, false, true)
+	end
+end
+
+function TransportAPI.DisablePassenger(passengerID)
+	local defs = UnitDefs[Spring.GetUnitDefID(passengerID)]
+	if defs.buildSpeed > 0 then
+		Spring.SetUnitBuildParams(passengerID, "buildRange", 0)
+	end
+	if defs.weapons and #defs.weapons > 0 then
+		Spring.SetUnitUseWeapons(passengerID, false, false)
+	end
 end
 
 function TransportAPI.CalculateTransporterSpeed(cargo)
