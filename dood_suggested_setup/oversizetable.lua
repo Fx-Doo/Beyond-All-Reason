@@ -1,45 +1,67 @@
+-- CATEGORIES:
+-- size = 1 : a very light passenger that can be carried by any transport, 
+-- a light transport can hold two without any speed loss
+
+-- size = 1.5 : a light passenger that can be carried by any transport, 
+-- a light transport can hold two but with a small speed loss (20%)
+
+-- size = 2 : a medium passenger that can be carried by any transport,
+-- a light transport can hold one without any speed loss
+
+-- size = 3 : a medium passenger that can be carried by any transport,
+-- a light transport can hold one but with a small speed loss (20%)
+
+-- size = 4 : a heavy passenger that can only be carried by heavy transports or t2 transports,
+-- they can only be carried one at a time, without any speed loss
+
+-- size = 6 : a very heavy passenger that can only be carried by heavy transports or t2 transports,
+-- they can only be carried one at a time, with a speed loss ranging from 15 to 30% depending on the transport
+
+-- Special case: Commanders are considered size 5; 
+-- but regardless of their overweight tag, they will always slow their transporter
+-- to their respective maximal speedNerf value.
 
 return {
 -- ARM Commanders
-  armcom = { passengersize = 5 },
-  armcomcon = { passengersize = 5 },
-  armcomlvl2 = { passengersize = 5 },
-  armcomlvl3 = { passengersize = 5 },
-  armcomlvl4 = { passengersize = 5 },
-  armcomlvl5 = { passengersize = 5 },
-  armcomlvl6 = { passengersize = 5 },
-  armcomlvl7 = { passengersize = 5 },
-  armcomlvl8 = { passengersize = 5 },
-  armcomlvl9 = { passengersize = 5 },
-  armcomlvl10 = { passengersize = 5 },
-  armcomnew = { passengersize = 5 },
+  armcom = { passengersize = 6 },
+  armcomcon = { passengersize = 6 },
+  armcomlvl2 = { passengersize = 6 },
+  armcomlvl3 = { passengersize = 6 },
+  armcomlvl4 = { passengersize = 6 },
+  armcomlvl5 = { passengersize = 6 },
+  armcomlvl6 = { passengersize = 6 },
+  armcomlvl7 = { passengersize = 6 },
+  armcomlvl8 = { passengersize = 6 },
+  armcomlvl9 = { passengersize = 6 },
+  armcomlvl10 = { passengersize = 6 },
+  armcomnew = { passengersize = 6 },
   -- ARM Bots T1
   armck = { passengersize = 2 },
   armflea = { passengersize = 1 },
-  armham = { passengersize = 2 },
-  armjeth = { passengersize = 2 },
+  armham = { passengersize = 1.5 },
+  armjeth = { passengersize = 1.5 },
   armpw = { passengersize = 1 },
   armrectr = { passengersize = 1 },
-  armrock = { passengersize = 2 },
-  armwar = { passengersize = 3 },
+  armrock = { passengersize = 1.5 },
+  armwar = { passengersize = 2 },
   -- ARM Bots T2
   armaak = { passengersize = 3 }, -- t2 aa bot
   armack = { passengersize = 2 }, -- t2 con
   armamph = { passengersize = 2 }, -- platy
   armaser = { passengersize = 2 }, -- jammer?
-  armdecom = { passengersize = 5 }, -- decoy com
-  armdecomlvl3 = { passengersize = 5 }, -- decoy com
-  armdecomlvl6 = { passengersize = 5 }, -- decoy com
-  armdecomlvl10 = { passengersize = 5 }, -- decoy com
+  armdecom = { passengersize = 6 }, -- decoy com
+  armdecomlvl3 = { passengersize = 6 }, -- decoy com
+  armdecomlvl6 = { passengersize = 6 }, -- decoy com
+  armdecomlvl10 = { passengersize = 6 }, -- decoy com
   armfark = { passengersize = 1 }, -- butler
   armfast = { passengersize = 2 }, -- sprinter
-  armfboy = { passengersize = 5 }, -- fattie
+  armfboy = { passengersize = 6 }, -- fattie
   armfido = { passengersize = 3 }, -- hound
   armhack = { passengersize = 1 }, -- ?
   armmark = { passengersize = 2 }, -- radar bot
   armmav = { passengersize = 3 }, -- maverick
   armsack = { passengersize = 1 }, -- ?
-  armscab = { passengersize = 5 }, -- mob anti
+  armscab = { passengersize = 6 }, -- mob anti
   armsnipe = { passengersize = 3 }, -- sniper
   armspid = { passengersize = 1.5 }, -- emp spider
   armsptk = { passengersize = 4 }, -- rocker spider (ex recluse)
@@ -47,16 +69,16 @@ return {
   armvader = { passengersize = 1 }, -- crawling bomb
   armzeus = { passengersize = 3 }, -- welder
   -- ARM Vehicles T1
-  armart = { passengersize = 3 }, -- artillery
+  armart = { passengersize = 2 }, -- artillery
   armbeaver = { passengersize = 2 }, -- amphib con
   armcv = { passengersize = 2 }, -- con
   armfav = { passengersize = 1 }, -- fav
-  armflash = { passengersize = 2 }, -- blitz
-  armjanus = { passengersize = 3 }, -- janus OP <3
-  armmlv = { passengersize = 2 }, -- minelayer
+  armflash = { passengersize = 1.5 }, -- blitz
+  armjanus = { passengersize = 2 }, -- janus OP <3
+  armmlv = { passengersize = 1 }, -- minelayer
   armpincer = { passengersize = 2 }, -- amphib
-  armsam = { passengersize = 3 }, -- missile
-  armstump = { passengersize = 3 }, -- stout
+  armsam = { passengersize = 2 }, -- missile
+  armstump = { passengersize = 2 }, -- stout
   -- ARM Vehicles T2
   armacv = { passengersize = 3 }, -- a con veh
   armbull = { passengersize = 4 }, -- bull
@@ -66,9 +88,9 @@ return {
   armhacv = { passengersize = 4 }, -- ?
   armjam = { passengersize = 2 }, --jammer veh
   armlatnk = { passengersize = 2 }, -- jaguar
-  armmanni = { passengersize = 5 }, -- starlight
+  armmanni = { passengersize = 6 }, -- starlight
   armmart = { passengersize = 4 }, -- luger/mauser
-  armmerl = { passengersize = 5 }, -- missile
+  armmerl = { passengersize = 6 }, -- missile
   armsacv = { passengersize = 4 }, -- ?
   armseer = { passengersize = 2 }, -- radar veh
   armyork = { passengersize = 3 }, -- flak veh
@@ -82,40 +104,40 @@ return {
   armbeamer = { passengersize = 4 },
   armllt = { passengersize = 4 },
   armnanotc = { passengersize = 2 },
-  armnanotc2plat = { passengersize = 5 },
-  armnanotct2 = { passengersize = 5 },
+  armnanotc2plat = { passengersize = 6 },
+  armnanotct2 = { passengersize = 6 },
   armrad = { passengersize = 4 },
   armrl = { passengersize = 4 },
   -- ARM Assist Drone
   armassistdrone_land = { passengersize = 1 },
   -- COR Commanders
-  corcom = { passengersize = 5 },
-  corcomcon = { passengersize = 5 },
-  corcomlvl2 = { passengersize = 5 },
-  corcomlvl3 = { passengersize = 5 },
-  corcomlvl4 = { passengersize = 5 },
-  corcomlvl5 = { passengersize = 5 },
-  corcomlvl6 = { passengersize = 5 },
-  corcomlvl7 = { passengersize = 5 },
-  corcomlvl8 = { passengersize = 5 },
-  corcomlvl9 = { passengersize = 5 },
-  corcomlvl10 = { passengersize = 5 },
+  corcom = { passengersize = 6 },
+  corcomcon = { passengersize = 6 },
+  corcomlvl2 = { passengersize = 6 },
+  corcomlvl3 = { passengersize = 6 },
+  corcomlvl4 = { passengersize = 6 },
+  corcomlvl5 = { passengersize = 6 },
+  corcomlvl6 = { passengersize = 6 },
+  corcomlvl7 = { passengersize = 6 },
+  corcomlvl8 = { passengersize = 6 },
+  corcomlvl9 = { passengersize = 6 },
+  corcomlvl10 = { passengersize = 6 },
   -- COR Bots T1
-  corak = { passengersize = 1 },
-  corck = { passengersize = 2 },
-  corcrash = { passengersize = 2 },
-  cornecro = { passengersize = 1 },
-  corstorm = { passengersize = 2 },
-  corthud = { passengersize = 2 },
+  corak = { passengersize = 1 }, -- grunt
+  corck = { passengersize = 2 }, -- con bot
+  corcrash = { passengersize = 1.5 }, -- aa bot
+  cornecro = { passengersize = 1 }, -- rez
+  corstorm = { passengersize = 1.5 }, -- rocket bot
+  corthud = { passengersize = 1.5 }, -- plasma bot
   -- COR Bots T2
-  coraak = { passengersize = 3 }, -- aa kbot
+  coraak = { passengersize = 3 }, -- aa bot
   corack = { passengersize = 2 }, -- t2 con
   coramph = { passengersize = 3 }, -- duck
   corcan = { passengersize = 3 }, -- sumo
-  cordecom = { passengersize = 5 }, -- decoy com
-  cordecomlvl3 = { passengersize = 5 },
-  cordecomlvl6 = { passengersize = 5 },
-  cordecomlvl10 = { passengersize = 5 },
+  cordecom = { passengersize = 6 }, -- decoy com
+  cordecomlvl3 = { passengersize = 6 },
+  cordecomlvl6 = { passengersize = 6 },
+  cordecomlvl10 = { passengersize = 6 },
   corfast = { passengersize = 1 }, -- freaker
   corhack = { passengersize = 1 }, -- ?
   corhrk = { passengersize = 3 }, -- rocket bot
@@ -127,27 +149,27 @@ return {
   corsktl = { passengersize = 1.5 }, -- skuttle
   corspec = { passengersize = 2 }, -- jammer?
   corspy = { passengersize = 2 }, -- spectre
-  corsumo = { passengersize = 5 }, -- mammoth
+  corsumo = { passengersize = 6 }, -- mammoth
   cortermite = { passengersize = 4 }, -- termite
   corvoyr = { passengersize = 2 }, -- radar
   -- COR Vehicles T1
-  corcv = { passengersize = 2 },
-  corfav = { passengersize = 1 },
-  corgarp = { passengersize = 2 },
-  corgator = { passengersize = 2 },
-  corlevlr = { passengersize = 3 },
-  cormist = { passengersize = 3 },
-  cormlv = { passengersize = 2 },
-  cormuskrat = { passengersize = 2 },
-  corraid = { passengersize = 3 },
-  corwolv = { passengersize = 3 },
+  corcv = { passengersize = 2 }, -- con veh
+  corfav = { passengersize = 1 }, -- scout veh
+  corgarp = { passengersize = 2 }, -- amphib veh
+  corgator = { passengersize = 1.5 }, -- incisor
+  corlevlr = { passengersize = 2 }, -- pounder
+  cormist = { passengersize = 2 }, -- missile truck
+  cormlv = { passengersize = 2 }, -- minelayer
+  cormuskrat = { passengersize = 2 }, -- amphib con veh
+  corraid = { passengersize = 2 }, -- brute
+  corwolv = { passengersize = 2 }, -- arti
   -- COR Vehicles T2
   coracv = { passengersize = 2 }, -- adv con
   corban = { passengersize = 4 }, -- banisher
   coreter = { passengersize = 2 }, -- jammer
-  corgol = { passengersize = 5 }, -- tzar
+  corgol = { passengersize = 6 }, -- tzar
   corhacv = { passengersize = 4 }, -- ?
-  cormabm = { passengersize = 5 }, -- mobile anti
+  cormabm = { passengersize = 6 }, -- mobile anti
   cormart = { passengersize = 4 }, -- art
   corparrow = { passengersize = 4 }, -- poison arrow
   corphantom = { passengersize = 2 }, -- amphib stealth scout
@@ -158,11 +180,11 @@ return {
   corseal = { passengersize = 4 }, -- alligator
   corsent = { passengersize = 4 }, -- aa veh
   corsiegebreaker = { passengersize = 16 }, --?
-  cortrem = { passengersize = 5 }, -- tremor
+  cortrem = { passengersize = 6 }, -- tremor
   corvac = { passengersize = 3 }, -- field engineer?
   corvacct = { passengersize = 3 }, -- ?
   corvrad = { passengersize = 2 }, -- mob vveh rad ?
-  corvroc = { passengersize = 5 }, -- vroc?
+  corvroc = { passengersize = 6 }, -- vroc?
   -- COR Hovercraft
   corah = { passengersize = 3 },
   corch = { passengersize = 2 },
@@ -174,8 +196,8 @@ return {
   corhllt = { passengersize = 4 },
   corllt = { passengersize = 4 },
   cornanotc = { passengersize = 2 },
-  cornanotc2plat = { passengersize = 5 },
-  cornanotct2 = { passengersize = 5 },
+  cornanotc2plat = { passengersize = 6 },
+  cornanotct2 = { passengersize = 6 },
   corrad = { passengersize = 4 },
   corrl = { passengersize = 4 },
   -- COR Assist Drone

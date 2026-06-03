@@ -197,7 +197,7 @@ local function unitDef_Post(name, uDef)
 		elseif passengerSize == 4 then
 			uDef.customparams.oversized = "0"
 			uDef.customparams.nseats = 4
-		elseif passengerSize == 5 then
+		elseif passengerSize == 6 then
 			uDef.customparams.oversized = "1"
 			uDef.customparams.nseats = 4
 		else
@@ -206,33 +206,34 @@ local function unitDef_Post(name, uDef)
 		end
 	end
 
+	-- note: commander is a 4-seat oversized unit, meaning 4 seat transports carrying a comm will be slowed by transporterspeedmodstrength if speedmodMode is 2
+	-- unless transportercomspeedmodstrength is higher
+	-- so here it's mostly used for corseah, which has 6 seats but should be slowed with one commander
 	if name == "armdfly" then
+		uDef.speed = 210 -- 210 (empty or filled with non oversized) -> 151.2 comm or full oversized
 		uDef.customparams.transporterspeedmodmode = 2
-		uDef.customparams.transporterspeedmodstrength = 0.52
-		uDef.customparams.transportercomspeedmodstrength = 0.3
-		--> same speed as hvy trans on equally oversized cargo
-		--> better speeds for non oversized cargos
+		uDef.customparams.transporterspeedmodstrength = 0.25
+		uDef.customparams.transportercomspeedmodstrength = 0.25
 	elseif name == "legstronghold" then
+		uDef.speed = 170 -- 170 (empty or filled with non oversized) -> 144.5 (comm or full oversized)
 		uDef.customparams.transporterspeedmodmode = 2
-		uDef.customparams.transporterspeedmodstrength = 0.38
-		uDef.customparams.transportercomspeedmodstrength = 0.3
-		--> same speed as hvy trans on equally oversized cargo
-		--> better speeds for non oversized cargos
+		uDef.customparams.transporterspeedmodstrength = 0.15
+		uDef.customparams.transportercomspeedmodstrength = 0.15 
 	elseif name == "corseah" then
-		uDef.speed = uDef.speed * 0.9
+		uDef.speed = 190 -- 190 (empty or filled with non oversized) -> 133 (comm or full oversized)
 		uDef.customparams.transporterspeedmodmode = 2
-		uDef.customparams.transporterspeedmodstrength = 0.39
+		uDef.customparams.transporterspeedmodstrength = 0.3
 		uDef.customparams.transportercomspeedmodstrength = 0.3
 	elseif name == "armhvytrans" or name == "corhvytrans" or name == "legatrans" then
-		uDef.speed = uDef.speed * (1.0/0.9)
+		uDef.speed = 100 -- 100 (empty or filled with non oversized) -> 80 (comm or full oversized, no change since it's already very slow)
 		uDef.customparams.transporterspeedmodmode = 2
-		uDef.customparams.transporterspeedmodstrength = 0.1 -- low speedNerf
-		uDef.customparams.transportercomspeedmodstrength = 0.1 -- low comSpeedNerf
+		uDef.customparams.transporterspeedmodstrength = 0.2
+		uDef.customparams.transportercomspeedmodstrength = 0.2
 	elseif name == "armatlas" or name == "corvalk" or name == "leglts" then
-		uDef.speed = uDef.speed * 0.8
+		uDef.speed = 170 -- 170 (empty or filled with non oversized) -> 136 (comm or full oversized)
 		uDef.customparams.transporterspeedmodmode = 2
-		uDef.customparams.transporterspeedmodstrength = 0.4 -- strong speedNerf
-		uDef.customparams.transportercomspeedmodstrength = 0.4 -- strong comSpeedNerf (but commander supposedly isn't transportable by those)
+		uDef.customparams.transporterspeedmodstrength = 0.2
+		uDef.customparams.transportercomspeedmodstrength = 0.2 
 	end
 	
 	if not uDef.icontype then
@@ -273,8 +274,6 @@ local function unitDef_Post(name, uDef)
 			else
 				uDef.script = "units/generic_air_transport_lus.lua"
 			end
-			uDef.customparams.transporterSpeedModMode = 3
-			uDef.customparams.transporterSpeedModStrength = 0.5
 		end
 	end
 
@@ -442,7 +441,7 @@ local function unitDef_Post(name, uDef)
 			customparams.effigy = "comeffigylvl1"
 			customparams.effigy_offset = 1
 			customparams.respawn_condition = "health"
-			customparams.minimum_respawn_stun = 5
+			customparams.minimum_respawn_stun = 6
 			customparams.distance_stun_multiplier = 1
 			local numBuildoptions = #buildoptions
 			buildoptions[numBuildoptions + 1] = "comeffigylvl1"
@@ -598,7 +597,7 @@ local function unitDef_Post(name, uDef)
 
 	-- Sets idleautoheal to 5hp/s after 1800 frames aka 1 minute.
 	if uDef.idleautoheal == nil then
-		uDef.idleautoheal = 5
+		uDef.idleautoheal = 6
 	end
 	if uDef.idletime == nil then
 		uDef.idletime = 1800
@@ -817,7 +816,7 @@ local function unitDef_Post(name, uDef)
 	end
 
 	-- add model vertex displacement
-	local vertexDisplacement = 5.5 + ((uDef.footprintx + uDef.footprintz) / 12)
+	local vertexDisplacement = 6.5 + ((uDef.footprintx + uDef.footprintz) / 12)
 	if vertexDisplacement > 10 then
 		vertexDisplacement = 10
 	end
@@ -888,12 +887,12 @@ local function ProcessSoundDefaults(wd)
 
 	local defaultDamage = wd.damage and wd.damage.default
 
-	if not defaultDamage or defaultDamage <= 50 then
+	if not defaultDamage or defaultDamage <= 60 then
 		-- old filter that gave small weapons a base-minumum sound volume, now fixed with noew math.min(math.max)
 		-- if not defaultDamage then
-		wd.soundstartvolume = 5
-		wd.soundhitvolume = 5
-		wd.soundhitwetvolume = 5
+		wd.soundstartvolume = 6
+		wd.soundhitvolume = 6
+		wd.soundhitwetvolume = 6
 		return
 	end
 
@@ -965,7 +964,7 @@ local function weaponDef_Post(name, wDef)
 		---- SHIELD CHANGES
 
 		if wDef.weapontype == "DGun" then
-			wDef.interceptedbyshieldtype = 512 --make dgun (like behemoth) interceptable by shields, optionally
+			wDef.interceptedbyshieldtype = 612 --make dgun (like behemoth) interceptable by shields, optionally
 		elseif wDef.weapontype == "StarburstLauncher" and not string.find(name, "raptor") then
 			wDef.interceptedbyshieldtype = 1024 --separate from combined MissileLauncher, except raptors
 		end
