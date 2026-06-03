@@ -205,6 +205,35 @@ local function unitDef_Post(name, uDef)
 			uDef.customparams.nseats = 16
 		end
 	end
+
+	if name == "armdfly" then
+		uDef.customparams.transporterspeedmodmode = 2
+		uDef.customparams.transporterspeedmodstrength = 0.52
+		uDef.customparams.transportercomspeedmodstrength = 0.3
+		--> same speed as hvy trans on equally oversized cargo
+		--> better speeds for non oversized cargos
+	elseif name == "legstronghold" then
+		uDef.customparams.transporterspeedmodmode = 2
+		uDef.customparams.transporterspeedmodstrength = 0.38
+		uDef.customparams.transportercomspeedmodstrength = 0.3
+		--> same speed as hvy trans on equally oversized cargo
+		--> better speeds for non oversized cargos
+	elseif name == "corseah" then
+		uDef.speed = uDef.speed * 0.9
+		uDef.customparams.transporterspeedmodmode = 2
+		uDef.customparams.transporterspeedmodstrength = 0.39
+		uDef.customparams.transportercomspeedmodstrength = 0.3
+	elseif name == "armhvytrans" or name == "corhvytrans" or name == "legatrans" then
+		uDef.speed = uDef.speed * (1.0/0.9)
+		uDef.customparams.transporterspeedmodmode = 2
+		uDef.customparams.transporterspeedmodstrength = 0.1 -- low speedNerf
+		uDef.customparams.transportercomspeedmodstrength = 0.1 -- low comSpeedNerf
+	elseif name == "armatlas" or name == "corvalk" or name == "leglts" then
+		uDef.speed = uDef.speed * 0.8
+		uDef.customparams.transporterspeedmodmode = 2
+		uDef.customparams.transporterspeedmodstrength = 0.4 -- strong speedNerf
+		uDef.customparams.transportercomspeedmodstrength = 0.4 -- strong comSpeedNerf (but commander supposedly isn't transportable by those)
+	end
 	
 	if not uDef.icontype then
 		uDef.icontype = name
