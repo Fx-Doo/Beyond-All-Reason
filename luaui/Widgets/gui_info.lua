@@ -235,7 +235,7 @@ local function refreshUnitInfo()
 			end
 		end
 		if unitDef.isTransport then
-			unitDefInfo[unitDefID].transport = { unitDef.transportMass, unitDef.transportSize, unitDef.transportCapacity }
+			unitDefInfo[unitDefID].transport = { tonumber(unitDef.customParams.transporterseats or 0)}
 		end
 		if unitDef.customParams.paralyzemultiplier then
 			unitDefInfo[unitDefID].paralyzeMult = tonumber(unitDef.customParams.paralyzemultiplier)
@@ -1775,14 +1775,7 @@ local function drawUnitInfo()
 		end
 
 		if unitDefInfo[displayUnitDefID].transport then
-
-			if unitDefInfo[displayUnitDefID].transport[1] < 5001 then
-				addTextInfo(Spring.I18N('ui.info.transport_light', { highlightColor = valueColor }), nil)
-			end
-			if unitDefInfo[displayUnitDefID].transport[1] > 5000 then
-				addTextInfo(Spring.I18N('ui.info.transport_heavy', { highlightColor = valueColor }), nil)
-			end
-			addTextInfo(Spring.I18N('ui.info.transportcapacity'), unitDefInfo[displayUnitDefID].transport[3])
+			addTextInfo(Spring.I18N('ui.info.transportcapacity'), unitDefInfo[displayUnitDefID].transport[1])
 		end
 
 		-- Build final text from buffer
