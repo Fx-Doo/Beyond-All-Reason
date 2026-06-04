@@ -37,7 +37,7 @@ return {
   armcomnew = { passengersize = 6 },
   -- ARM Bots T1
   armck = { passengersize = 2 },
-  armflea = { passengersize = 1 },
+  armflea = { passengersize = 0.5 },
   armham = { passengersize = 1.5 },
   armjeth = { passengersize = 1.5 },
   armpw = { passengersize = 1 },
@@ -72,7 +72,7 @@ return {
   armart = { passengersize = 2 }, -- artillery
   armbeaver = { passengersize = 2 }, -- amphib con
   armcv = { passengersize = 2 }, -- con
-  armfav = { passengersize = 1 }, -- fav
+  armfav = { passengersize = 0.5 }, -- fav
   armflash = { passengersize = 1.5 }, -- blitz
   armjanus = { passengersize = 2 }, -- janus OP <3
   armmlv = { passengersize = 1 }, -- minelayer
@@ -154,7 +154,7 @@ return {
   corvoyr = { passengersize = 2 }, -- radar
   -- COR Vehicles T1
   corcv = { passengersize = 2 }, -- con veh
-  corfav = { passengersize = 1 }, -- scout veh
+  corfav = { passengersize = 0.5 }, -- scout veh
   corgarp = { passengersize = 2 }, -- amphib veh
   corgator = { passengersize = 1.5 }, -- incisor
   corlevlr = { passengersize = 2 }, -- pounder
