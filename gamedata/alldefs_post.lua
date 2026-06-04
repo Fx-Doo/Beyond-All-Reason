@@ -182,7 +182,10 @@ local function unitDef_Post(name, uDef)
 
 	if toOversize[name] then
 		local passengerSize = toOversize[name].passengersize
-		if passengerSize == 1 then
+		if passengerSize == 0.5 then
+			uDef.customparams.oversized = "-1"
+			uDef.customparams.nseats = 1
+		elseif passengerSize == 1 then
 			uDef.customparams.oversized = "0"
 			uDef.customparams.nseats = 1
 		elseif passengerSize == 1.5 then
