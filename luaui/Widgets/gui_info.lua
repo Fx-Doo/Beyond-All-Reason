@@ -1558,6 +1558,12 @@ local function drawUnitInfo()
 							groups[unitGroup[uDefID]],
 							{unitDefInfo[uDefID].metalCost, unitDefInfo[uDefID].energyCost}
 						)
+						if UnitDefs[uDefID].customParams.oversized == "1" then
+							WG.FlowUI.Draw.RectRoundOutline(cellRect[cellID][1], cellRect[cellID][2], cellRect[cellID][3], cellRect[cellID][4], 0, 1, _,_,_,_,  { 1.0, 1.0, 0, 1.0 }, { 1.0, 1.0, 0, 0.5 }, {})
+						else
+							WG.FlowUI.Draw.RectRoundOutline(cellRect[cellID][1], cellRect[cellID][2], cellRect[cellID][3], cellRect[cellID][4], 0, 1, _,_,_,_,  { 0, 1.0, 0, 1.0 }, { 0, 1.0, 0, 0.5 }, {})
+						end
+						glColor(1, 1, 1, 1)
 					end
 					cellID = cellID - 1
 					if cellID <= 0 then
