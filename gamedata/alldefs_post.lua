@@ -190,8 +190,6 @@ categories["MINE"] = function(uDef) return uDef.weapondefs.minerange end
 categories["COMMANDER"] = function(uDef) return commanderList[uDef.movementclass] end
 categories["EMPABLE"] = function(uDef) return categories.SURFACE(uDef) and uDef.customparams.paralyzemultiplier ~= 0 end
 
--- Dood suggested tractorbeam setup:
-local toOversize = VFS.Include("dood_suggested_setup/oversizeTable.lua")
 -------------------------
 -- MODULE FUNCTIONS
 -------------------------
@@ -203,96 +201,10 @@ local function unitDef_Post(name, uDef)
 	local buildoptions = uDef.buildoptions
 	local weapondefs = uDef.weapondefs
 	local weapons = uDef.weapons
-	--- beta tractorbeam mod option
 
-	if modOptions.beta_tractorbeam == true then
-		if toOversize[name] then
-			local passengerSize = toOversize[name].passengersize
-			if passengerSize == 0.5 then
-				uDef.customparams.oversized = "-1"
-				uDef.customparams.nseats = 1
-			elseif passengerSize == 1 then
-				uDef.customparams.oversized = "0"
-				uDef.customparams.nseats = 1
-			elseif passengerSize == 1.5 then
-				uDef.customparams.oversized = "1"
-				uDef.customparams.nseats = 1
-			elseif passengerSize == 2 then
-				uDef.customparams.oversized = "0"
-				uDef.customparams.nseats = 2
-			elseif passengerSize == 3 then
-				uDef.customparams.oversized = "1"
-				uDef.customparams.nseats = 2
-			elseif passengerSize == 4 then
-				uDef.customparams.oversized = "0"
-				uDef.customparams.nseats = 4
-			elseif passengerSize == 6 then
-				uDef.customparams.oversized = "1"
-				uDef.customparams.nseats = 4
-			else
-				uDef.customparams.oversized = "0"
-				uDef.customparams.nseats = 16
-			end
-		end
-
-		-- note: commander is a 4-seat oversized unit, meaning 4 seat transports carrying a comm will be slowed by transporterspeedmodstrength if speedmodMode is 2
-		-- unless transportercomspeedmodstrength is higher
-		-- so here it's mostly used for corseah, which has 6 seats but should be slowed with one commander
-		if name == "armdfly" then
-			uDef.metalCost = 420
-			uDef.energyCost = 10000
-			uDef.health = 1000
-			uDef.sightDistance = 550
-			uDef.speed = 210 -- 210 (empty or filled with non oversized) -> 151.2 comm or full oversized
-			uDef.customparams.transporterspeedmodmode = 2
-			uDef.customparams.transporterspeedmodstrength = 0.25
-			uDef.customparams.transportercomspeedmodstrength = 0.25
-		elseif name == "legstronghold" then
-			uDef.health = 2200
-			uDef.speed = 170 -- 170 (empty or filled with non oversized) -> 144.5 (comm or full oversized)
-			uDef.customparams.transporterspeedmodmode = 2
-			uDef.customparams.transporterspeedmodstrength = 0.25
-			uDef.customparams.transportercomspeedmodstrength = 0.25
-		elseif name == "corseah" then
-		    uDef.metalCost = 320
-		    uDef.energyCost = 7500
-		    uDef.health = 1800
-			uDef.speed = 190 -- 190 (empty or filled with non oversized) -> 133 (comm or full oversized)
-			uDef.customparams.transporterspeedmodmode = 2
-			uDef.customparams.transporterspeedmodstrength = 0.35
-			uDef.customparams.transportercomspeedmodstrength = 0.35
-		elseif name == "armhvytrans" or name == "corhvytrans" or name == "legatrans" then
-			uDef.speed = 100 -- 100 (empty or filled with non oversized) -> 80 (comm or full oversized, no change since it's already very slow)
-			uDef.customparams.transporterspeedmodmode = 2
-			uDef.customparams.transporterspeedmodstrength = 0.2
-			uDef.customparams.transportercomspeedmodstrength = 0.2
-		elseif name == "armatlas" or name == "corvalk" or name == "leglts" then
-			uDef.speed = 170 -- 170 (empty or filled with non oversized) -> 136 (comm or full oversized)
-			uDef.customparams.transporterspeedmodmode = 2
-			uDef.customparams.transporterspeedmodstrength = 0.2
-			uDef.customparams.transportercomspeedmodstrength = 0.2 
-		end
-		if uDef.transportcapacity then
-			uDef.transportcapacity = 1000
-			uDef.transportsize = 1000
-			uDef.transportunloadmethod = 0
-			uDef.transportmass = 100000
-			uDef.holdsteady = true
-			uDef.releaseheld = true
-			uDef.loadingRadius = 512
-			uDef.unloadSpread = 0
-			uDef.objectname = "units/" .. name .. "_tractorbeam.s3o"
-			if name == "armdfly" or name == "legstronghold" then
-				uDef.script = "units/weaponized_air_transport_lus.lua"
-			else
-				uDef.script = "units/generic_air_transport_lus.lua"
-			end
-		end
+	if not uDef.icontype then
+		uDef.icontype = name
 	end
-		
-		if not uDef.icontype then
-			uDef.icontype = name
-		end
 
 	--global physics behavior changes
 	if uDef.health then
