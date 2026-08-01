@@ -46,6 +46,9 @@ return {
 			paralyzemultiplier = 0.4,
 			subfolder = "CorBuildings/LandDefenceOffence",
 			techlevel = 3,
+		
+			wpn1turretx = "85",
+			wpn2turretx = "85",
 		},
 		featuredefs = {
 			dead = {

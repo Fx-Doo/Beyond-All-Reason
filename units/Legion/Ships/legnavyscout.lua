@@ -35,6 +35,8 @@ return {
 			model_author = "ZephyrSkies (Model), Phill-Art (Concept Art)",
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "Legion/Ships",
+		
+			wpn1turrety = "270",
 		},
 		featuredefs = {
 			dead = {

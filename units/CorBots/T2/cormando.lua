@@ -61,6 +61,9 @@ return {
 			techlevel = 2,
 			unitgroup = "buildert2",
 			water_fall_damage_multiplier = 0,
+		
+			wpn1turrety = "300",
+			wpn1turretx = "225",
 		},
 		sfxtypes = {
 			explosiongenerators = {

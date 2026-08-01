@@ -37,6 +37,11 @@ return {
 			model_author = "Tharsis",
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "CorBots",
+		
+			wpn1turrety = "140",
+			wpn1turretx = "50",
+			wpn2turrety = "140",
+			wpn2turretx = "50",
 		},
 		featuredefs = {
 			dead = {

@@ -43,6 +43,9 @@ return {
 			normaltex = "unittextures/cor_normal.dds",
 			subfolder = "CorSeaplanes",
 			unitgroup = "aa",
+		
+			wpn1turrety = "360",
+			wpn1turretx = "720",
 		},
 		sounds = {
 			build = "nanlath1",

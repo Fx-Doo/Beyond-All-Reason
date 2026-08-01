@@ -30,6 +30,8 @@ return {
 			subfolder = "CorBuildings/SeaDefence",
 			techlevel = 2,
 			unitgroup = "sub",
+		
+			wpn1turrety = "80",
 		},
 		featuredefs = {
 			dead = {

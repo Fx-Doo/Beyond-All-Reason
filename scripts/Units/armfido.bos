@@ -1,5 +1,6 @@
 
 #include "../recoil_common_includes.h"
+#include "../unitDefsTurretSpeeds.h"
 
 piece  barrel, turret, loturret, flare, sleeve, torso, pelvis, lthigh, lleg, lfoot, rthigh, rleg, rfoot, luparm, lloarm, lhand, ruparm, rloarm, rhand,
        eyes, shoulder, ltooth, rtooth, aimy1, aimx1;
@@ -1423,6 +1424,9 @@ StopMoving(){
 
 Create()
 {
+	Weapon1TurretY = <150.0>;  // default – overridden by gadget
+	Weapon1TurretX = <50.0>;  // default – overridden by gadget
+
 	hide aimx1;
 	hide aimy1;
 	hide flare;
@@ -1466,8 +1470,8 @@ AimWeapon1(heading, pitch)
 {
 	signal SIGNAL_AIM1;
 	set-signal-mask SIGNAL_AIM1;
-	turn aimy1 to y-axis heading speed <150.000000>;
-	turn aimx1 to x-axis <0.000000> - pitch speed <50.000000>;
+	turn aimy1 to y-axis heading speed Weapon1TurretY;
+	turn aimx1 to x-axis <0.000000> - pitch speed Weapon1TurretX;
 	if ( (get ABS(last_primary_heading - heading)>900) OR (get ABS(last_primary_pitch - pitch)>300) )
 	{
 		// seems to take 3 frames for wait-for-turn to process

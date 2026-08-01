@@ -35,6 +35,9 @@ return {
 			normaltex = "unittextures/cor_normal.dds",
 			subfolder = "CorHovercraft",
 			unitgroup = "weapon",
+		
+			wpn1turrety = "130",
+			wpn1turretx = "80",
 		},
 		featuredefs = {
 			dead = {

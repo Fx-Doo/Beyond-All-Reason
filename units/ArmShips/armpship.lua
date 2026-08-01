@@ -34,6 +34,11 @@ return {
 			normaltex = "unittextures/Arm_normal.dds",
 			subfolder = "ArmShips",
 			unitgroup = "weapon",
+		
+			wpn1turrety = "180",
+			wpn1turretx = "90",
+			wpn2turrety = "180",
+			wpn2turretx = "90",
 		},
 		featuredefs = {
 			dead = {

@@ -43,6 +43,9 @@ return {
 			paralyzemultiplier = 1,
 			subfolder = "ArmShips",
 			unitgroup = "weaponaa",
+		
+			wpn1turrety = "300",
+			wpn2turrety = "300",
 		},
 		featuredefs = {
 			dead = {

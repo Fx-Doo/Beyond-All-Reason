@@ -36,6 +36,9 @@ return {
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "Legion/Bots/T2 Bots",
 			techlevel = 2,
+		
+			wpn1turrety = "180",
+			wpn1turretx = "85",
 		},
 		featuredefs = {
 			dead = {

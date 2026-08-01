@@ -38,6 +38,9 @@ return {
 			techlevel = 2,
 			unitgroup = "aa",
 			usebuildinggrounddecal = true,
+		
+			wpn1turrety = "1200",
+			wpn1turretx = "950",
 		},
 		featuredefs = {
 			dead = {

@@ -39,6 +39,9 @@ return {
 			unitgroup = "weapon",
 			restrictions_inclusion = "_nolrpc_",
 			usebuildinggrounddecal = true,
+		
+			wpn1turrety = "5",
+			wpn1turretx = "4",
 		},
 		featuredefs = {
 			dead = {

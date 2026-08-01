@@ -40,6 +40,16 @@ return {
 			normaltex = "unittextures/leegmech_normal.dds",
 			subfolder = "leggantry",
 			techlevel = 3,
+		
+			wpn1turrety = "90",
+			wpn2turrety = "100",
+			wpn2turretx = "100",
+			wpn3turrety = "100",
+			wpn3turretx = "100",
+			wpn4turrety = "200",
+			wpn4turretx = "200",
+			wpn5turrety = "200",
+			wpn5turretx = "200",
 		},
 		featuredefs = {
 			dead = {

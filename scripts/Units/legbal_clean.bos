@@ -1,5 +1,6 @@
 
 #include "../recoil_common_includes.h"
+#include "../unitDefsTurretSpeeds.h"
 
 piece  	pelvis, aimy1, torso, armor, aimx1, barrel, flare, backblast,
 		lthigh, lknee, lleg, lfoot, rthigh, rknee, rleg, rfoot;
@@ -229,6 +230,9 @@ StopMoving()
 
 Create()
 {
+	Weapon1TurretY = <90.021978>;  // default – overridden by gadget
+	Weapon1TurretX = <45.010989>;  // default – overridden by gadget
+
 	hide flare;
 	hide aimx1;
 	hide aimy1;
@@ -278,8 +282,8 @@ RestoreAfterDelay()
 AimWeapon1(heading, pitch)
 {
 	signal SIGNAL_AIM1;
-	turn aimy1 to y-axis heading speed <90.021978>;
-	turn aimx1 to x-axis <0.0> - pitch speed <45.010989>;
+	turn aimy1 to y-axis heading speed Weapon1TurretY;
+	turn aimx1 to x-axis <0.0> - pitch speed Weapon1TurretX;
 	if ((wpn1_lasthead == 0xbadface) OR ABSOLUTE_GREATER_THAN(WRAPDELTA(heading - wpn1_lasthead), <7>))
 	{
 		wpn1_lasthead = 0xbadface;

@@ -37,6 +37,9 @@ return {
 			subfolder = "CorBots",
 			weapon1turretx = 300,
 			weapon1turrety = 300,
+		
+			wpn1turrety = "200",
+			wpn1turretx = "100",
 		},
 		featuredefs = {
 			dead = {

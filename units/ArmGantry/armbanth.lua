@@ -44,6 +44,8 @@ return {
 			subfolder = "ArmGantry",
 			techlevel = 3,
 			unitgroup = "weapon",
+		
+			wpn2turrety = "300",
 		},
 		featuredefs = {
 			dead = {

@@ -38,6 +38,9 @@ return {
 			normaltex = "unittextures/Arm_normal.dds",
 			subfolder = "ArmHovercraft",
 			unitgroup = "aa",
+		
+			wpn2turrety = "370",
+			wpn2turretx = "280",
 		},
 		featuredefs = {
 			dead = {

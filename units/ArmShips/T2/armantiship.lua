@@ -55,6 +55,8 @@ return {
 			techlevel = 2,
 			unitgroup = "antinuke",
 			restrictions_exclusion = "_noantinuke_",
+		
+			wpn1turretx = "70",
 		},
 		featuredefs = {
 			dead = {

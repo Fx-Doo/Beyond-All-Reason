@@ -36,6 +36,9 @@ return {
 			normaltex = "unittextures/cor_normal.dds",
 			subfolder = "CorBots",
 			unitgroup = "weapon",
+		
+			wpn1turrety = "90",
+			wpn1turretx = "45",
 		},
 		featuredefs = {
 			dead = {

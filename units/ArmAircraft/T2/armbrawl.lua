@@ -34,6 +34,8 @@ return {
 			subfolder = "ArmAircraft/T2",
 			techlevel = 2,
 			unitgroup = "weapon",
+		
+			wpn1turretx = "180",
 		},
 		sfxtypes = {
 			explosiongenerators = {

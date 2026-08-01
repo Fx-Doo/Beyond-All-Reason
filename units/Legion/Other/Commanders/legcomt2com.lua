@@ -97,6 +97,10 @@ return {
 			normaltex = "unittextures/Arm_normal.dds",
 			paralyzemultiplier = 0.025,
 			subfolder = "",
+		
+			wpn4turrety = "250",
+			wpn4turretx = "200",
+			wpn5turretx = "100",
 		},
 		featuredefs = {
 			dead = {

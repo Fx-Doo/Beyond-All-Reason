@@ -43,8 +43,16 @@ return {
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "CorVehicles/T2",
 			techlevel = 2,
+<<<<<<< Updated upstream
 			weapon1turretx = 200,
 			weapon1turrety = 400,
+=======
+			weapon1turretx = 65,
+			weapon1turrety = 105,
+		
+			wpn1turrety = "300",
+			wpn1turretx = "200",
+>>>>>>> Stashed changes
 		},
 		featuredefs = {
 			dead = {

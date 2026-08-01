@@ -37,6 +37,9 @@ return {
 			removewait = true,
 			subfolder = "Legion/Defenses",
 			techlevel = 2,
+		
+			wpn1turrety = "100",
+			wpn1turretx = "125",
 		},
 		featuredefs = {
 			dead = {

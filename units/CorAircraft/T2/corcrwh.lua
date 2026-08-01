@@ -41,6 +41,19 @@ return {
 			subfolder = "CorAircraft/T2",
 			techlevel = 2,
 			unitgroup = "weapon",
+		
+			wpn1turrety = "200",
+			wpn1turretx = "200",
+			wpn2turrety = "450",
+			wpn2turretx = "450",
+			wpn3turrety = "200",
+			wpn3turretx = "200",
+			wpn4turrety = "200",
+			wpn4turretx = "200",
+			wpn5turrety = "200",
+			wpn5turretx = "200",
+			wpn6turrety = "200",
+			wpn6turretx = "200",
 		},
 		sfxtypes = {
 			explosiongenerators = {

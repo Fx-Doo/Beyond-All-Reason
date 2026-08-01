@@ -40,6 +40,13 @@ return {
 			unitgroup = "weapon",
 			speedfactorinwater = 2.6,
 			speedfactoratdepth = 15,
+		
+			wpn1turretx = "30",
+			wpn2turretx = "30",
+			wpn3turrety = "120",
+			wpn3turretx = "25",
+			wpn4turrety = "120",
+			wpn4turretx = "25",
 		},
 		featuredefs = {
 			dead = {

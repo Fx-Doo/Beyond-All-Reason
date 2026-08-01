@@ -39,6 +39,11 @@ return {
 			subfolder = "CorGantry",
 			techlevel = 3,
 			unitgroup = "weapon",
+		
+			wpn1turrety = "130",
+			wpn1turretx = "120",
+			wpn2turrety = "192",
+			wpn2turretx = "90",
 		},
 		featuredefs = {
 			dead = {

@@ -114,6 +114,17 @@ return {
 			minimum_respawn_stun = 5,
 			distance_stun_multiplier = 1,
 			fall_damage_multiplier = 5,--this ensures commander dies when it hits the ground so effigies can trigger respawn.
+		
+			wpn1turrety = "300",
+			wpn1turretx = "390",
+			wpn2turrety = "250",
+			wpn2turretx = "200",
+			wpn4turrety = "250",
+			wpn4turretx = "200",
+			wpn3turrety = "360",
+			wpn3turretx = "390",
+			wpn5turrety = "360",
+			wpn5turretx = "390",
 		},
 		featuredefs = {
 			dead = {

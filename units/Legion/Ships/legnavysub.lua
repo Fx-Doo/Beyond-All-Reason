@@ -37,6 +37,8 @@ return {
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "Legion/Ships",
 			unitgroup = "sub",
+		
+			wpn1turrety = "60",
 		},
 		featuredefs = {
 			dead = {

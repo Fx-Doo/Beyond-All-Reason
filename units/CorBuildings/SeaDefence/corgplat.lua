@@ -31,6 +31,9 @@ return {
 			removewait = true,
 			subfolder = "CorBuildings/SeaDefence",
 			unitgroup = "weapon",
+		
+			wpn1turrety = "220",
+			wpn1turretx = "220",
 		},
 		featuredefs = {
 			dead = {

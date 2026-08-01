@@ -43,6 +43,9 @@ return {
 			normaltex = "unittextures/Arm_normal.dds",
 			subfolder = "ArmSeaplanes",
 			unitgroup = "aa",
+		
+			wpn1turrety = "360",
+			wpn1turretx = "720",
 		},
 		sounds = {
 			build = "nanlath1",

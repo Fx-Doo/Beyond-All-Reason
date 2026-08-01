@@ -42,6 +42,9 @@ return {
 			subfolder = "CorVehicles/T2",
 			techlevel = 2,
 			unitgroup = "aa",
+		
+			wpn2turrety = "670",
+			wpn2turretx = "670",
 		},
 		featuredefs = {
 			dead = {

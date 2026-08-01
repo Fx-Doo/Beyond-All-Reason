@@ -38,6 +38,19 @@ return {
 			normaltex = "unittextures/Arm_normal.dds",
 			subfolder = "ArmBots/T2",
 			techlevel = 3,
+		
+			wpn1turrety = "120",
+			wpn1turretx = "65",
+			wpn2turrety = "45",
+			wpn2turretx = "70",
+			wpn3turrety = "150",
+			wpn3turretx = "150",
+			wpn4turrety = "150",
+			wpn4turretx = "150",
+			wpn5turrety = "45",
+			wpn5turretx = "70",
+			wpn6turrety = "120",
+			wpn6turretx = "65",
 		},
 		featuredefs = {
 			dead = {

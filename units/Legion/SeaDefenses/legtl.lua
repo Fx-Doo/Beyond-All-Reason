@@ -32,6 +32,9 @@ return {
 			removewait = true,
 			subfolder = "Legion/SeaDefenses",
 			unitgroup = "sub",
+		
+			wpn1turrety = "80",
+			wpn1turretx = "50",
 		},
 		featuredefs = {
 			dead = {

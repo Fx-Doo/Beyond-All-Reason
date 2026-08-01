@@ -58,6 +58,8 @@ return {
 			normaltex = "unittextures/cor_normal.dds",
 			subfolder = "CorVehicles",
 			unitgroup = "builder",
+		
+			wpn1turrety = "300",
 		},
 		featuredefs = {
 			dead = {

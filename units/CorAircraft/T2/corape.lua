@@ -36,6 +36,8 @@ return {
 			subfolder = "CorAircraft/T2",
 			techlevel = 2,
 			unitgroup = "weapon",
+		
+			wpn1turretx = "300",
 		},
 		sounds = {
 			canceldestruct = "cancel2",

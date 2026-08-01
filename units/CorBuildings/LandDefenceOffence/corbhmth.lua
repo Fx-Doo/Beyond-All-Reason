@@ -42,6 +42,8 @@ return {
 			techlevel = 2,
 			unitgroup = "energy",
 			usebuildinggrounddecal = true,
+		
+			wpn1turretx = "25",
 		},
 		featuredefs = {
 			dead = {

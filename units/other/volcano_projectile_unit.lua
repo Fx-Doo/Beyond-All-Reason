@@ -14,6 +14,9 @@ return {
 		customparams     = {
 			faction = "NONE",
 			is_volcano_launcher = 1,
+		
+			wpn1turrety = "140",
+			wpn1turretx = "50",
 		},
 
 		--------------------------------------------------------------------------

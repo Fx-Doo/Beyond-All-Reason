@@ -46,6 +46,9 @@ return {
 			techlevel = 2,
 			weapon1turretx = 65,
 			weapon1turrety = 105,
+		
+			wpn1turrety = "120",
+			wpn1turretx = "60",
 		},
 		featuredefs = {
 			dead = {

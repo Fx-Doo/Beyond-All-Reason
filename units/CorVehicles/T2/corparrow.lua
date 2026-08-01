@@ -49,6 +49,9 @@ return {
 			unitgroup = "weapon",
 			weapon1turretx = 35,
 			weapon1turrety = 55,
+		
+			wpn1turrety = "55",
+			wpn1turretx = "35",
 		},
 		featuredefs = {
 			dead = {

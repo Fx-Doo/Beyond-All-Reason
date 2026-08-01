@@ -45,6 +45,9 @@ return {
 			removewait = true,
 			subfolder = "ArmBuildings/LandDefenceOffence",
 			techlevel = 3,
+		
+			wpn1turrety = "50",
+			wpn1turretx = "50",
 		},
 		featuredefs = {
 			dead = {

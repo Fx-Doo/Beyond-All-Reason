@@ -43,6 +43,21 @@ return {
 			subfolder = "ArmShips/T2",
 			techlevel = 2,
 			unitgroup = "weapon",
+		
+			wpn1turrety = "50",
+			wpn1turretx = "25",
+			wpn2turrety = "90",
+			wpn2turretx = "25",
+			wpn3turrety = "50",
+			wpn3turretx = "25",
+			wpn4turrety = "90",
+			wpn4turretx = "25",
+			wpn5turrety = "90",
+			wpn5turretx = "25",
+			wpn6turrety = "250",
+			wpn6turretx = "200",
+			wpn7turrety = "250",
+			wpn7turretx = "200",
 		},
 		featuredefs = {
 			dead = {

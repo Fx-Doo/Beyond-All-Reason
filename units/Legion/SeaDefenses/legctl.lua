@@ -37,6 +37,8 @@ return {
 			subfolder = "Legion/SeaDefenses",
 			unitgroup = "sub",
 			-- usebuildinggrounddecal = true,
+		
+			wpn1turrety = "200",
 		},
 		featuredefs = {
 			dead = {

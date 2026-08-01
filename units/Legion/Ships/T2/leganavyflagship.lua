@@ -43,6 +43,20 @@ return {
 			subfolder = "Legion/Ships/T2",
 			techlevel = 2,
 			unitgroup = "weapon",
+		
+			wpn1turretx = "25",
+			wpn2turrety = "6",
+			wpn2turretx = "25",
+			wpn3turrety = "6",
+			wpn3turretx = "25",
+			wpn4turrety = "150",
+			wpn4turretx = "15",
+			wpn5turrety = "150",
+			wpn5turretx = "15",
+			wpn6turrety = "150",
+			wpn6turretx = "15",
+			wpn7turrety = "150",
+			wpn7turretx = "15",
 		},
 		featuredefs = {
 			dead = {

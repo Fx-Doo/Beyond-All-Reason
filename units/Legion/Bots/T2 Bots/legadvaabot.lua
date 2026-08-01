@@ -36,6 +36,11 @@ return {
 			subfolder = "Legion/Bots/T2 Bots",
 			techlevel = 2,
 			unitgroup = "aa",
+		
+			wpn1turrety = "225",
+			wpn1turretx = "225",
+			wpn2turrety = "225",
+			wpn2turretx = "225",
 		},
 		featuredefs = {
 			dead = {

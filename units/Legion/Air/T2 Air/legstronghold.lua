@@ -43,6 +43,9 @@ return {
 			subfolder = "CorAircraft/T2",
 			techlevel = 2,
 			crashable = 0,
+		
+			wpn1turrety = "180",
+			wpn1turretx = "180",
 		},
 		sfxtypes = {
 			explosiongenerators = {

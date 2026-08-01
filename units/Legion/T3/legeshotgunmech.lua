@@ -39,6 +39,12 @@ return {
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "leggantry",
 			techlevel = 3,
+		
+			wpn1turrety = "100",
+			wpn2turrety = "200",
+			wpn2turretx = "100",
+			wpn4turrety = "300",
+			wpn4turretx = "300",
 		},
 		featuredefs = {
 			dead = {

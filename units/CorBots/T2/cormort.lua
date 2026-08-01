@@ -37,6 +37,9 @@ return {
 			subfolder = "CorBots/T2",
 			techlevel = 2,
 			unitgroup = "weapon",
+		
+			wpn1turrety = "190",
+			wpn1turretx = "150",
 		},
 		featuredefs = {
 			dead = {

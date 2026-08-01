@@ -36,6 +36,9 @@ return {
 			subfolder = "CorAircraft",
 			drone = 1,
 			nohealthbars = 1,
+		
+			wpn1turrety = "300",
+			wpn1turretx = "300",
 		},
 		sounds = {
 			canceldestruct = "cancel2",

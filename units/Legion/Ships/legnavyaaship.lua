@@ -40,6 +40,9 @@ return {
 			model_author = "ZephyrSkies",
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "Legion/Ships",
+		
+			wpn1turrety = "180",
+			wpn1turretx = "90",
 		},
 		featuredefs = {
 			dead = {

@@ -1,5 +1,6 @@
 
 #include "../recoil_common_includes.h"
+#include "../unitDefsTurretSpeeds.h"
 
 //INCREMENT THIS COUNTER FOR EVERY HOUR OF YOUR LIFE WASTED HERE: 26
 		
@@ -484,6 +485,22 @@ StopMoving(){
 //--------------------------------------------------------
 
 Create(){
+	Weapon1TurretY = <300.0>;  // default – overridden by gadget
+	Weapon1TurretX = <390.0>;  // default – overridden by gadget
+	Weapon2TurretY = <250.0>;  // default – overridden by gadget
+	Weapon2TurretX = <200.0>;  // default – overridden by gadget
+	Weapon3TurretY = <360.0>;  // default – overridden by gadget
+	Weapon3TurretX = <390.0>;  // default – overridden by gadget
+	Weapon4TurretY = <250.0>;  // default – overridden by gadget
+	Weapon4TurretX = <200.0>;  // default – overridden by gadget
+
+	Weapon1TurretY = <300.0>;  // default – overridden by gadget
+	Weapon1TurretX = <390.0>;  // default – overridden by gadget
+	Weapon2TurretY = <250.0>;  // default – overridden by gadget
+	Weapon2TurretX = <200.0>;  // default – overridden by gadget
+	Weapon4TurretY = <250.0>;  // default – overridden by gadget
+	Weapon4TurretX = <200.0>;  // default – overridden by gadget
+
 
 	hide nano;
 	hide aimxr;
@@ -660,11 +677,11 @@ AimWeapon1(heading, pitch) //pew pew
 	
 	torsoRot = heading;
 	
-	turn aimy1 to y-axis heading speed <300.0000>;
+	turn aimy1 to y-axis heading speed Weapon1TurretY;
 	
-	turn lshoulder to y-axis <0.0> speed <300.0>;
-	turn larm to x-axis 0-(pitch/2) speed <390.0000>;
-	turn lhand to x-axis 0-(pitch/2) speed <390.0000>;
+	turn lshoulder to y-axis <0.0> speed Weapon1TurretY;
+	turn larm to x-axis 0-(pitch/2) speed Weapon1TurretX;
+	turn lhand to x-axis 0-(pitch/2) speed Weapon1TurretX;
 	
 	isAiming = 1;
 	wait-for-turn aimy1 around y-axis;
@@ -709,8 +726,8 @@ AimWeapon2(heading, pitch)
     }	
 	signal SIGNAL_AIM2;
 	set-signal-mask SIGNAL_AIM2;
-	turn aaturret to y-axis heading - torsoRot speed <250.0>;
-	turn aabarrel to x-axis <0> - pitch speed <200.0>;
+	turn aaturret to y-axis heading - torsoRot speed Weapon2TurretY;
+	turn aabarrel to x-axis <0> - pitch speed Weapon2TurretX;
 	wait-for-turn aaturret around y-axis;
 	wait-for-turn aabarrel around x-axis;
 	return (1);
@@ -756,11 +773,11 @@ AimWeapon3(heading, pitch)
 	isAiming = 1;
 	rightArm = 0;
 	
-	turn aimy1 to y-axis heading speed <360.0000> ;
+	turn aimy1 to y-axis heading speed Weapon3TurretY ;
 	torsoRot = heading;
-	turn rshoulder to y-axis <0.0> speed <300.0>;
-	turn rarm to x-axis 0-(pitch/2) speed <390.0000>;
-	turn rhand to x-axis 0-(pitch/2) speed <390.0000>;
+	turn rshoulder to y-axis <0.0> speed Weapon3TurretY;
+	turn rarm to x-axis 0-(pitch/2) speed Weapon3TurretX;
+	turn rhand to x-axis 0-(pitch/2) speed Weapon3TurretX;
 	
 	wait-for-turn aimy1 around y-axis;
 	
@@ -788,8 +805,8 @@ AimWeapon4(heading, pitch)
 {
 	signal SIGNAL_AIM2;
 	set-signal-mask SIGNAL_AIM2;
-	turn aaturret to y-axis heading - torsoRot speed <250.0>;
-	turn aabarrel to x-axis <0> - pitch speed <200.0>;
+	turn aaturret to y-axis heading - torsoRot speed Weapon4TurretY;
+	turn aabarrel to x-axis <0> - pitch speed Weapon4TurretX;
 	wait-for-turn aaturret around y-axis;
 	wait-for-turn aabarrel around x-axis;
 	return (1);

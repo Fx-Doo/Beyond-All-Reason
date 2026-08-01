@@ -1,5 +1,6 @@
 
 #include "../recoil_common_includes.h"
+#include "../unitDefsTurretSpeeds.h"
 
 piece  pelvis, lfleg, rfleg, lbleg, rbleg, lbfoot, lffoot, rbfoot, rffoot, torso, flakgun, flareflak, flare1, flare2, flare3, flare4, aimy1, aimx1, aimx2;
 
@@ -244,6 +245,11 @@ StopMoving(){
 
 Create()
 {
+	Weapon1TurretY = <200.0>;  // default – overridden by gadget
+	Weapon1TurretX = <100.0>;  // default – overridden by gadget
+	Weapon2TurretY = <120.0>;  // default – overridden by gadget
+	Weapon2TurretX = <100.0>;  // default – overridden by gadget
+
 	hide flareflak;
 	hide flare4;
 	hide flare3;
@@ -295,8 +301,8 @@ RestoreAfterDelay()
 AimWeapon1(heading, pitch){
 	signal SIGNAL_AIM1;
 	set-signal-mask SIGNAL_AIM1;
-	turn aimy1 to y-axis heading speed <200>;
-	turn aimx1 to x-axis (-1*pitch) speed <100>;
+	turn aimy1 to y-axis heading speed Weapon1TurretY;
+	turn aimx1 to x-axis (-1*pitch) speed Weapon1TurretX;
 	wait-for-turn aimy1 around y-axis;
 	wait-for-turn aimx1 around x-axis;
 	start-script RestoreAfterDelay();
@@ -343,8 +349,8 @@ QueryWeapon1(pieceIndex){
 AimWeapon2(heading, pitch){
 	signal SIGNAL_AIM2;
 	set-signal-mask SIGNAL_AIM2;
-	//turn torso to y-axis <120> speed <120>;
-	turn aimx2 to x-axis (0-pitch) speed <100>;
+	//turn torso to y-axis <120> speed Weapon2TurretY;
+	turn aimx2 to x-axis (0-pitch) speed Weapon2TurretX;
 	wait-for-turn aimx2 around x-axis;
 	return (1);
 }

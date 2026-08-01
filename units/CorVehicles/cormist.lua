@@ -41,6 +41,11 @@ return {
 			normaltex = "unittextures/cor_normal.dds",
 			subfolder = "CorVehicles",
 			unitgroup = "weaponaa",
+		
+			wpn1turrety = "250",
+			wpn1turretx = "150",
+			wpn2turrety = "250",
+			wpn2turretx = "200",
 		},
 		featuredefs = {
 			dead = {

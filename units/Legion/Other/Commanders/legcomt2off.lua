@@ -106,6 +106,9 @@ return {
 			paralyzemultiplier = 0.025,
 			subfolder = "",
 			paratrooper = true,
+		
+			wpn4turrety = "250",
+			wpn4turretx = "200",
 		},
 		featuredefs = {
 			dead = {

@@ -44,6 +44,9 @@ return {
 			subfolder = "CorBuildings/LandDefenceOffence",
 			unitgroup = "weapon",
 			usebuildinggrounddecal = true,
+		
+			wpn1turrety = "300",
+			wpn1turretx = "110",
 		},
 		featuredefs = {
 			dead = {

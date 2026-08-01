@@ -37,6 +37,11 @@ return {
 			model_author = "Johnathan Crimson (Concept Art/Model), ZephyrSkies (Model)",
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "Legion/Ships",
+		
+			wpn1turrety = "30",
+			wpn1turretx = "15",
+			wpn2turrety = "30",
+			wpn2turretx = "15",
 		},
 		featuredefs = {
 			dead = {

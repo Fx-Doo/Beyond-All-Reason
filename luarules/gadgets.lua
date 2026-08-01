@@ -271,6 +271,7 @@ local callInLists = {
 	"UnitReverseBuilt",
 	"UnitFromFactory",
 	"UnitDestroyed",
+	"WeaponAutoTarget",
 	"RenderUnitDestroyed",
 	"UnitExperience",
 	"UnitIdle",
@@ -1939,15 +1940,32 @@ end
 function gadgetHandler:AllowWeaponTarget(attackerID, targetID, attackerWeaponNum, attackerWeaponDefID, defPriority)
 	-- Calls with no input priority are pure pass/fail tests.
 	-- These are common, and BAR never disallows any of them.
+<<<<<<< Updated upstream
 	-- if not defPriority then
 	-- 	return true -- The second return value is never used.
 	-- end
-
+=======
 	local allowed = true
+	if not defPriority then
+		for _, g in ipairs(self.AllowWeaponTargetList) do
+			allowed = g:AllowWeaponTarget(attackerID, targetID, attackerWeaponNum, attackerWeaponDefID, defPriority)
+			if not allowed then
+				return allowed
+			end
+		end
+		return allowed 
+	end
+>>>>>>> Stashed changes
+
 	local result = 1.0
 
+<<<<<<< Updated upstream
 	if targetID == -1 and attackerWeaponNum == -1 then
 		-- The `defPriority` return value here is actually the autotarget search radius,
+=======
+	if attackerWeaponDefID == 0 then
+		-- The `targetPriority` return value is actually the autotarget search radius,
+>>>>>>> Stashed changes
 		-- and applies to the unit's targeting search for its command AI, not weapons.
 		for _, g in ipairs(self.UnitAutoTargetRangeList) do
 			defPriority = g:UnitAutoTargetRange(attackerID, defPriority)
@@ -1964,6 +1982,8 @@ function gadgetHandler:AllowWeaponTarget(attackerID, targetID, attackerWeaponNum
 end
 
 function gadgetHandler:UnitAutoTargetRange(attackerID, autoTargetRange)
+	Spring.Echo("g:UnitAutoTargetRange is deprecated, use g:AllowWeaponTarget instead")
+	return 0
 	-- Implementation stub for g:UnitAutoTargetRange. See g:AllowWeaponTarget, above.
 	-- This is needed for gadgetHandler to "see" this callin and build its call list.
 end
@@ -2036,6 +2056,16 @@ function gadgetHandler:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, at
 
 	for _, g in ipairs(self.UnitDestroyedList) do
 		g:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
+	end
+	tracy.ZoneEnd()
+	return
+end
+
+function gadgetHandler:WeaponAutoTarget(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
+	tracy.ZoneBeginN("G:WeaponAutoTarget")
+
+	for _, g in ipairs(self.WeaponAutoTargetList) do
+		g:WeaponAutoTarget(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
 	end
 	tracy.ZoneEnd()
 	return

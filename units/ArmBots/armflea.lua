@@ -36,6 +36,8 @@ return {
 			normaltex = "unittextures/Arm_normal.dds",
 			subfolder = "ArmBots",
 			unitgroup = "weapon",
+		
+			wpn1turrety = "450",
 		},
 		featuredefs = {
 			dead = {

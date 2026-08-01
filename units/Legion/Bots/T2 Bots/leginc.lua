@@ -37,6 +37,9 @@ return {
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "CorBots/T2",
 			techlevel = 2,
+		
+			wpn1turrety = "30",
+			wpn1turretx = "15",
 		},
 		featuredefs = {
 			dead = {

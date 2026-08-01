@@ -41,6 +41,10 @@ return {
 			weapon1turrety = 200,
 			reactive_armor_health = 300,
 			reactive_armor_restore = 15,
+		
+			wpn2turrety = "90",
+			wpn1turrety = "200",
+			wpn1turretx = "200",
 		},
 		featuredefs = {
 			dead = {

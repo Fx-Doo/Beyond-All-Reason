@@ -1,0 +1,2379 @@
+{
+  "armaak": {
+    "2": {
+      "y": 250.0,
+      "x": 400.0,
+      "complex": false
+    },
+    "3": {
+      "y": 250.0,
+      "x": 400.0,
+      "complex": false
+    },
+    "4": {
+      "y": 250.0,
+      "x": 400.0,
+      "complex": false
+    },
+    "5": {
+      "y": 250.0,
+      "x": 400.0,
+      "complex": false
+    }
+  },
+  "armaak_clean": {
+    "1": {
+      "y": 200.0,
+      "x": 100.0,
+      "complex": false
+    },
+    "2": {
+      "y": 120.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "armaas": {
+    "2": {
+      "y": 455.0,
+      "x": 430.0,
+      "complex": false
+    },
+    "3": {
+      "y": 755.0,
+      "x": 730.0,
+      "complex": false
+    }
+  },
+  "armah": {
+    "2": {
+      "y": 370.0,
+      "x": 280.0,
+      "complex": false
+    }
+  },
+  "armamph": {
+    "1": {
+      "y": 150.0,
+      "x": null,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "armanac": {
+    "1": {
+      "y": 170.0,
+      "x": 80.0,
+      "complex": false
+    }
+  },
+  "armanni": {
+    "1": {
+      "y": 50.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "armantiship": {
+    "1": {
+      "y": null,
+      "x": 70.0,
+      "complex": false
+    }
+  },
+  "armart": {
+    "1": {
+      "y": 110.0,
+      "x": 40.0,
+      "complex": false
+    }
+  },
+  "armatl": {
+    "1": {
+      "y": 80.016484,
+      "x": 80.016484,
+      "complex": false
+    }
+  },
+  "armbanth": {
+    "2": {
+      "y": 300.071429,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armbats": {
+    "1": {
+      "y": 55.0,
+      "x": 30.0,
+      "complex": false
+    },
+    "2": {
+      "y": 55.0,
+      "x": 30.0,
+      "complex": false
+    }
+  },
+  "armbeamer": {
+    "1": {
+      "y": 500.0,
+      "x": 250.0,
+      "complex": false
+    }
+  },
+  "armbrawl": {
+    "1": {
+      "y": null,
+      "x": 180.0,
+      "complex": false
+    }
+  },
+  "armbrtha": {
+    "1": {
+      "y": 5.0,
+      "x": 3.5,
+      "complex": false
+    }
+  },
+  "armbull": {
+    "1": {
+      "y": 105.0,
+      "x": 65.0,
+      "complex": false
+    }
+  },
+  "armcir": {
+    "1": {
+      "y": 250.0,
+      "x": 250.0,
+      "complex": false
+    }
+  },
+  "armclaw": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "armcom_clean": {
+    "1": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    }
+  },
+  "armcomboss_clean": {
+    "1": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    }
+  },
+  "armcroc": {
+    "1": {
+      "y": 90.0,
+      "x": 45.0,
+      "complex": false
+    },
+    "2": {
+      "y": 180.0,
+      "x": 180.0,
+      "complex": false
+    }
+  },
+  "armcrus": {
+    "1": {
+      "y": 110.0,
+      "x": 30.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "armdecade": {
+    "1": {
+      "y": 270.0,
+      "x": 150.0,
+      "complex": false
+    },
+    "2": {
+      "y": 270.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "armdfly": {
+    "1": {
+      "y": null,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "armdl": {
+    "1": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armepoch": {
+    "1": {
+      "y": 50.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "2": {
+      "y": 90.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "3": {
+      "y": 50.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "4": {
+      "y": 90.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "5": {
+      "y": 90.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "6": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "7": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "armfast": {
+    "1": {
+      "y": 400.0,
+      "x": 500.0,
+      "complex": false
+    }
+  },
+  "armfav": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "armfboy": {
+    "1": {
+      "y": 100.0,
+      "x": 75.0,
+      "complex": false
+    }
+  },
+  "armferret": {
+    "1": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "armfflak": {
+    "1": {
+      "y": 700.17033,
+      "x": 550.131868,
+      "complex": false
+    }
+  },
+  "armfhlt": {
+    "1": {
+      "y": 150.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "armfido": {
+    "1": {
+      "y": 150.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "armflak": {
+    "1": {
+      "y": 1200.0,
+      "x": 950.0,
+      "complex": false
+    }
+  },
+  "armflash": {
+    "1": {
+      "y": 250.0,
+      "x": 240.0,
+      "complex": false
+    }
+  },
+  "armflea": {
+    "1": {
+      "y": 450.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armfrock": {
+    "1": {
+      "y": 450.0,
+      "x": 450.0,
+      "complex": false
+    }
+  },
+  "armfrt": {
+    "1": {
+      "y": 450.0,
+      "x": 450.0,
+      "complex": false
+    }
+  },
+  "armgplat": {
+    "1": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "armgremlin": {
+    "1": {
+      "y": 360.0,
+      "x": 3600.0,
+      "complex": false
+    }
+  },
+  "armham": {
+    "1": {
+      "y": 140.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "armhlt": {
+    "1": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "armjanus": {
+    "1": {
+      "y": 80.0,
+      "x": 50.0,
+      "complex": false
+    },
+    "2": {
+      "y": 80.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "armjeth": {
+    "2": {
+      "y": 275.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armkraken": {
+    "1": {
+      "y": 150.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "armlatnk": {
+    "1": {
+      "y": 150.0,
+      "x": null,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "armllt": {
+    "1": {
+      "y": 300.071429,
+      "x": 200.043956,
+      "complex": false
+    }
+  },
+  "armlship": {
+    "1": {
+      "y": 150.0,
+      "x": 150.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "armlun": {
+    "1": {
+      "y": 120.0,
+      "x": 80.0,
+      "complex": false
+    }
+  },
+  "armmanni": {
+    "1": {
+      "y": 50.010989,
+      "x": 50.010989,
+      "complex": false
+    }
+  },
+  "armmar": {
+    "1": {
+      "y": 270.0,
+      "x": 360.0,
+      "complex": false
+    },
+    "2": {
+      "y": 360.0,
+      "x": 360.0,
+      "complex": false
+    }
+  },
+  "armmart": {
+    "1": {
+      "y": 35.005495,
+      "x": 35.005495,
+      "complex": false
+    }
+  },
+  "armmav": {
+    "1": {
+      "y": 250.027473,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "armmercury": {
+    "1": {
+      "y": 125.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "armmerl": {
+    "1": {
+      "y": 90.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armmh": {
+    "1": {
+      "y": null,
+      "x": 90.0,
+      "complex": false
+    }
+  },
+  "armmship": {
+    "2": {
+      "y": 170.038462,
+      "x": 130.027473,
+      "complex": false
+    }
+  },
+  "armpb": {
+    "1": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "armprowl": {
+    "1": {
+      "y": 140.0,
+      "x": 85.0,
+      "complex": false
+    },
+    "2": {
+      "y": 360.0,
+      "x": 270.0,
+      "complex": false
+    }
+  },
+  "armpship": {
+    "1": {
+      "y": 180.0,
+      "x": 90.0,
+      "complex": false
+    },
+    "2": {
+      "y": 180.0,
+      "x": 90.0,
+      "complex": false
+    }
+  },
+  "armpt": {
+    "1": {
+      "y": 300.0,
+      "x": null,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armpw": {
+    "1": {
+      "y": null,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armraz": {
+    "1": {
+      "y": 120.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armrl": {
+    "1": {
+      "y": 450.0,
+      "x": 450.0,
+      "complex": false
+    }
+  },
+  "armrock": {
+    "1": {
+      "y": 130.027473,
+      "x": 180.021978,
+      "complex": false
+    }
+  },
+  "armroy": {
+    "1": {
+      "y": 100.0,
+      "x": 40.0,
+      "complex": false
+    },
+    "2": {
+      "y": 180.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armsam": {
+    "1": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "2": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "armscab": {
+    "1": {
+      "y": 30.0,
+      "x": 90.0,
+      "complex": false
+    }
+  },
+  "armsfig2": {
+    "1": {
+      "y": 360.0,
+      "x": 720.0,
+      "complex": false
+    }
+  },
+  "armsh": {
+    "1": {
+      "y": 200.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "armshockwave": {
+    "1": {
+      "y": 60.0,
+      "x": 70.0,
+      "complex": false
+    }
+  },
+  "armsnipe": {
+    "1": {
+      "y": 210.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "armspid": {
+    "1": {
+      "y": 150.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "armsptk": {
+    "1": {
+      "y": 150.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "armstump": {
+    "1": {
+      "y": 90.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "armthor": {
+    "2": {
+      "y": null,
+      "x": 60.0,
+      "complex": false
+    },
+    "3": {
+      "y": 120.0,
+      "x": null,
+      "complex": false
+    },
+    "4": {
+      "y": 120.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armtl_clean": {
+    "1": {
+      "y": 80.016484,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armtrident_clean": {
+    "2": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "armvulc": {
+    "1": {
+      "y": 15.0,
+      "x": 6.0,
+      "complex": false
+    }
+  },
+  "armyork": {
+    "2": {
+      "y": 650.0,
+      "x": 600.0,
+      "complex": false
+    }
+  },
+  "armzapper_clean": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "armzeus": {
+    "1": {
+      "y": 225.005495,
+      "x": 75.005495,
+      "complex": false
+    }
+  },
+  "coraak": {
+    "2": {
+      "y": 225.0,
+      "x": 225.0,
+      "complex": false
+    },
+    "3": {
+      "y": 225.0,
+      "x": 225.0,
+      "complex": false
+    },
+    "4": {
+      "y": 225.0,
+      "x": 225.0,
+      "complex": false
+    },
+    "5": {
+      "y": 225.0,
+      "x": 225.0,
+      "complex": false
+    }
+  },
+  "coraak_clean": {
+    "1": {
+      "y": 200.0,
+      "x": 100.0,
+      "complex": false
+    },
+    "2": {
+      "y": 120.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "corah": {
+    "2": {
+      "y": 250.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "corak": {
+    "1": {
+      "y": null,
+      "x": null,
+      "complex": false
+    }
+  },
+  "coramph": {
+    "1": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    },
+    "2": {
+      "y": 200.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "corape": {
+    "1": {
+      "y": null,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "corarch": {
+    "2": {
+      "y": 455.0,
+      "x": 430.0,
+      "complex": false
+    },
+    "3": {
+      "y": 755.0,
+      "x": 730.0,
+      "complex": false
+    }
+  },
+  "coratl": {
+    "1": {
+      "y": 80.016484,
+      "x": null,
+      "complex": false
+    }
+  },
+  "corban": {
+    "1": {
+      "y": 125.0,
+      "x": 125.0,
+      "complex": false
+    }
+  },
+  "corbats": {
+    "1": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    },
+    "4": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "corbhmth": {
+    "1": {
+      "y": null,
+      "x": 25.0,
+      "complex": false
+    }
+  },
+  "corblackhy": {
+    "1": {
+      "y": null,
+      "x": 25.0,
+      "complex": false
+    },
+    "2": {
+      "y": 150.0,
+      "x": null,
+      "complex": false
+    },
+    "3": {
+      "y": 200.0,
+      "x": 150.0,
+      "complex": false
+    },
+    "4": {
+      "y": 150.0,
+      "x": null,
+      "complex": false
+    },
+    "5": {
+      "y": 150.0,
+      "x": null,
+      "complex": false
+    },
+    "6": {
+      "y": 200.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "corbuzz": {
+    "1": {
+      "y": 15.0,
+      "x": 1.0,
+      "complex": false
+    }
+  },
+  "corcan": {
+    "1": {
+      "y": 270.0,
+      "x": 170.0,
+      "complex": false
+    }
+  },
+  "corcom_clean": {
+    "1": {
+      "y": 300.0,
+      "x": 250.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 250.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 360.0,
+      "complex": false
+    }
+  },
+  "corcomboss_clean": {
+    "1": {
+      "y": 300.0,
+      "x": 250.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 250.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 360.0,
+      "complex": false
+    }
+  },
+  "corcomhilvl": {
+    "5": {
+      "y": 300.0,
+      "x": 250.0,
+      "complex": false
+    },
+    "6": {
+      "y": 360.0,
+      "x": 360.0,
+      "complex": false
+    }
+  },
+  "corcrash": {
+    "2": {
+      "y": 225.0,
+      "x": 225.0,
+      "complex": false
+    }
+  },
+  "corcrus": {
+    "1": {
+      "y": 90.0,
+      "x": 100.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "corcrw_clean": {
+    "1": {
+      "y": null,
+      "x": 200.0,
+      "complex": false
+    },
+    "2": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "3": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "corcrwh": {
+    "1": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "2": {
+      "y": 450.0,
+      "x": 450.0,
+      "complex": false
+    },
+    "3": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "4": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "6": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "cordemon": {
+    "1": {
+      "y": 130.0,
+      "x": 120.0,
+      "complex": false
+    },
+    "2": {
+      "y": 192.5,
+      "x": 90.0,
+      "complex": false
+    }
+  },
+  "cordl": {
+    "1": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "cordoom": {
+    "1": {
+      "y": null,
+      "x": 85.0,
+      "complex": false
+    },
+    "2": {
+      "y": null,
+      "x": 85.0,
+      "complex": false
+    }
+  },
+  "cordoom_clean": {
+    "3": {
+      "y": 500.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "cordronecarry": {
+    "2": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "corenaa": {
+    "1": {
+      "y": 670.159341,
+      "x": 670.159341,
+      "complex": false
+    }
+  },
+  "corerad": {
+    "1": {
+      "y": 250.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "coresupp": {
+    "1": {
+      "y": 270.0,
+      "x": 150.0,
+      "complex": false
+    },
+    "2": {
+      "y": 270.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "corexp": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "corfav": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "corfdoom": {
+    "3": {
+      "y": 500.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "corflak": {
+    "1": {
+      "y": 1200.0,
+      "x": 950.0,
+      "complex": false
+    }
+  },
+  "corfrock": {
+    "1": {
+      "y": 450.0,
+      "x": 450.0,
+      "complex": false
+    }
+  },
+  "corfrt": {
+    "1": {
+      "y": 450.0,
+      "x": 450.0,
+      "complex": false
+    }
+  },
+  "corfship": {
+    "1": {
+      "y": 150.0,
+      "x": 150.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "corgator": {
+    "1": {
+      "y": 192.5,
+      "x": 192.5,
+      "complex": false
+    }
+  },
+  "corgol_clean": {
+    "1": {
+      "y": 40.0,
+      "x": 30.0,
+      "complex": false
+    }
+  },
+  "corgplat": {
+    "1": {
+      "y": 220.0,
+      "x": 220.0,
+      "complex": false
+    }
+  },
+  "corhal": {
+    "1": {
+      "y": 150.0,
+      "x": 75.0,
+      "complex": false
+    }
+  },
+  "corhllt": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    },
+    "2": {
+      "y": 400.0,
+      "x": 400.0,
+      "complex": false
+    }
+  },
+  "corhrk": {
+    "1": {
+      "y": 150.032967,
+      "x": 200.043956,
+      "complex": false
+    }
+  },
+  "corint": {
+    "1": {
+      "y": 5.0,
+      "x": 3.5,
+      "complex": false
+    }
+  },
+  "corjugg": {
+    "1": {
+      "y": 90.0,
+      "x": 50.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.071429,
+      "x": null,
+      "complex": false
+    },
+    "3": {
+      "y": 300.071429,
+      "x": null,
+      "complex": false
+    },
+    "4": {
+      "y": 300.071429,
+      "x": 200.038462,
+      "complex": false
+    }
+  },
+  "corkarg": {
+    "1": {
+      "y": 85.0,
+      "x": 85.0,
+      "complex": false
+    },
+    "2": {
+      "y": null,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "corkorg": {
+    "1": {
+      "y": null,
+      "x": 150.0,
+      "complex": false
+    },
+    "2": {
+      "y": 100.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "corlevlr": {
+    "1": {
+      "y": 170.038462,
+      "x": 20.0,
+      "complex": false
+    }
+  },
+  "corllt": {
+    "1": {
+      "y": 300.071429,
+      "x": 200.043956,
+      "complex": false
+    }
+  },
+  "cormando": {
+    "1": {
+      "y": 300.0,
+      "x": 225.0,
+      "complex": false
+    }
+  },
+  "cormart": {
+    "1": {
+      "y": 35.005495,
+      "x": 35.005495,
+      "complex": false
+    }
+  },
+  "cormart_clean": {
+    "1": {
+      "y": 35.005495,
+      "x": 35.005495,
+      "complex": false
+    }
+  },
+  "cormaw": {
+    "1": {
+      "y": 300.0,
+      "x": 110.0,
+      "complex": false
+    }
+  },
+  "cormh": {
+    "1": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    }
+  },
+  "cormist": {
+    "1": {
+      "y": 250.06044,
+      "x": 150.032967,
+      "complex": false
+    },
+    "2": {
+      "y": 250.06044,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "cormlv": {
+    "1": {
+      "y": 300.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "cormort": {
+    "1": {
+      "y": 190.043956,
+      "x": 150.032967,
+      "complex": false
+    }
+  },
+  "cormship": {
+    "1": {
+      "y": null,
+      "x": 90.0,
+      "complex": false
+    },
+    "2": {
+      "y": 170.0,
+      "x": 130.0,
+      "complex": false
+    }
+  },
+  "corparrow": {
+    "1": {
+      "y": 55.0,
+      "x": 35.0,
+      "complex": false
+    }
+  },
+  "corprince": {
+    "1": {
+      "y": null,
+      "x": 10.0,
+      "complex": false
+    },
+    "2": {
+      "y": 50.0,
+      "x": 20.0,
+      "complex": true
+    },
+    "3": {
+      "y": 50.0,
+      "x": 20.0,
+      "complex": true
+    },
+    "4": {
+      "y": 50.0,
+      "x": 20.0,
+      "complex": true
+    },
+    "5": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "6": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "corpship": {
+    "1": {
+      "y": 135.0,
+      "x": 67.5,
+      "complex": false
+    }
+  },
+  "corpt": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "corpyro": {
+    "1": {
+      "y": 275.0,
+      "x": 110.0,
+      "complex": false
+    }
+  },
+  "corraid": {
+    "1": {
+      "y": 90.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "correap": {
+    "1": {
+      "y": 85.005495,
+      "x": 50.005495,
+      "complex": false
+    }
+  },
+  "corrl": {
+    "1": {
+      "y": 450.0,
+      "x": 450.0,
+      "complex": false
+    }
+  },
+  "corroy": {
+    "1": {
+      "y": 60.0,
+      "x": 40.0,
+      "complex": false
+    }
+  },
+  "corsala": {
+    "1": {
+      "y": 150.0,
+      "x": 45.0,
+      "complex": false
+    }
+  },
+  "corseal": {
+    "1": {
+      "y": 75.0,
+      "x": 45.0,
+      "complex": false
+    }
+  },
+  "corsent": {
+    "2": {
+      "y": 670.0,
+      "x": 670.0,
+      "complex": false
+    }
+  },
+  "corsentinel": {
+    "2": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "corsfig2": {
+    "1": {
+      "y": 360.0,
+      "x": 720.0,
+      "complex": false
+    }
+  },
+  "corsh": {
+    "1": {
+      "y": 200.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "corshiva": {
+    "2": {
+      "y": null,
+      "x": 15.0,
+      "complex": false
+    }
+  },
+  "corsiegebreaker": {
+    "1": {
+      "y": null,
+      "x": 35.0,
+      "complex": false
+    }
+  },
+  "corsnap": {
+    "1": {
+      "y": 130.0,
+      "x": 80.0,
+      "complex": false
+    }
+  },
+  "corstorm": {
+    "1": {
+      "y": 90.021978,
+      "x": 45.010989,
+      "complex": false
+    }
+  },
+  "cortermite": {
+    "1": {
+      "y": 180.0,
+      "x": 110.0,
+      "complex": false
+    }
+  },
+  "corthud": {
+    "1": {
+      "y": 140.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "cortl": {
+    "1": {
+      "y": 120.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "cortrem": {
+    "1": {
+      "y": 20.0,
+      "x": 360.0,
+      "complex": false
+    }
+  },
+  "corvipe": {
+    "1": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "corvroc": {
+    "1": {
+      "y": null,
+      "x": 45.0,
+      "complex": false
+    }
+  },
+  "corwolv": {
+    "1": {
+      "y": 110.0,
+      "x": 90.0,
+      "complex": false
+    }
+  },
+  "legaabot": {
+    "1": {
+      "y": 30.0,
+      "x": 45.0,
+      "complex": true
+    }
+  },
+  "legadvaabot": {
+    "1": {
+      "y": 225.0,
+      "x": 225.0,
+      "complex": false
+    },
+    "2": {
+      "y": 225.0,
+      "x": 225.0,
+      "complex": false
+    }
+  },
+  "legaheattank_clean": {
+    "1": {
+      "y": 65.0,
+      "x": 65.0,
+      "complex": false
+    }
+  },
+  "legamcluster_clean": {
+    "1": {
+      "y": 35.005495,
+      "x": 35.005495,
+      "complex": false
+    }
+  },
+  "leganavalaaturret": {
+    "1": {
+      "y": 240.0,
+      "x": 120.0,
+      "complex": false
+    }
+  },
+  "leganavaltorpturret": {
+    "1": {
+      "y": 80.016484,
+      "x": 40.0,
+      "complex": false
+    }
+  },
+  "leganavyaaship": {
+    "1": {
+      "y": 270.0,
+      "x": 120.0,
+      "complex": false
+    }
+  },
+  "leganavyantiswarm": {
+    "1": {
+      "y": 170.0,
+      "x": 70.0,
+      "complex": false
+    },
+    "2": {
+      "y": 170.0,
+      "x": 70.0,
+      "complex": false
+    }
+  },
+  "leganavyartyship": {
+    "1": {
+      "y": null,
+      "x": 25.0,
+      "complex": false
+    },
+    "2": {
+      "y": 60.0,
+      "x": 15.0,
+      "complex": false
+    },
+    "3": {
+      "y": 60.0,
+      "x": 15.0,
+      "complex": false
+    },
+    "4": {
+      "y": 60.0,
+      "x": 15.0,
+      "complex": false
+    }
+  },
+  "leganavybattleship": {
+    "1": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    },
+    "2": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    },
+    "3": {
+      "y": 120.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "4": {
+      "y": 120.0,
+      "x": 25.0,
+      "complex": false
+    }
+  },
+  "leganavybattlesub": {
+    "1": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    }
+  },
+  "leganavycruiser": {
+    "1": {
+      "y": 135.0,
+      "x": 100.0,
+      "complex": true
+    },
+    "2": {
+      "y": 300.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "leganavyflagship": {
+    "1": {
+      "y": null,
+      "x": 25.0,
+      "complex": false
+    },
+    "2": {
+      "y": 6.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "3": {
+      "y": 6.0,
+      "x": 25.0,
+      "complex": false
+    },
+    "4": {
+      "y": 150.0,
+      "x": 15.0,
+      "complex": false
+    },
+    "5": {
+      "y": 150.0,
+      "x": 15.0,
+      "complex": false
+    },
+    "6": {
+      "y": 150.0,
+      "x": 15.0,
+      "complex": false
+    },
+    "7": {
+      "y": 150.0,
+      "x": 15.0,
+      "complex": false
+    }
+  },
+  "leganavyheavysub": {
+    "1": {
+      "y": 360.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "leganavymissileship": {
+    "1": {
+      "y": null,
+      "x": 5.0,
+      "complex": false
+    }
+  },
+  "legapopupdef": {
+    "1": {
+      "y": 180.0,
+      "x": 180.0,
+      "complex": false
+    }
+  },
+  "legaskirmtank_clean": {
+    "1": {
+      "y": 120.0,
+      "x": 60.0,
+      "complex": false
+    }
+  },
+  "legavroc_clean": {
+    "1": {
+      "y": null,
+      "x": 90.0,
+      "complex": false
+    }
+  },
+  "legbal": {
+    "1": {
+      "y": 90.021978,
+      "x": 45.010989,
+      "complex": false
+    }
+  },
+  "legbal_clean": {
+    "1": {
+      "y": 90.021978,
+      "x": 45.010989,
+      "complex": false
+    }
+  },
+  "legbart": {
+    "1": {
+      "y": 180.0,
+      "x": 85.0,
+      "complex": false
+    }
+  },
+  "legbart_clean": {
+    "1": {
+      "y": 140.0,
+      "x": 85.0,
+      "complex": false
+    }
+  },
+  "legbastion_clean": {
+    "1": {
+      "y": 35.0,
+      "x": 85.0,
+      "complex": false
+    }
+  },
+  "legbunk": {
+    "1": {
+      "y": 184.0,
+      "x": null,
+      "complex": true
+    },
+    "2": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    },
+    "3": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    }
+  },
+  "legcen": {
+    "1": {
+      "y": 300.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "legcom": {
+    "1": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "2": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "legcomhilvl": {
+    "1": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "2": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    }
+  },
+  "legcomlvl2": {
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "legcomlvl3": {
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    }
+  },
+  "legcomoff": {
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "legcomt2com": {
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": null,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "legcomt2def": {
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "legctl": {
+    "1": {
+      "y": 200.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "legeheatraymech": {
+    "1": {
+      "y": 60.0,
+      "x": null,
+      "complex": true
+    },
+    "2": {
+      "y": 90.0,
+      "x": 35.0,
+      "complex": true
+    },
+    "3": {
+      "y": 90.0,
+      "x": 35.0,
+      "complex": true
+    },
+    "6": {
+      "y": 300.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "legeheatraymech_old": {
+    "1": {
+      "y": 60.0,
+      "x": null,
+      "complex": true
+    },
+    "2": {
+      "y": 90.0,
+      "x": 35.0,
+      "complex": true
+    },
+    "3": {
+      "y": 90.0,
+      "x": 35.0,
+      "complex": true
+    },
+    "4": {
+      "y": 90.0,
+      "x": 35.0,
+      "complex": true
+    },
+    "5": {
+      "y": 90.0,
+      "x": 35.0,
+      "complex": true
+    },
+    "6": {
+      "y": 300.0,
+      "x": 150.0,
+      "complex": false
+    }
+  },
+  "legehovertank": {
+    "1": {
+      "y": 100.0,
+      "x": 100.0,
+      "complex": false
+    },
+    "2": {
+      "y": 120.0,
+      "x": 120.0,
+      "complex": false
+    }
+  },
+  "legelrpcmech": {
+    "1": {
+      "y": 30.0,
+      "x": 45.0,
+      "complex": false
+    },
+    "2": {
+      "y": 30.0,
+      "x": 45.0,
+      "complex": false
+    }
+  },
+  "legeshotgunmech": {
+    "1": {
+      "y": 100.0,
+      "x": null,
+      "complex": false
+    },
+    "2": {
+      "y": 200.0,
+      "x": 100.0,
+      "complex": false
+    },
+    "4": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "legevocom1": {
+    "1": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "2": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    }
+  },
+  "legevocom2": {
+    "1": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "2": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    }
+  },
+  "legevocom3": {
+    "1": {
+      "y": 300.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "2": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "3": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    },
+    "4": {
+      "y": 250.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": 360.0,
+      "x": 390.0,
+      "complex": false
+    }
+  },
+  "legflak": {
+    "1": {
+      "y": 240.0,
+      "x": 120.0,
+      "complex": false
+    }
+  },
+  "legfort": {
+    "1": {
+      "y": 70.0,
+      "x": null,
+      "complex": false
+    },
+    "2": {
+      "y": 70.0,
+      "x": null,
+      "complex": false
+    },
+    "3": {
+      "y": 240.0,
+      "x": 120.0,
+      "complex": false
+    },
+    "4": {
+      "y": 240.0,
+      "x": null,
+      "complex": false
+    },
+    "5": {
+      "y": 240.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "leggat_clean": {
+    "1": {
+      "y": 120.0,
+      "x": 65.0,
+      "complex": false
+    }
+  },
+  "leggob": {
+    "1": {
+      "y": 200.0,
+      "x": 100.0,
+      "complex": false
+    }
+  },
+  "leghastatus": {
+    "2": {
+      "y": 170.0,
+      "x": 80.0,
+      "complex": false
+    },
+    "3": {
+      "y": 170.0,
+      "x": 80.0,
+      "complex": false
+    }
+  },
+  "leghastatusalt": {
+    "2": {
+      "y": 170.0,
+      "x": 80.0,
+      "complex": false
+    },
+    "3": {
+      "y": 170.0,
+      "x": 80.0,
+      "complex": false
+    }
+  },
+  "legheavydrone": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "leginc": {
+    "1": {
+      "y": 30.0,
+      "x": 15.0,
+      "complex": false
+    }
+  },
+  "leginc_clean": {
+    "1": {
+      "y": 30.0,
+      "x": 15.0,
+      "complex": false
+    }
+  },
+  "legjav": {
+    "2": {
+      "y": 720.0,
+      "x": 360.0,
+      "complex": false
+    }
+  },
+  "legkark": {
+    "1": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "2": {
+      "y": 90.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "leglob": {
+    "1": {
+      "y": 140.0,
+      "x": 50.0,
+      "complex": false
+    },
+    "2": {
+      "y": 140.0,
+      "x": 50.0,
+      "complex": false
+    }
+  },
+  "leglraa": {
+    "1": {
+      "y": 100.0,
+      "x": 125.0,
+      "complex": false
+    }
+  },
+  "legmech": {
+    "1": {
+      "y": 90.0,
+      "x": null,
+      "complex": false
+    },
+    "2": {
+      "y": 100.0,
+      "x": 100.0,
+      "complex": false
+    },
+    "3": {
+      "y": 100.0,
+      "x": 100.0,
+      "complex": false
+    },
+    "4": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    },
+    "5": {
+      "y": 200.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "legmrv_clean": {
+    "1": {
+      "y": 300.0,
+      "x": 200.0,
+      "complex": false
+    }
+  },
+  "legnavyaaship": {
+    "1": {
+      "y": 180.0,
+      "x": 90.0,
+      "complex": false
+    }
+  },
+  "legnavyartyship": {
+    "1": {
+      "y": 30.0,
+      "x": 15.0,
+      "complex": false
+    },
+    "2": {
+      "y": 30.0,
+      "x": 15.0,
+      "complex": false
+    }
+  },
+  "legnavydestro": {
+    "1": {
+      "y": null,
+      "x": 30.0,
+      "complex": false
+    }
+  },
+  "legnavyscout": {
+    "1": {
+      "y": 270.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "legnavysub": {
+    "1": {
+      "y": 60.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "legpede": {
+    "1": {
+      "y": 120.0,
+      "x": 65.0,
+      "complex": false
+    },
+    "2": {
+      "y": 45.0,
+      "x": 70.0,
+      "complex": false
+    },
+    "3": {
+      "y": 150.0,
+      "x": 150.0,
+      "complex": false
+    },
+    "4": {
+      "y": 150.0,
+      "x": 150.0,
+      "complex": false
+    },
+    "5": {
+      "y": 45.0,
+      "x": 70.0,
+      "complex": false
+    },
+    "6": {
+      "y": 120.0,
+      "x": 65.0,
+      "complex": false
+    }
+  },
+  "legportent": {
+    "2": {
+      "y": 30.0,
+      "x": 5.0,
+      "complex": false
+    },
+    "3": {
+      "y": 30.0,
+      "x": 5.0,
+      "complex": false
+    }
+  },
+  "legrwall": {
+    "1": {
+      "y": 120.0,
+      "x": 60.0,
+      "complex": false
+    }
+  },
+  "legscout": {
+    "1": {
+      "y": 300.0,
+      "x": 300.0,
+      "complex": false
+    }
+  },
+  "legstronghold": {
+    "1": {
+      "y": 180.0,
+      "x": 180.0,
+      "complex": false
+    }
+  },
+  "legtl": {
+    "1": {
+      "y": 80.016484,
+      "x": 50.010989,
+      "complex": false
+    }
+  },
+  "legtriarius": {
+    "1": {
+      "y": 100.0,
+      "x": 40.0,
+      "complex": false
+    },
+    "2": {
+      "y": 180.0,
+      "x": null,
+      "complex": false
+    }
+  },
+  "legtriariusdrone": {
+    "1": {
+      "y": 100.0,
+      "x": 40.0,
+      "complex": false
+    }
+  },
+  "legtriariusheatray": {
+    "1": {
+      "y": 80.0,
+      "x": 40.0,
+      "complex": false
+    },
+    "2": {
+      "y": 30.0,
+      "x": 15.0,
+      "complex": false
+    }
+  },
+  "legvflak": {
+    "1": {
+      "y": 240.0,
+      "x": 120.0,
+      "complex": false
+    }
+  }
+}

@@ -41,6 +41,11 @@ return {
 			techlevel = 3,
 			unitgroup = "weapon",
 			restrictions_inclusion = "_nolrpc_",
+		
+			wpn1turrety = "30",
+			wpn1turretx = "45",
+			wpn2turrety = "30",
+			wpn2turretx = "45",
 		},
 		featuredefs = {
 			dead = {

@@ -33,6 +33,9 @@ return {
 			subfolder = "Legion/SeaDefenses/T2",
 			techlevel = 2,
 			unitgroup = "aa",
+		
+			wpn1turrety = "240",
+			wpn1turretx = "120",
 		},
 		featuredefs = {
 			dead = {

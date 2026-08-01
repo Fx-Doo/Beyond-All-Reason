@@ -42,6 +42,8 @@ return {
 			normaltex = "unittextures/leg_normal.dds",
 			subfolder = "ArmVehicles/T2",
 			techlevel = 2,
+		
+			wpn1turretx = "90",
 		},
 		featuredefs = {
 			dead = {

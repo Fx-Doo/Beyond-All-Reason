@@ -41,6 +41,8 @@ return {
 			inheritxpratemultiplier = 1,
 			childreninheritxp = "DRONE",
 			parentsinheritxp = "DRONE",
+		
+			wpn1turretx = "30",
 		},
 		featuredefs = {
 			dead = {

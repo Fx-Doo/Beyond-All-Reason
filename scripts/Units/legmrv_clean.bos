@@ -1,4 +1,5 @@
 #include "../recoil_common_includes.h"
+#include "../unitDefsTurretSpeeds.h"
 
 // piece  base, steer, turret, fwheel, bwheel, gunr, sleever, barrelr, flarer, gunr2, sleever2, barrelr2, flarer2,
 // 		gunl, sleevel, barrell, flarel, gunl2, sleevel2, barrell2, flarel2;
@@ -38,6 +39,9 @@ static-var  restore_delay, moveSpeed, wheelSpeed, whichGun, oldHeading, timeLeft
 
 Create()
 {
+	Weapon1TurretY = <300.0>;  // default – overridden by gadget
+	Weapon1TurretX = <200.0>;  // default – overridden by gadget
+
 	hide flareTop;
 	hide flareBottom;
 	whichGun = 9;
@@ -132,9 +136,15 @@ AimWeapon1(heading, pitch)
     timeLeft = restore_delay;
 	signal SIGNAL_AIM1;
 	set-signal-mask SIGNAL_AIM1;
+<<<<<<< Updated upstream
 	turn turret to y-axis heading speed <400.000000>;
 	turn sleeveTop to x-axis <0.000000> - pitch speed <200.000000>;
 	turn sleeveBottom to x-axis <0.000000> - pitch speed <200.000000>;
+=======
+	turn turret to y-axis heading speed Weapon1TurretY;
+	turn sleeveTop to x-axis <0.000000> - pitch speed Weapon1TurretX;
+	turn sleeveBottom to x-axis <0.000000> - pitch speed Weapon1TurretX;
+>>>>>>> Stashed changes
 	if (get ABS(last_primary_heading - heading)> <20>)
 	{
 		// seems to take 3 frames for wait-for-turn to process

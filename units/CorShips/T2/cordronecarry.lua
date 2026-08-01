@@ -51,6 +51,9 @@ return {
 			childreninheritxp = "DRONE",
 			parentsinheritxp = "DRONE",
 			restrictions_inclusion = "_noair_",
+		
+			wpn2turrety = "300",
+			wpn2turretx = "300",
 		},
 		featuredefs = {
 			dead = {

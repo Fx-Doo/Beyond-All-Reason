@@ -41,6 +41,11 @@ return {
 			paralyzemultiplier = 1,
 			subfolder = "CorShips",
 			unitgroup = "weaponaa",
+		
+			wpn1turrety = "300",
+			wpn1turretx = "300",
+			wpn2turrety = "300",
+			wpn2turretx = "300",
 		},
 		featuredefs = {
 			dead = {

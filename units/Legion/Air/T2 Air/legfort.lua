@@ -40,6 +40,13 @@ return {
 			normaltex = "unittextures/LEG_normal.dds",
 			subfolder = "CorAircraft/T2",
 			techlevel = 2,
+		
+			wpn1turrety = "70",
+			wpn2turrety = "70",
+			wpn3turrety = "240",
+			wpn3turretx = "120",
+			wpn4turrety = "240",
+			wpn5turrety = "240",
 		},
 		sfxtypes = {
 			explosiongenerators = {

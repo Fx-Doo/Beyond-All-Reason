@@ -39,6 +39,10 @@ return {
 			subfolder = "CorShips/T2",
 			techlevel = 2,
 			unitgroup = "weapon",
+		
+			wpn1turretx = "90",
+			wpn2turrety = "170",
+			wpn2turretx = "130",
 		},
 		featuredefs = {
 			dead = {
