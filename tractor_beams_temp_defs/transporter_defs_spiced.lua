@@ -47,6 +47,14 @@ local DEFAULT_GENERIC_SCRIPT    = "units/generic_air_transport_lus.lua"
 local DEFAULT_WEAPONIZED_SCRIPT = "units/weaponized_air_transport_lus.lua"
 
 return {
+	-- Gadget settings
+	-- customizable constants for the gadget.
+	ALLOW_ENEMY_LOAD_MODE = 4, 	-- Stunned only
+	ENEMY_LOAD_RADIUS_MULTIPLIER = 0.7, 	-- enemy load range is this ratio of the normal load range
+	MIN_CONSECUTIVE_FRAMES_TO_LOAD_ENEMY = 60, -- enemy load range is this ratio of the normal load range
+	LOAD_RADIUS = 128,			-- elmos XZ; transporter must be within this range to fire PerformLoad
+	UNLOAD_RADIUS = 32, 		-- elmos XZ; transporter must be within this range to fire PerformUnload
+
     -- -------------------------------------------------------------------------
 	-- LAB BUILDOPTIONS
 	-- Per-factory explicit list of transports when beta_tractorbeam is active.
