@@ -9,7 +9,7 @@ function widget:GetInfo()
 		version = "1.0",
 		license = "GNU GPL, v2 or later",
 		layer 	= -1, -- won't work at layer 0 for unknown reasons
-		enabled = true
+		enabled = false
 	}
 end
 

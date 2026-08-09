@@ -1,0 +1,2 @@
+hotspot topleft
+frame  anims/cursorprioritydef_0.bmp  5

@@ -44,7 +44,7 @@ function DoomStack:SetData(targetID, reloadState, rangeState, pauseState)
     self.rangeState = rangeState and rangeState or self.rangeState -- nil => keep current state, else => set new state
     self.reloadState = reloadState and reloadState or self.reloadState -- nil => keep current state, else => set new state
     self.pauseState = pauseState and pauseState or self.pauseState -- nil => keep current state, else => set new state
-    self.value = self.pauseState == 1 and (self.reloadState * self.rangeState == 1 and self.expectedDamage or 0.01*self.expectedDamage) or 0 -- if any state is 0, set value to 0.001*expectedDamage to avoid division by zero
+    self.value = self.pauseState == 1 and self.rangeState * self.reloadState * self.expectedDamage or 0
 end
 
 function DoomStack:StackUpdated() -- dumps current into lastData

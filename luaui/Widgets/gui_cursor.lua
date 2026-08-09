@@ -110,6 +110,7 @@ function SetCursor(cursorSet)
 			'cursorrepair','cursorrevive','cursorrestore',
 			'cursormove','cursorpatrol','cursorreclamate','cursorselfd',
 			'cursornumber','cursorsettarget','cursorupgmex','cursorareamex',
+			'cursorprioritydef',
 			'uiresizev', 'uiresizeh', 'uiresized1', 'uiresized2', 'uimove',
 		}
 		for i=1, #cursorNames do

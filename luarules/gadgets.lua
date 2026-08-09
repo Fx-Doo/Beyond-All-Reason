@@ -271,7 +271,7 @@ local callInLists = {
 	"UnitReverseBuilt",
 	"UnitFromFactory",
 	"UnitDestroyed",
-	"WeaponAutoTarget",
+	"WeaponChangedTarget",
 	"RenderUnitDestroyed",
 	"UnitExperience",
 	"UnitIdle",
@@ -1924,27 +1924,26 @@ end
 
 function gadgetHandler:AllowWeaponTargetCheck(attackerID, attackerWeaponNum, attackerWeaponDefID)
 local ignore = true
+local keepWatching = false
 for _, g in ipairs(self.AllowWeaponTargetCheckList) do
-	local allowCheck, ignoreCheck = g:AllowWeaponTargetCheck(attackerID, attackerWeaponNum, attackerWeaponDefID)
+	local allowCheck, ignoreCheck, gKeepWatching = g:AllowWeaponTargetCheck(attackerID, attackerWeaponNum, attackerWeaponDefID)
+	if gKeepWatching then keepWatching = true end
 	if not ignoreCheck then
 		ignore = false
 		if not allowCheck then
-			return 0
+			return 0, keepWatching
 		end
 	end
 end
 
-return ((ignore and -1) or 1)
+-- Return -1 (defer to engine) unless a gadget explicitly denies
+-- This ensures user targets always take precedence and firestates are respected
+return -1, keepWatching
 end
 
 function gadgetHandler:AllowWeaponTarget(attackerID, targetID, attackerWeaponNum, attackerWeaponDefID, defPriority)
 	-- Calls with no input priority are pure pass/fail tests.
 	-- These are common, and BAR never disallows any of them.
-<<<<<<< Updated upstream
-	-- if not defPriority then
-	-- 	return true -- The second return value is never used.
-	-- end
-=======
 	local allowed = true
 	if not defPriority then
 		for _, g in ipairs(self.AllowWeaponTargetList) do
@@ -1955,17 +1954,11 @@ function gadgetHandler:AllowWeaponTarget(attackerID, targetID, attackerWeaponNum
 		end
 		return allowed 
 	end
->>>>>>> Stashed changes
 
 	local result = 1.0
 
-<<<<<<< Updated upstream
-	if targetID == -1 and attackerWeaponNum == -1 then
-		-- The `defPriority` return value here is actually the autotarget search radius,
-=======
 	if attackerWeaponDefID == 0 then
 		-- The `targetPriority` return value is actually the autotarget search radius,
->>>>>>> Stashed changes
 		-- and applies to the unit's targeting search for its command AI, not weapons.
 		for _, g in ipairs(self.UnitAutoTargetRangeList) do
 			defPriority = g:UnitAutoTargetRange(attackerID, defPriority)
@@ -2061,11 +2054,11 @@ function gadgetHandler:UnitDestroyed(unitID, unitDefID, unitTeam, attackerID, at
 	return
 end
 
-function gadgetHandler:WeaponAutoTarget(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
-	tracy.ZoneBeginN("G:WeaponAutoTarget")
+function gadgetHandler:WeaponChangedTarget(attackerID, attackerDefID, attackerTeam, weaponNum, weaponDefID, oldTargetData, newTargetData)
+	tracy.ZoneBeginN("G:WeaponChangedTarget")
 
-	for _, g in ipairs(self.WeaponAutoTargetList) do
-		g:WeaponAutoTarget(unitID, unitDefID, unitTeam, attackerID, attackerDefID, attackerTeam, weaponDefID)
+	for _, g in ipairs(self.WeaponChangedTargetList) do
+		g:WeaponChangedTarget(attackerID, attackerDefID, attackerTeam, weaponNum, weaponDefID, oldTargetData, newTargetData)
 	end
 	tracy.ZoneEnd()
 	return

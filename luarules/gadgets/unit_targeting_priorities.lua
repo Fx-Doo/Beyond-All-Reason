@@ -15,13 +15,14 @@ end
 
 if gadgetHandler:IsSyncedCode() then
 	local UPDATE_RATE = 1
-	local DoomHandler = VFS.Include("luarules/gadgets/doomstack/handler.lua")
+	local DoomHandlerClass = VFS.Include("luarules/gadgets/doomstack/handler.lua")
+	local DoomHandlers = {}        -- [allyTeam] = handler instance
+	local projectileAllyTeam = {} -- [proID] = allyTeam, for routing ProjectileDestroyed
+	local unitAllyTeam = {}       -- [unitID] = allyTeam cache (needed for UnitDestroyed)
 	local OVERKILL_MODE = 2 -- 0: none, 1: hp%damagePerShot ~= 0 (further = bad), 2: hp - damagePerShot < 0 (further = bad)
 	local PRIORITIES_UNDO_POWER = 1 -- 0: no undo, ]0;1]: undo partial or complete undo
-	--Spring.Echo(WeaponDefs)
 	for wDefID, wDef in pairs(WeaponDefs) do
 		local dumbness = tonumber(wDef.customParams.dumbness or 0.5) -- [0,1] 0: full penalty, 1: no penalty
-		--Spring.Echo(wDef.name, dumbness)
 		local damagesTable = wDef.damages
 		local damagesPerShotTable = {}
 		local damageMultTable = {}
@@ -43,7 +44,6 @@ if gadgetHandler:IsSyncedCode() then
 		end
 		local reloadFrames = math.max(1, math.floor(wDef.reload * 30 + 0.5))
 		local secDamage = (damagesTable[0] or 0) * salvoSize * 30 / reloadFrames  -- matches engine: weaponDmg->GetDefault() * salvoSize / reloadTime * GAME_SPEED
-		--Spring.Echo(wDef.name, secDamage)
 		local overKillMults = {}
 		for unitDefID, unitDef in pairs(UnitDefs) do
 			local maxHealth = unitDef.health
@@ -85,33 +85,55 @@ if gadgetHandler:IsSyncedCode() then
 
 	local currentTargets = {} -- {[attackerID] = {targetID=, weaponNum=}} -- only the lowest-weaponNum target is tracked
 
+	local function GetHandler(unitID)
+		local at = unitAllyTeam[unitID] or Spring.GetUnitAllyTeam(unitID)
+		return at and DoomHandlers[at]
+	end
+
 	function gadget:Initialize()
-		DoomHandler:Init()
+		for _, allyTeam in ipairs(Spring.GetAllyTeamList()) do
+			DoomHandlers[allyTeam] = DoomHandlerClass:New(allyTeam)
+		end
 		for _, unitID in ipairs(Spring.GetAllUnits()) do
-			DoomHandler:RegisterUnit(unitID)
-			local unitDefID = Spring.GetUnitDefID(unitID)
-			Script.SetWatchAllowTargetUnit(unitID, true)
+			local unitAT = Spring.GetUnitAllyTeam(unitID)
+			unitAllyTeam[unitID] = unitAT
+			for allyTeam, handler in pairs(DoomHandlers) do
+				if allyTeam == unitAT then handler:OwnerCreated(unitID)
+				else                       handler:TargetCreated(unitID) end
+			end
+		end
+		for wDefID in pairs(WeaponDefs) do
+			Script.SetWatchWeapon(wDefID, true)
 		end
 	end
 
 	function gadget:UnitCreated(unitID, unitDefID)
-		DoomHandler:RegisterUnit(unitID)
-		Script.SetWatchAllowTargetUnit(unitID, true)
+		local unitAT = Spring.GetUnitAllyTeam(unitID)
+		unitAllyTeam[unitID] = unitAT
+		for allyTeam, handler in pairs(DoomHandlers) do
+			if allyTeam == unitAT then handler:OwnerCreated(unitID)
+			else                       handler:TargetCreated(unitID) end
+		end
 	end
 
 	function gadget:UnitDestroyed(unitID, unitDefID)
-		DoomHandler:UnregisterUnit(unitID)
+		local unitAT = unitAllyTeam[unitID]
+		for allyTeam, handler in pairs(DoomHandlers) do
+			if allyTeam == unitAT then handler:OwnerDestroyed(unitID)
+			else                       handler:TargetDestroyed(unitID) end
+		end
 		currentTargets[unitID] = nil
+		unitAllyTeam[unitID] = nil
 	end
 
 	function gadget:AllowWeaponTargetCheck(attackerID, attackerWeaponNum, attackerWeaponDefID)
 		if whileupdate then return false end
 		local states = Spring.GetUnitStates(attackerID)
 		if states and states["firestate"] <= 1 then return false end
-		Script.SetWatchAllowTargetUnit(attackerID, false)
 		RemoveCurrentTarget(attackerID, attackerWeaponNum)
-		DoomHandler:WeaponRequestsTarget(attackerID, attackerWeaponNum, attackerWeaponDefID)
-		return true
+		local handler = GetHandler(attackerID)
+		if handler then handler:WeaponRequestsTarget(attackerID, attackerWeaponNum, attackerWeaponDefID) end
+		return true, false, true  -- keepWatching=true: AllowWeaponTarget fires per-target so TestWeaponTarget can veto already-committed targets
 	end
 
 	function gadget:UnitAutoTargetRange(attackerID, range)
@@ -119,20 +141,22 @@ if gadgetHandler:IsSyncedCode() then
 		if states and states["movestate"] == 0 then return 0 end
 		local unitDefID = Spring.GetUnitDefID(attackerID)
 		local weapons = UnitDefs[unitDefID].weapons
+		local handler = GetHandler(attackerID)
 		for k,v in pairs(weapons) do
 			RemoveCurrentTarget(attackerID, k)
-			DoomHandler:WeaponRequestsTarget(attackerID, k, v.weaponDef)
+			if handler then handler:WeaponRequestsTarget(attackerID, k, v.weaponDef) end
 		end
-		return range
+		return 0
 	end
 
 	function gadget:AllowWeaponTarget(attackerID, targetID, attackerWeaponNum, attackerWeaponDefID, defPriority)
 		if defPriority then
-			return defPriority, false
+			return true, defPriority
 		end
-		local allowed = DoomHandler:TestWeaponTarget(targetID)
+		local handler = GetHandler(attackerID)
+		local allowed = not handler or handler:TestWeaponTarget(targetID)
 		if allowed then
-			DoomHandler:WeaponTarget(attackerID, attackerWeaponNum, attackerWeaponDefID, targetID)
+			if handler then handler:WeaponTarget(attackerID, attackerWeaponNum, attackerWeaponDefID, targetID) end
 			RegisterCurrentTarget(attackerID, attackerWeaponNum, targetID)
 		end
 		return allowed
@@ -148,6 +172,13 @@ if gadgetHandler:IsSyncedCode() then
 
 	function RegisterCurrentTarget(attackerID, attackerWeaponNum, targetID)
 		if not targetID then return end
+		-- Guard: Don't modify multiplier if this unit has priority targets set by user
+		-- (indicated by has_priority_targets rules param)
+		local hasPriorityTargets = Spring.GetUnitRulesParam(attackerID, "has_priority_targets")
+		if hasPriorityTargets and hasPriorityTargets > 0 then
+			return  -- Skip modifying multiplier for priority-target units
+		end
+		
 		local cur = currentTargets[attackerID]
 		if cur and attackerWeaponNum > cur.weaponNum then return end -- higher weaponNum can't override a lower one
 		if cur then
@@ -157,28 +188,44 @@ if gadgetHandler:IsSyncedCode() then
 		Spring.SetUnitToTargetUnitPriorityMult(attackerID, targetID, 1)
 	end
 
-	function gadget:WeaponAutoTarget(attackerID, attackerWeaponNum, attackerWeaponDefID, targetID)
-		RegisterCurrentTarget(attackerID, attackerWeaponNum, targetID)
-		DoomHandler:WeaponTarget(attackerID, attackerWeaponNum, attackerWeaponDefID, targetID)
-		Script.SetWatchAllowTargetUnit(attackerID, true)
+	function gadget:WeaponChangedTarget(attackerID, attackerDefID, attackerTeam, weaponNum, weaponDefID, oldTargetData, newTargetData)
+		local targetID = newTargetData and newTargetData[2] == string.byte('u') and newTargetData[1]
+		RegisterCurrentTarget(attackerID, weaponNum, targetID)
+		local handler = GetHandler(attackerID)
+		if handler then handler:WeaponTarget(attackerID, weaponNum, weaponDefID, targetID) end
 	end
 
 	function gadget:GameFramePost(f)
 		if f%UPDATE_RATE == 0 then
-			DoomHandler:Update(UPDATE_RATE)
+			for _, handler in pairs(DoomHandlers) do
+				handler:Update(UPDATE_RATE)
+			end
 		end
 	end
 
 	function gadget:ProjectileCreated(projID, projOwnerID, weaponDefID)
-		DoomHandler:ProjectileCreated(projID, projOwnerID, weaponDefID)
+		if not projOwnerID or projOwnerID < 0 then return end
+		local allyTeam = Spring.GetUnitAllyTeam(projOwnerID)
+		local handler = allyTeam and DoomHandlers[allyTeam]
+		if handler then
+			projectileAllyTeam[projID] = allyTeam
+			handler:ProjectileCreated(projID, projOwnerID, weaponDefID)
+		end
 	end
 
 	function gadget:ProjectileDestroyed(projID)
-		DoomHandler:WeaponReached(projID)
+		local allyTeam = projectileAllyTeam[projID]
+		if allyTeam then
+			DoomHandlers[allyTeam]:WeaponReached(projID)
+			projectileAllyTeam[projID] = nil
+		end
 	end
 
 	function gadget:UnitDamaged(unitID)
-		DoomHandler:UnitDamaged(unitID)
+		local unitAT = unitAllyTeam[unitID]
+		for allyTeam, handler in pairs(DoomHandlers) do
+			if allyTeam ~= unitAT then handler:TargetDamaged(unitID) end
+		end
 	end
 else
 	return
