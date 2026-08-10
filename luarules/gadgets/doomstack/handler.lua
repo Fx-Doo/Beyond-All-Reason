@@ -163,7 +163,7 @@ function DoomHandler:WeaponFired(attackerID, weaponNum, proID)
         local reloadState = salvoLeft > 0 and salvoLeft / salvoSize or 0
         stack:SetData(nil, reloadState, nil, nil)
         if stack.targetID then
-            self.activeProjectiles[proID] = {targetID = stack.targetID, value = stack.expectedDamage}
+            self.activeProjectiles[proID] = {targetID = stack.targetID, value = stack:expectedDamage()}
             self.anticipatedDamages[stack.targetID] = (self.anticipatedDamages[stack.targetID] or 0) + self.activeProjectiles[proID].value
         end
         self:UpdateStack(stack) --> update doom total
@@ -181,33 +181,6 @@ end
 
 function DoomHandler:TargetDamaged(targetID)
     self:UpdateTargetMult(targetID)
-end
-
-function DoomHandler:ProjectileHit(projectileID, targetID, actualDamage, expectedDamage)
-    -- Projectile hit expected target with actualDamage
-    -- Use actual damage instead of anticipated (removes from anticipatedDamages, adds real damage received)
-    if self.activeProjectiles[projectileID] then
-        local oldExpected = self.activeProjectiles[projectileID].value
-        self.anticipatedDamages[targetID] = math.max(0, (self.anticipatedDamages[targetID] or 0) - oldExpected + actualDamage)
-        self.activeProjectiles[projectileID] = nil
-        self:UpdateTargetMult(targetID)
-    end
-end
-
-function DoomHandler:ProjectileMissed(projectileID, intendedTargetID, actualTargetID, actualDamage)
-    -- Projectile missed intended target, hit different unit (or splashed)
-    -- Remove from intended target's anticipated damages
-    if self.activeProjectiles[projectileID] then
-        local oldExpected = self.activeProjectiles[projectileID].value
-        self.anticipatedDamages[intendedTargetID] = math.max(0, (self.anticipatedDamages[intendedTargetID] or 0) - oldExpected)
-        self.activeProjectiles[projectileID] = nil
-        self:UpdateTargetMult(intendedTargetID)
-    end
-    -- If actual target is in our tracking and valid, update its anticipated damages too
-    if actualTargetID and Spring.ValidUnitID(actualTargetID) then
-        self.anticipatedDamages[actualTargetID] = (self.anticipatedDamages[actualTargetID] or 0) + actualDamage
-        self:UpdateTargetMult(actualTargetID)
-    end
 end
 
 function DoomHandler:WeaponRequestsTarget(attackerID, weaponNum, weaponDefID) -- pauses current stack without removing values
@@ -278,46 +251,6 @@ function DoomHandler:UpdateStackList(stackList, count)
     end
 end
 
-function DoomHandler:GetExpectedDamage(weaponDefID, targetID)
-    local weaponDef = WeaponDefs[weaponDefID]
-    local targetArmorType = UnitDefs[Spring.GetUnitDefID(targetID)].armorType
-    if weaponDef then
-        local baseDamage = (weaponDef.damages[targetArmorType] or weaponDef.damages[0]) * weaponDef.salvoSize
-        
-        -- Determine if weapon is ballistic (cannon, laser, non-tracking missile)
-        -- and should apply hitChance penalty
-        local isBallistic = weaponDef.type ~= "BeamLaser" and not weaponDef.tracks
-        
-        if isBallistic then
-            -- Calculate hit chance based on target mobility vs projectile flight time
-            local range = weaponDef.range
-            local projectileSpeed = weaponDef.projectilespeed * 30
-            local eta = projectileSpeed and projectileSpeed > 0 and range / projectileSpeed or 0
-            
-            -- High-trajectory weapons take significantly longer to reach target
-            if weaponDef.highTrajectory then
-                eta = eta * 2
-            end
-            
-            -- Starburst launchers have extreme eta penalty (massive arc)
-            if weaponDef.starburst then
-                eta = eta * 5
-            end
-            
-            local targetSpeed = Spring.GetUnitDefID(targetID) and UnitDefs[Spring.GetUnitDefID(targetID)].speed or 0
-            local aoe = weaponDef.damageAreaOfEffect
-            local hitChance =  aoe / (targetSpeed * eta) -- should probably be something like ^0.2 or w/e because it should heavily decrease if aoe < targetSpeed * eta, but not be linear. This is a placeholder for now.
-            local hitChance = math.min(1.0,hitChance * hitChance * hitChance / weaponDef.accuracy)
-            Spring.Echo(weaponDef.name .. " expected damage vs " .. UnitDefs[Spring.GetUnitDefID(targetID)].name .. ": baseDamage=" .. baseDamage .. ", hitChance=" .. hitChance)
-            return baseDamage * hitChance
-        else
-            -- Instant-hit (lasers) or tracking (missiles) get full damage
-            return baseDamage
-        end
-    end
-    return 0
-end
-
 -- Entry point from gadget:ProjectileCreated — disambiguates weapon by highest reloadFrame
 function DoomHandler:ProjectileCreated(proID)
     local ownerID = Spring.GetProjectileOwnerID(proID)
@@ -369,7 +302,6 @@ function DoomHandler:Update(UPDATE_RATE) -- called from GameFramePost; frame+1 i
 
         local health = self:GetAnticipatedHealth(targetID)
         local threshold = self:GetTargetDoomThreshold(targetID) -- always the minimal threshold for ignoring stacks, even if the target is not marked as ignored
-        Spring.Echo("DoomHandler:Update() - targetID: " .. targetID .. ", health: " .. health .. ", totalDoom: " .. totalDoom .. ", threshold: " .. threshold)
         if totalDoom > health + threshold then -- we need to validate when anticipated health == 0 too
             local targetPosX, targetPosY, targetPosZ = Spring.GetUnitPosition(targetID)
             Spring.SpawnCEG("doomeffect", targetPosX, targetPosY+20, targetPosZ,0,1,0,0,20,0)
@@ -411,7 +343,6 @@ function DoomHandler:Update(UPDATE_RATE) -- called from GameFramePost; frame+1 i
         else
             local targetPosX, targetPosY, targetPosZ = Spring.GetUnitPosition(targetID)
             if not targetPosX or not targetPosY or not targetPosZ then
-                Spring.Echo("DoomHandler:Update() - Invalid target position for targetID: " .. targetID)
                 return
             end
             Spring.SpawnCEG("targeteffect", targetPosX, targetPosY+20, targetPosZ,0,1,0,0,20,0)

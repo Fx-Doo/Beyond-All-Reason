@@ -53,31 +53,42 @@ if gadgetHandler:IsSyncedCode() then
 			overKillMults[2] = 1 + (2*(1 - dumbness)/(1+dumbness)) * (1 - (shotsToKill < 1 and shotsToKill or 1)) -- dumbness=1: no overkill penalty; dumbness=0: full penalty [1,2]; at dumbness=0 switchRange=range/3 for shotsToKill=0.5
 			local invPowerMult = math.max(0.0001,damagesTable[armorType]) * unitDef.power -- cancels engine's /= (damageMul * power); curArmorMultiple ignored (runtime)
 			local invHealthMult = 1/(secDamage + maxHealth)
-			-- the proximityPriority theory:
-			--[[ we have this mult:
-				rangeMult = (dist2D * proximityPriority) + modRange * 0.4 + 100
-				let customMult be our "inverter" from here on
-				customMult is such that:
-				customMult * rangeMult(dist = 0, range = defaultRange) = 1
-				customMult * rangeMult(dist = range, range = defaultRange) = 2
-				for a default proximity priority of 0.5, the solution is;
-				customMult(range) = 1/((range - (125 - (range / 8))) * 0.4 + 100)
-
-				-- considering multiple targets placed at (dist/range), all having the same overKillMult
-				-- target prio range modifier ends up being mult = 1+(dist/range)
-			]]
-
-			-- dumbness:
-			--[[ a unit dumbness defines how much overlap there can be in the overKillMult * rangeMult results
-			modelization, calibrated for a shotsToKill = < 0.5
-			dumbness = switchRange / maxRange such that units with shotsToKill = 0.5 at 
-			range <= switchRange are prefered over 
-			units with shotsToKill > 1 placed at maxRange
-			]]
-
+			local hitChance = 1
+			
+			-- Determine if weapon is ballistic (cannon, laser, non-tracking missile)
+			-- and should apply hitChance penalty based on target mobility vs projectile flight time
+			local isBallistic = wDef.type ~= "BeamLaser" and not wDef.tracks
+			
+			if isBallistic then
+				-- Use weapon range as separation and target max speed for static defense-time calculation
+				local sep = wDef.range
+				local targetSpeed = unitDef.speed / 30  -- max speed in elmos/frame
+				local projectileSpeed = wDef.projectilespeed or 0
+				local eta = projectileSpeed > 0 and sep / projectileSpeed or 0
+				local predictBoost = wDef.customParams.predictBoost or 0
+				local currentBoost = math.max(1, (1 - predictBoost) * targetSpeed)
+				
+				-- High-trajectory weapons take significantly longer to reach target
+				if wDef.highTrajectory then
+					eta = eta * 2
+				end
+				
+				-- Starburst launchers have extreme eta penalty (massive arc)
+				if wDef.type == "StarburstLauncher" then
+					eta = eta * 5000
+				end
+				
+				local accuracy = wDef.accuracy or 1.0
+				local aoe = wDef.damageAreaOfEffect or 0
+				
+				-- Hit chance: inversely proportional to how far target can move during projectile flight
+				hitChance = targetSpeed > 0 and aoe / (targetSpeed * eta) or 1
+				hitChance = math.min(1.0, hitChance / (currentBoost * accuracy))
+			end
+			
 			local range = wDef.range
 			local invRangeMult = 1/(range * 0.4 + 100)
-			local undoStuff = invPowerMult * invHealthMult * invRangeMult
+			local undoStuff = invPowerMult * invHealthMult * invRangeMult / hitChance
 			Spring.SetWeaponDefToUnitDefPriorityMult(wDefID, unitDefID, undoStuff * (overKillMults[OVERKILL_MODE] or undoStuff)) 
 		end
 	end
