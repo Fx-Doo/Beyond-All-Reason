@@ -38,10 +38,32 @@ local keepFlyingStraightAfterThisCommand = {
 	[CMD.ATTACK] = true,
 }
 
+local bombers = {}
+local fighters = {}
+local strafegunships = {}
+local restoreManeuverBlockTimeNextFrame = {}
+
 Spring.SetCustomCommandDrawData(CMD_LAND_AT_GOAL, CMD.MOVE , {0.1, 1.0, 0.1, 0.8}) -- custom command to show the landing zone; will be used in the future when we have a better way to show it without using a command
 for udid, ud in pairs(UnitDefs) do
 	if ud.canFly then
 		handledUnitTypes[udid] = math.max(UnitDefs[udid].turnRadius or 128, 128)
+		if ud.isStrafeAirUnit then
+			if ud.weapons and #ud.weapons > 0 then
+				for i = 1, #ud.weapons do
+					local weaponDefID = ud.weapons[i].weaponDef
+					if weaponDefID then
+						local weaponDef = WeaponDefs[weaponDefID]
+						if weaponDef and (weaponDef.type == "AircraftBomb" or weaponDef.type == "TorpedoLauncher") then
+							Script.SetWatchWeapon(weaponDefID, true)
+							bombers[udid] = weaponDef.reload * 0.6
+							break
+						end
+					end
+				end
+			else -- no weapon fall back to fighter type
+				fighters[udid] = true
+			end
+		end
 	end
 end
 
@@ -82,6 +104,48 @@ function gadget:UnitDamaged(unitID, unitDefID, unitTeam, damage, paralyzer)
 	end
 end
 
+function gadget:ProjectileCreated(proID, proOwnerID, proWeaponDefID)
+	if proWeaponDefID and WeaponDefs[proWeaponDefID] and WeaponDefs[proWeaponDefID].type == "AircraftBomb" then
+		handleBomberFired(proOwnerID)
+	end
+end
+
+function handleBomberFired(unitID)
+	if not unitID or not Spring.ValidUnitID(unitID) then
+		return
+	end
+	local salvoLeft = Spring.GetUnitWeaponState(unitID, 1, "salvoLeft")
+	if salvoLeft and salvoLeft > 0 then
+		restoreManeuverBlockTimeNextFrame[unitID] = restoreManeuverBlockTimeNextFrame[unitID] or 0
+		return -- still has bombs left, don't change the maneuverBlockTime yet, but keep track of first fire frame (timer starts)
+	end
+	local currentQ = Spring.GetUnitCommands(unitID, 2)
+	if #currentQ == 2 then
+		if currentQ and currentQ[1] and currentQ[1].id == CMD_ATTACK then
+			Spring.UnitFinishCommand(unitID)
+			restoreManeuverBlockTimeNextFrame[unitID] = restoreManeuverBlockTimeNextFrame[unitID] - 20
+			Spring.MoveCtrl.SetAirMoveTypeData(unitID, "maneuverBlockTime", restoreManeuverBlockTimeNextFrame[unitID]) 
+		end
+	elseif #currentQ == 1 then
+		if currentQ and currentQ[1] and currentQ[1].id ~= CMD_ATTACK then
+			restoreManeuverBlockTimeNextFrame[unitID] = restoreManeuverBlockTimeNextFrame[unitID] - 20 -- by removing one frame, we're always > value in the current frame
+			Spring.MoveCtrl.SetAirMoveTypeData(unitID, "maneuverBlockTime", restoreManeuverBlockTimeNextFrame[unitID]) 
+		end
+	end
+end
+
+function gadget:GameFrame(frame)
+	for unitID, v in pairs(restoreManeuverBlockTimeNextFrame) do
+		if Spring.ValidUnitID(unitID) then
+			local unitDefID = Spring.GetUnitDefID(unitID)
+			Spring.MoveCtrl.SetAirMoveTypeData(unitID, "maneuverBlockTime", v+1)
+			v = v + 1
+			restoreManeuverBlockTimeNextFrame[unitID] = v < 240 and v or nil
+		else 	
+			restoreManeuverBlockTimeNextFrame[unitID] = nil
+		end
+	end
+end
 function gadget:UnitCmdDone(unitID, unitDefID, teamID, cmdID, cmdParams, cmdOptions, cmdTag)
 
 	if not handledUnits[unitID] then
