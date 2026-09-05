@@ -5,6 +5,8 @@
 --Skeleton pieces
 --local head, torso, luparm, biggun, ruparm, rloarm, lflare, nano, laserflare, pelvis, rthigh, lthigh, lleg, rleg, rfoot, rfootstep, lfoot, lfootstep, dish, barrel, aimy1, bigguncyl,hatpoint, crown, medalsilver, medalbronze, medalgold, cagelight, cagelight_emit = piece("head", "torso", "luparm", "biggun", "ruparm","rloarm","lflare", "nano", "laserflare", "pelvis", "rthigh", "lthigh" ,"lleg", "rleg", "rfoot", "rfootstep", "lfoot", "lfootstep", "dish", "barrel", "aimy1","bigguncyl","hatpoint", "crown", "medalsilver", "medalbronze", "medalgold", "cagelight", "cagelight_emit")
 local head, torso, luparm, biggun, ruparm, rloarm, lflare, nano, laserflare, pelvis, rthigh, lthigh, lleg, rleg, rfoot, rfootstep, lfoot, lfootstep, dish, barrel, aimy1, bigguncyl,hatpoint, crown, medalsilver, medalbronze, medalgold, armhexl, armhexl2, armhexl_emit, armhexl2_emit = piece("head", "torso", "luparm", "biggun", "ruparm","rloarm","lflare", "nano", "laserflare", "pelvis", "rthigh", "lthigh" ,"lleg", "rleg", "rfoot", "rfootstep", "lfoot", "lfootstep", "dish", "barrel", "aimy1","bigguncyl","hatpoint", "crown", "medalsilver", "medalbronze", "medalgold", "armhexl", "armhexl2", "armhexl_emit", "armhexl2_emit")
+local ankler, anklel, hipr, hipl, lowerbody = piece("ankler", "anklel", "hipr", "hipl", "lowerbody")
+
 
 local weapons = {
 	[1] = "laser",
@@ -45,6 +47,7 @@ local weapons = {
 
 local SIG_AIM = 2
 local SIG_WALK = 4
+local SIG_LEGWORKS = 8
 local PlaySoundFile 	= Spring.PlaySoundFile
 local GetUnitPosition 	= Spring.GetUnitPosition
 local GetGameFrame 		= Spring.GetGameFrame
@@ -55,6 +58,23 @@ local ValidID = Spring.ValidUnitID
 
 -- for the AimPrimary script, to skip wait-for-turn if needed
 local last_primary_heading = -1000000
+
+-- Heading delta tracking for leg works
+local stepStartHeading -- current's step starting heading
+local currentStepHeadingDelta = 0 -- accumulated heading change since last step
+local decayingStepHeadingDelta = 0 -- when the delta is dumped into the this list, it starts decaying at unitDef.turnRate
+local maxStepDeg = UnitDefs[Spring.GetUnitDefID(unitID)].turnRate/30
+local maxStepHead = degToHead(maxStepDeg)
+local lastGroundedFoot
+local lastTrackedHeading = 0 -- for heading monitoring thread
+local FULL = 65536
+local HALF = FULL/2
+
+-- Piece mappings for leg works (adjust to match your actual model pieces)
+local groundedFoot = anklel -- Currently grounded foot
+local swingingThigh = hipr -- Currently swinging thigh
+local swingingFoot = ankler -- Currently swinging foot
+local groundedThigh = hipl -- Currently grounded thigh
 
 local function BelowWater(piecename)
 	local _,y,_ = Spring.GetUnitPiecePosition(unitID, piecename)
@@ -69,6 +89,16 @@ local function BelowWater(piecename)
 end
 
 local rad = math.rad
+
+local function degToHead(degrees)
+	-- Convert degrees to Spring heading units (0-65536 = full circle)
+	return degrees * 65536 / 360
+end
+
+local function headToRad(heading)
+	-- Convert COB heading (0-65536 = full circle) to radians
+	return heading * 2 * math.pi / 65536
+end
 
 local function turn(piece, axis, goal, speed)
 	if speed then
@@ -86,9 +116,80 @@ local function move(piece, axis, goal, speed)
 	Move(piece, axis, goal, speed)
 end
 
+local function shortDelta(a, b)
+	local d = a - b
+	if d >  HALF then d = d - FULL end
+	if d < -HALF then d = d + FULL end
+	return d
+end
+
+function ChangeHeading(currentHeading, lastHeading)
+	local thisDelta = shortDelta(currentHeading, lastHeading)
+	currentStepHeadingDelta = currentStepHeadingDelta + thisDelta
+	Signal(SIG_LEGWORKS)
+	StartThread(LegWorks)
+end
+
+function decayDelta(decayHeading) -- we move towards 0, at turnRate speed
+	if decayHeading < 0 then
+		decayHeading = decayHeading + math.min(maxStepHead, -decayHeading)
+	elseif decayHeading > 0 then
+		decayHeading = decayHeading - math.min(maxStepHead, decayHeading)
+	end
+	return decayHeading
+end
+
+function LegWorks()
+	SetSignalMask(SIG_LEGWORKS)
+	if lastGroundedFoot ~= groundedFoot then
+		lastGroundedFoot = groundedFoot
+		decayingStepHeadingDelta = decayingStepHeadingDelta + currentStepHeadingDelta -- decaying should be zeroed at this time, unless some weirdness in the walk() function
+		-- we stack "just in case"
+		currentStepHeadingDelta = 0
+	end
+	if (math.abs(currentStepHeadingDelta) > 0 or math.abs(decayingStepHeadingDelta) > 0) then
+		decayingStepHeadingDelta = decayDelta(decayingStepHeadingDelta)
+		local thisDelta = (currentStepHeadingDelta + decayingStepHeadingDelta) -- our reference is the pelvis, it's currently located at -thisDelta
+		Turn(pelvis, 2, headToRad(-thisDelta / 2), headToRad(maxStepHead / 2))
+		Turn(groundedThigh, 2, headToRad(-thisDelta / 4), headToRad(maxStepHead / 4))
+		Turn(groundedFoot, 2, headToRad(-thisDelta / 4), headToRad(maxStepHead / 4))
+		Turn(swingingThigh, 2, headToRad(thisDelta / 4), headToRad(maxStepHead / 4))
+		Turn(swingingFoot, 2, headToRad(thisDelta / 4), headToRad(maxStepHead / 4))
+	end
+	while (math.abs(currentStepHeadingDelta) > 0 or math.abs(decayingStepHeadingDelta) > 0) do
+		Sleep(33)
+		decayingStepHeadingDelta = decayDelta(decayingStepHeadingDelta)
+		local thisDelta = (currentStepHeadingDelta + decayingStepHeadingDelta) -- our reference is the pelvis, it's currently located at -thisDelta
+		Turn(pelvis, 2, headToRad(-thisDelta / 2), headToRad(maxStepHead / 2))
+		Turn(groundedThigh, 2, headToRad(-thisDelta / 4), headToRad(maxStepHead / 4))
+		Turn(groundedFoot, 2, headToRad(-thisDelta / 4), headToRad(maxStepHead / 4))
+		Turn(swingingThigh, 2, headToRad(thisDelta / 4), headToRad(maxStepHead / 4))
+		Turn(swingingFoot, 2, headToRad(thisDelta / 4), headToRad(maxStepHead / 4))
+	end
+end
+
+function TrackHeading()
+	-- Continuously monitor unit heading and call ChangeHeading on change
+	-- Replaces COB's default heading callin for Lua scripts
+	while true do
+		local currentHeading = Spring.GetUnitHeading(unitID)
+		if currentHeading and currentHeading ~= lastTrackedHeading then
+			ChangeHeading(currentHeading, lastTrackedHeading)
+			lastTrackedHeading = currentHeading
+		end
+		Sleep(33) -- Check heading each frame (33ms)
+	end
+end
+
 function walk()
 	if (bMoving) then --Frame:4
-				if (leftArm) then turn(biggun, 1, -48.215180, 113.735764/animSpeed) --delta=-3.79
+			-- Initialize foot tracking at start of walk cycle
+			-- Right foot is grounded at beginning, left foot swinging
+			groundedFoot = rfoot
+			swingingThigh = lthigh
+			swingingFoot = lfoot
+			groundedThigh = rthigh
+			if (leftArm) then turn(biggun, 1, -48.215180, 113.735764/animSpeed) --delta=-3.79
 				turn(head, 1, -2.620635, 39.654598/animSpeed) --delta=1.32
 				turn(head, 2, -3.829846, 114.895376/animSpeed) --delta=-3.83
 				turn(lfoot, 1, -33.266887, 1084.110406/animSpeed) --delta=36.14
@@ -202,6 +303,11 @@ function walk()
 				if not Spring.GetUnitIsCloaked(unitID) then
 					UnitScript.EmitSfx(lfootstep, 1024 + 2)
 				end
+				-- Left foot just landed and is now grounded
+				groundedFoot = lfoot
+				swingingThigh = rthigh
+				swingingFoot = rfoot
+				groundedThigh = lthigh
 				if (leftArm) then turn(biggun, 1, -49.335727, 68.030323/animSpeed) end--delta=2.27
 				turn(head, 1, -2.091907, 47.585562/animSpeed) --delta=1.59
 				turn(head, 2, -3.829846, 68.937274/animSpeed) --delta=2.30
@@ -375,6 +481,11 @@ function walk()
 				if not Spring.GetUnitIsCloaked(unitID) then
 					UnitScript.EmitSfx(rfootstep, 1024 + 2)
 				end
+				-- Right foot just landed and is now grounded
+				groundedFoot = rfoot
+				swingingThigh = lthigh
+				swingingFoot = lfoot
+				groundedThigh = rthigh
 				if (leftArm) then turn(biggun, 1, -53.164273, 68.030323/animSpeed) end--delta=-2.27
 				turn(head, 1, -2.091907, 47.585562/animSpeed) --delta=1.59
 				turn(head, 2, 3.829846, 68.937274/animSpeed) --delta=-2.30
@@ -914,6 +1025,7 @@ function script.Create()
 	animSpeed = 4
 	StartThread(UnitSpeed)
 	StartThread(StopWalking)
+	StartThread(TrackHeading)
 end
 
 function ShowCrown()
