@@ -4414,6 +4414,11 @@
 			"desc": "For advanced users!!! A base64 encoded snippet of code that modifies game definitions.",
 			"hint": "Input must be base64"
 		},
+		"tweakmap": {
+			"name": "Tweak Map",
+			"desc": "For advanced users!!! A base64 encoded lua list of map edits, applied in order: { {type = \"ramp\", args = {startX, startZ, endX, endZ, width, smoothWidth}}, ... }. Types: ramp, squarePlateau, roundPlateau, metalSpot, feature.",
+			"hint": "Input must be base64"
+		},
 		"forceallunits": {
 			"name": "Force Load All Units (Dev/Modding)",
 			"desc": "Load all UnitDefs even if ais or options for them aren't enabled"
@@ -4492,6 +4497,42 @@
 		"tweakdefs9": {
 			"name": "Tweak Defs 9",
 			"desc": "A base64 encoded snippet of code that modifies game definitions."
+		},
+		"tweakmap1": {
+			"name": "Tweak Map 1",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap2": {
+			"name": "Tweak Map 2",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap3": {
+			"name": "Tweak Map 3",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap4": {
+			"name": "Tweak Map 4",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap5": {
+			"name": "Tweak Map 5",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap6": {
+			"name": "Tweak Map 6",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap7": {
+			"name": "Tweak Map 7",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap8": {
+			"name": "Tweak Map 8",
+			"desc": "A base64 encoded lua list of map edits to apply."
+		},
+		"tweakmap9": {
+			"name": "Tweak Map 9",
+			"desc": "A base64 encoded lua list of map edits to apply."
 		}
 	}
 }

@@ -2741,6 +2741,17 @@ Example: Armada VS Cortex VS Legion: 273 or 100 010 001 or 256 + 16 + 1]],
 
 	-- NOTE: update language/en/interface.json when you change name or desc
 	{
+		key = "tweakmap",
+		name = "Tweak Map",
+		desc = "For advanced users!!! A base64 encoded lua list of map edits, applied in order: { {type = \"ramp\", args = {startX, startZ, endX, endZ, width, smoothWidth}}, ... }. Types: ramp, squarePlateau, roundPlateau, metalSpot, feature.",
+		hint = "Input must be base64",
+		section = "options_cheats",
+		type = "string",
+		def = "",
+	},
+
+	-- NOTE: update language/en/interface.json when you change name or desc
+	{
 		key = "forceallunits",
 		name = "Force Load All Units (Dev/Modding)",
 		desc = "Load all UnitDefs even if ais or options for them aren't enabled",
@@ -2785,6 +2796,19 @@ for i = 1, 29 do
 		key = "tweakdefs" .. i,
 		name = "Tweak Defs " .. i,
 		desc = "A base64 encoded snippet of code that modifies game definitions.",
+		section = "options_extra",
+		type = "string",
+		def = "",
+		hidden = true,
+	}
+end
+
+for i = 1, 29 do
+	-- NOTE: update language/en/interface.json when you change name or desc
+	options[#options + 1] = {
+		key = "tweakmap" .. i,
+		name = "Tweak Map " .. i,
+		desc = "A base64 encoded lua list of map edits to apply.",
 		section = "options_extra",
 		type = "string",
 		def = "",
