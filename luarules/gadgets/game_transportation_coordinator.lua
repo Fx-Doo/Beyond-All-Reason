@@ -3,7 +3,7 @@ local gadget = gadget ---@type Gadget
 function gadget:GetInfo()
 	return {
 		name    = "Transport Handler",
-		desc    = "Main handler for tractor beam transports",
+		desc    = "Main coordinator for all transports",
 		author  = "DoodVanDaag",
 		date    = "2026",
 		license = "GNU GPL, v2 or later",
