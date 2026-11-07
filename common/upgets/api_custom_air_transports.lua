@@ -25,6 +25,7 @@ end
 
 globalScope.TransportAPI = {}
 local TransportAPI = globalScope.TransportAPI
+TransportAPI.Helpers = VFS.Include("common/upgets/transport_helpers.lua")
 
 -- SPRING API LOCALS
 local spGetUnitPosition        = Spring.GetUnitPosition
