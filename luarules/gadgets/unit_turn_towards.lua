@@ -37,6 +37,19 @@ local commandDesc = {
 local function TurnTowards(unitID, cmdParams)
 	-- TODO: Implement turning here. Yield to wait for the next frame; return to finish the command.
 	while true do
+		local unitPosX, unitPosY, unitPosZ = Spring.GetUnitPosition(unitID)
+		local targetPosX, targetPosY, targetPosZ = cmdParams[1], cmdParams[2], cmdParams[3]
+		local currentDirX, currentDirY, currentDirZ = Spring.GetUnitDirection(unitID)
+		local wantedDirX, wantedDirY, wantedDirZ = targetPosX - unitPosX, targetPosY - unitPosY, targetPosZ - unitPosZ
+		local wantedHeading = Spring.GetHeadingFromVector(wantedDirX, wantedDirZ)
+		local currentHeading = Spring.GetHeadingFromVector(currentDirX, currentDirZ)
+		local turnRate = UnitDefs[Spring.GetUnitDefID(unitID)].turnRate
+		local headDelta = shortDelta(wantedHeading, currentHeading)
+		local sign = math.abs(headDelta) / headDelta
+		local maxTurnThisFrame = math.min(turnRate, headDelta)
+		local newHeading = currentHeading + (sign * maxTurnThisFrame)
+		local newDirX, newDirZ = Spring.GetVectorFromHeading(newHeading)
+		Spring.SetUnitDirection(newDirX, currentDirY, newDirZ)
 		coroutine.yield()
 	end
 end
