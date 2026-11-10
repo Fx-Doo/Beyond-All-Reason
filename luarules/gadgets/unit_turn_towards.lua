@@ -34,8 +34,12 @@ local commandDesc = {
 	tooltip = "Turn towards a position",
 }
 
+local function shortDelta(wantedHeading, currentHeading)
+	-- Spring headings span 65536 units per revolution.
+	return (wantedHeading - currentHeading + 32768) % 65536 - 32768
+end
+
 local function TurnTowards(unitID, cmdParams)
-	-- TODO: Implement turning here. Yield to wait for the next frame; return to finish the command.
 	while true do
 		local unitPosX, unitPosY, unitPosZ = Spring.GetUnitPosition(unitID)
 		local targetPosX, targetPosY, targetPosZ = cmdParams[1], cmdParams[2], cmdParams[3]
@@ -44,17 +48,17 @@ local function TurnTowards(unitID, cmdParams)
 		local wantedHeading = Spring.GetHeadingFromVector(wantedDirX, wantedDirZ)
 		local currentHeading = Spring.GetHeadingFromVector(currentDirX, currentDirZ)
 		local turnRate = UnitDefs[Spring.GetUnitDefID(unitID)].turnRate
-		local headDelta = shortDelta(wantedHeading, currentHeading)	
+		local headDelta = shortDelta(wantedHeading, currentHeading)
 		if headDelta == 0 then
 			return
 		end
 		local absHeadDelta = math.abs(headDelta)
 		local sign = absHeadDelta / headDelta
 		local maxTurnThisFrame = math.min(turnRate, absHeadDelta)
-		local newHeading = currentHeading + (sign * maxTurnThisFrame)
+		local newHeading = (currentHeading + sign * maxTurnThisFrame + 32768) % 65536 - 32768
 		local newDirX, newDirZ = Spring.GetVectorFromHeading(newHeading)
-		Spring.SetUnitDirection(newDirX, currentDirY, newDirZ)
-		if newHeading == wantedHeading then
+		Spring.SetUnitDirection(unitID, newDirX, currentDirY, newDirZ)
+		if absHeadDelta <= turnRate then
 			return
 		end
 		coroutine.yield()

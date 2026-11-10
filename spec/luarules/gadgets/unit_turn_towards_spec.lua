@@ -19,8 +19,13 @@ local function loadGadget(mode)
 		},
 		GameCMD = { TURN_TOWARDS = CMD_TURN_TOWARDS },
 		CMDTYPE = { ICON_MAP = 5 },
-		UnitDefs = { [1] = { speed = 60 }, [2] = { speed = 0 } },
+		UnitDefs = { [1] = { speed = 60, turnRate = 10 }, [2] = { speed = 0 } },
 		Spring = {
+			GetUnitPosition = function() return 0, 0, 0 end,
+			GetUnitDirection = function() return 0, 0, 1 end,
+			GetHeadingFromVector = function(x) return x end,
+			GetVectorFromHeading = function(h) return h, 1 end,
+			SetUnitDirection = function() end,
 			GetUnitCurrentCommand = function()
 				return state.id, 0, state.tag
 			end,
@@ -83,6 +88,93 @@ describe("turn towards command", function()
 		assert.is_nil(state.descriptor)
 		gadget:UnitCreated(9, 1)
 		assert.same({ 9, CMD_TURN_TOWARDS }, state.descriptor)
+	end)
+
+	describe("turn towards heading", function()
+		local function loadTurningGadget(heading, turnRate)
+			local world = { heading = heading, calls = {}, logs = {} }
+			local env = {
+				gadget = {},
+				gadgetHandler = { IsSyncedCode = function() return true end },
+				GameCMD = { TURN_TOWARDS = CMD_TURN_TOWARDS },
+				CMDTYPE = { ICON_MAP = 1 },
+				UnitDefs = { { speed = 1, turnRate = turnRate } },
+				LOG = { ERROR = "error" },
+			}
+			env.Spring = {
+				GetUnitPosition = function() return 0, 0, 0 end,
+				GetUnitDirection = function() return world.heading, 0, 1 end,
+				GetHeadingFromVector = function(x) return x end,
+				GetVectorFromHeading = function(h)
+					assert.is_true(h >= -32768 and h < 32768)
+					return h, 1
+				end,
+				GetUnitDefID = function() return 1 end,
+				GetUnitCommandCount = function() return 1 end,
+				GetUnitCurrentCommand = function() return CMD_TURN_TOWARDS, 0, 42 end,
+				SetUnitDirection = function(unitID, x, y, z)
+					world.calls[#world.calls + 1] = { unitID, x, y, z }
+					world.heading = x
+				end,
+				Log = function(_, _, message) world.logs[#world.logs + 1] = message end,
+			}
+			setmetatable(env, { __index = _G })
+			local chunk = assert(loadfile("luarules/gadgets/unit_turn_towards.lua"))
+			setfenv(chunk, env)
+			chunk()
+			world.gadget = env.gadget
+			return world
+		end
+
+		local function fallback(world, target)
+			return world.gadget:CommandFallback(UNIT_ID, 1, 0, CMD_TURN_TOWARDS, { target, 0, 1 }, {}, 42)
+		end
+
+		it("turns in either direction by at most the turn rate per frame", function()
+			for _, sign in ipairs({ -1, 1 }) do
+				local world = loadTurningGadget(0, 100)
+				assert.is_false(select(2, fallback(world, sign * 250)))
+				for _, expected in ipairs({ sign * 100, sign * 200, sign * 250 }) do
+					world.gadget:GameFrame()
+					assert.equals(expected, world.heading)
+					assert.equals(UNIT_ID, world.calls[#world.calls][1])
+				end
+				assert.is_true(select(2, fallback(world, sign * 250)))
+				assert.same({}, world.logs)
+			end
+		end)
+
+		it("takes the shortest path across either heading boundary", function()
+			for _, sign in ipairs({ -1, 1 }) do
+				local world = loadTurningGadget(sign * 32760, 10)
+				local target = -sign * 32760
+				fallback(world, target)
+				world.gadget:GameFrame()
+				assert.equals(-sign * 32766, world.heading)
+				world.gadget:GameFrame()
+				assert.equals(target, world.heading)
+				assert.is_true(select(2, fallback(world, target)))
+				assert.same({}, world.logs)
+			end
+		end)
+
+		it("finishes an already aligned command without changing direction", function()
+			local world = loadTurningGadget(100, 50)
+			fallback(world, 100)
+			world.gadget:GameFrame()
+			assert.same({}, world.calls)
+			assert.is_true(select(2, fallback(world, 100)))
+			assert.same({}, world.logs)
+		end)
+
+		it("finishes in one frame when the target is across the heading boundary", function()
+			local world = loadTurningGadget(32760, 20)
+			fallback(world, -32760)
+			world.gadget:GameFrame()
+			assert.equals(-32760, world.heading)
+			assert.is_true(select(2, fallback(world, -32760)))
+			assert.same({}, world.logs)
+		end)
 	end)
 
 	it("starts only on fallback and resumes once per frame without restarting", function()
