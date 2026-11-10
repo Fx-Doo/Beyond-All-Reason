@@ -44,12 +44,19 @@ local function TurnTowards(unitID, cmdParams)
 		local wantedHeading = Spring.GetHeadingFromVector(wantedDirX, wantedDirZ)
 		local currentHeading = Spring.GetHeadingFromVector(currentDirX, currentDirZ)
 		local turnRate = UnitDefs[Spring.GetUnitDefID(unitID)].turnRate
-		local headDelta = shortDelta(wantedHeading, currentHeading)
-		local sign = math.abs(headDelta) / headDelta
-		local maxTurnThisFrame = math.min(turnRate, headDelta)
+		local headDelta = shortDelta(wantedHeading, currentHeading)	
+		if headDelta == 0 then
+			return
+		end
+		local absHeadDelta = math.abs(headDelta)
+		local sign = absHeadDelta / headDelta
+		local maxTurnThisFrame = math.min(turnRate, absHeadDelta)
 		local newHeading = currentHeading + (sign * maxTurnThisFrame)
 		local newDirX, newDirZ = Spring.GetVectorFromHeading(newHeading)
 		Spring.SetUnitDirection(newDirX, currentDirY, newDirZ)
+		if newHeading == wantedHeading then
+			return
+		end
 		coroutine.yield()
 	end
 end
