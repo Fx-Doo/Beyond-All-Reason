@@ -342,6 +342,39 @@ local function ParseBoxes()
 	return startBoxConfig, configSource, isExplicitSource(configSource)
 end
 
+-- MapGen v2 hook: every file that includes this module (gadgets and widgets alike) parses its own copy, so patching
+-- one copy from a widget never reaches the start box overlay. When MapGen v2 has published new start boxes
+-- (rules param "mapgen_startboxes") each copy applies them itself. No param = no change.
+do
+	local baseParse = ParseBoxes
+	local mapgenLib, mapgenEntries, mapgenText
+	ParseBoxes = function()
+		local config, source, explicit = baseParse()
+		local text = Spring.GetGameRulesParam and Spring.GetGameRulesParam("mapgen_startboxes")
+		if config and text and text ~= "" then
+			if text ~= mapgenText then
+				mapgenText = text
+				mapgenLib, mapgenEntries = nil, nil
+				for _, path in ipairs({ "luarules/gadgets/libs/mapgen_v2/startboxes.lua", "luarules/gadgets/libs/mapgen/startboxes.lua" }) do
+					local ok, lib = pcall(VFS.Include, path)
+					if ok and type(lib) == "table" and lib.applyToConfig then
+						mapgenLib = lib
+						mapgenEntries = lib.deserialize(text)
+						break
+					end
+				end
+			end
+			if mapgenLib then
+				local ok, err = pcall(mapgenLib.applyToConfig, config, mapgenEntries, Game.mapSizeZ - 1)
+				if not ok then
+					Spring.Echo("[MapGen v2] start box hook failed: " .. tostring(err))
+				end
+			end
+		end
+		return config, source, explicit
+	end
+end
+
 --------------------------------------------------------------------------------
 -- Shared accessors
 --
